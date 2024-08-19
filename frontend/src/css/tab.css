@@ -1,0 +1,16 @@
+button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    background-color: #f1f1f1;
+    margin-right: 10px;
+}
+
+button.active {
+    background-color: #007bff;
+    color: white;
+}
+
+button:not(.active):hover {
+    background-color: #ddd;
+}

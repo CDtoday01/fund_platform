@@ -109,6 +109,10 @@ export const setAuthUser = (access_token, refresh_token) => {
     useAuthStore.getState().setLoading(false)
 }
 
+export const getToken = () => {
+    return Cookies.get("access_token"); // Retrieves the access token from cookies
+};
+
 export const getRefreshToken = async () => {
     const refresh_token = Cookies.get("refresh_token")
     const response = await axios.post("user/token/refresh/", {

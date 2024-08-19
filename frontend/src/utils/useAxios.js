@@ -1,6 +1,6 @@
 import axios from "axios";
 import { isAccessTokenExpired, setAuthUser, getRefreshToken } from "./auth";
-import { BASE_URL } from "./constrants";
+import { BASE_URL } from "./constraints";
 import Cookies from "js-cookie";
 
 const useAxios = () => {

@@ -47,10 +47,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     
      # custom app
-    "userauths",
-    # "company",
-    'order',
-    'trade',
+    'userauths',
+    'etfs',
+
     
     # third party app
     'corsheaders',
@@ -151,9 +150,15 @@ AUTH_USER_MODEL = 'userauths.User'
 
 # White listing the localhost:3000 port
 # for React
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+]
+
 CORS_ORIGIN_WHITELIST = (
     'http://localhost:5173',
 )
+
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
