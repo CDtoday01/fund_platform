@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getToken } from '../utils/getToken';
+import { getCSRFToken } from '../utils/csrfUtils';
 
 const axiosInstance = axios.create({
     baseURL: 'http://localhost:8000/api/',
@@ -18,9 +19,9 @@ axiosInstance.interceptors.request.use(
             config.headers['Authorization'] = `Bearer ${token}`;
         }
         // Add CSRF token from cookies if available
-        const csrfToken = document.cookie.match(/csrftoken=([^;]+)/);
+        const csrfToken = getCSRFToken();
         if (csrfToken) {
-            config.headers['X-CSRFToken'] = csrfToken[1];
+            config.headers['X-CSRFToken'] = csrfToken;
         }
         return config;
     },
@@ -30,21 +31,14 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-    (response) => {
-        return response;
-    },
+    (response) => response,
     (error) => {
         const { response } = error;
         if (response && response.status === 401) {
             localStorage.removeItem('user'); // Adjust based on your storage method
-            const token = getToken();
-            if (token){
-                localStorage.removeItem('jwtToken');
-            }
-            
-            alert("Session expired. Please log in again.")
+            localStorage.removeItem('jwtToken');
+            alert("Session expired. Please log in again.");
             window.location.href = '/login'; // Redirect to login page
-            
         }
         return Promise.reject(error);
     }
