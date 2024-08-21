@@ -38,12 +38,8 @@ const UserETFs = () => {
             const axiosInstance = useAxios();
             const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
             if (response.status === 200) {
-                setETFs(prevETFs => prevETFs.map(etf => {
-                    if (etf.id === etfId) {
-                        return { ...etf, users: [...etf.users, currentUserId] };
-                    }
-                    return etf;
-                }));
+                // Refresh ETF list to reflect changes
+                fetchUserETFs(activeTab, activeState);
                 alert(`Joined ETF ${etfId}!`);
             } else {
                 console.error('Failed to join ETF:', response.data);
@@ -59,12 +55,8 @@ const UserETFs = () => {
             const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
             if (response.status === 200) {
                 if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
-                    setETFs(prevETFs => prevETFs.map(etf => {
-                        if (etf.id === etfId) {
-                            return { ...etf, users: etf.users.filter(userId => userId !== currentUserId) };
-                        }
-                        return etf;
-                    }));
+                    // Refresh ETF list to reflect changes
+                    fetchUserETFs(activeTab, activeState);
                 }
             } else {
                 console.error('Failed to leave ETF');
