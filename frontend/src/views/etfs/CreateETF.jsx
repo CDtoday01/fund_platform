@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createETF } from '../../services/etfService';
 import { Link, useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
-import { getToken } from '../../utils/auth';
+import useAxios from '../../utils/useAxios';
 
 const CreateETF = () => {
     const [name, setName] = useState('');
@@ -20,6 +19,7 @@ const CreateETF = () => {
     useEffect(() => {
         const fetchDefaults = async () => {
             try {
+                const axiosInstance = useAxios();
                 const response = await axiosInstance.get('/etfs/defaults/');
                 const defaults = response.data;
                 setName(defaults.name);
@@ -34,9 +34,8 @@ const CreateETF = () => {
                 console.error('Error fetching default values:', error);
             }
         };
-
         fetchDefaults();
-    }, [getToken]);
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -62,7 +61,7 @@ const CreateETF = () => {
         };
 
         try {
-            const response = await createETF(newETF, getToken());
+            const response = await createETF(newETF);
             alert('ETF added successfully');
             setErrors({});
             // Redirect to ETF detail page with the newly created ETF ID
@@ -81,6 +80,7 @@ const CreateETF = () => {
 
     const checkNameExists = async (name) => {
         try {
+            const axiosInstance = useAxios();
             const response = await axiosInstance.get(`/etfs/?name=${name}`);
             return response.data.length > 0;
         } catch (error) {

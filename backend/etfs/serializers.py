@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import ETF, UserETF
 from django.contrib.auth.models import User
 from django.utils import timezone
+from typing import Optional
 
 class ETFSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
@@ -15,7 +16,7 @@ class ETFSerializer(serializers.ModelSerializer):
         user = self.context.get('user')
         return obj.useretf_set.filter(user=user).exists()
 
-    def get_state(self, obj):
+    def get_state(self, obj) -> Optional[str]:
         current_time = timezone.now()
         if obj.exist_end < current_time:
             return 'past'

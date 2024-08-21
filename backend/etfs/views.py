@@ -49,6 +49,8 @@ class ETFDetailView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class ETFDefaultsView(APIView):
+    serializer_class = ETFSerializer
+
     def get(self, request):
         now = timezone.now()
         formatted_now = now.strftime('%Y-%m-%d %H:%M')
@@ -66,7 +68,8 @@ class ETFDefaultsView(APIView):
 
 class CreateETFView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
-    
+    serializer_class = ETFSerializer
+
     def post(self, request):
         data = request.data
         data['creator'] = request.user.id  # Assign current user's ID to creator field
@@ -78,6 +81,7 @@ class CreateETFView(APIView):
 
 class DeleteETFView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+    serializer_class = ETFSerializer
 
     def delete(self, request, etf_id):
         etf = get_object_or_404(ETF, id=etf_id)
@@ -109,13 +113,10 @@ class UserETFView(generics.ListAPIView):
 
         return queryset
 
-class JoinETFView(LoginRequiredMixin, View):
-    def post(self, request, etf_id):
+class JoinETFView(APIView):
+    permission_classes = [IsAuthenticated]
 
-        # Verify if the user is authenticated
-        if not request.user.is_authenticated:
-            return JsonResponse({'error': 'User not authenticated'}, status=401)
-        
+    def post(self, request, etf_id):
         etf = get_object_or_404(ETF, id=etf_id)
         user = request.user
 
@@ -128,26 +129,18 @@ class JoinETFView(LoginRequiredMixin, View):
         etf.users.add(user)
         return JsonResponse({'success': 'Joined ETF successfully'})
 
-class LeaveETFView(LoginRequiredMixin, View):
-    def post(self, request, etf_id):
-        try:
-            etf = ETF.objects.get(id=etf_id)
-            user = request.user
-            etf.users.remove(user)  # Correctly remove the user from the ETF
-            return JsonResponse({'status': 'success'}, status=200)
-        except ETF.DoesNotExist:
-            return JsonResponse({'error': 'ETF not found'}, status=404)
-        except Exception as e:
-            return JsonResponse({'error': str(e)}, status=500)
-        # etf = get_object_or_404(ETF, id=etf_id)
-        # user = request.user
+class LeaveETFView(APIView):
+    permission_classes = [IsAuthenticated]
 
-        # if not etf.users.filter(id=user.id).exists():
-        #     return JsonResponse({'error': 'Not a member'}, status=400)
-        # else:
-        #     UserETF.objects.delete(user=user, etf=etf)
-        #     etf.users.remove(user)
-        #     return JsonResponse({'success': 'Left ETF successfully'})
+    def post(self, request, etf_id):
+        etf = get_object_or_404(ETF, id=etf_id)
+        user = request.user
+        
+        if not etf.users.filter(id=user.id).exists():
+            return Response({'error': 'Not a member'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        etf.users.remove(user)
+        return Response({'success': 'Left ETF successfully'}, status=status.HTTP_200_OK)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

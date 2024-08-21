@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
+import useAxios from '../../utils/useAxios';
 
 const ETFs = () => {
     const [etfs, setETFs] = useState([]);
 
     const fetchActiveETFs = async () => {
         try {
+            const axiosInstance = useAxios();
             const response = await axiosInstance.get(`/etfs/`);
             setETFs(response.data);
         } catch (error) {

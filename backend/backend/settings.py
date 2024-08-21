@@ -33,8 +33,8 @@ SECRET_KEY = 'django-insecure-e7i4tfps6kp@0g4311^n8f18o3vt20a60=in&!o9$bnil948^y
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'localhost:5173']
 ALLOWED_HOSTS = []
-
 
 # Application definition
 
@@ -147,6 +147,8 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'userauths.User'
+
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
 # White listing the localhost:3000 port
 # for React

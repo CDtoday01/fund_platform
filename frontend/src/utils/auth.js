@@ -7,8 +7,8 @@ import Swal from 'sweetalert2'
 const Toast = Swal.mixin({
   toast:true,
   position: "top",
-  showConfirmButton:false,
-  timer:1500,
+  showConfirmButton: false,
+  timer: 1500,
   timerProgressBar: true
 })
 
@@ -19,7 +19,7 @@ export const login = async (email, password) => {
             email,
             password
         })
-        if(status === 200){
+        if (status === 200){
             setAuthUser(data.access, data.refresh)
             // alert - sign in successfully
             Toast.fire({
@@ -109,10 +109,6 @@ export const setAuthUser = (access_token, refresh_token) => {
     useAuthStore.getState().setLoading(false)
 }
 
-export const getToken = () => {
-    return Cookies.get("access_token"); // Retrieves the access token from cookies
-};
-
 export const getRefreshToken = async () => {
     const refresh_token = Cookies.get("refresh_token")
     const response = await axios.post("user/token/refresh/", {
@@ -127,6 +123,7 @@ export const isAccessTokenExpired = (accessToken) => {
         console.error('Invalid token specified: must be a string');
         return true;
     }
+    
     try {
         const decodedToken = jwtDecode(accessToken)
         return decodedToken.exp < Date.now() /1000

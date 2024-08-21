@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../../utils/axiosInstance';
+import useAxios from '../../utils/useAxios';
 import { deleteETF } from '../../services/etfService';
 const ETFDetail = () => {
     
@@ -9,6 +9,7 @@ const ETFDetail = () => {
     const [etf, setETF] = useState(null);
 
     useEffect(() => {
+        const axiosInstance = useAxios();
         axiosInstance.get(`/etfs/${id}/`)
             .then(response => {
                 setETF(response.data);

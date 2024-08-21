@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../../css/tab.css';
-import axiosInstance from '../../utils/axiosInstance';
+import useAxios from '../../utils/useAxios';
 import { useAuthStore } from '../../store/auth';
 
 const UserETFs = () => {
@@ -18,12 +18,14 @@ const UserETFs = () => {
     }, [user, activeTab, activeState]);
 
     const fetchUserETFs = async (tab, state) => {
+        const axiosInstance = useAxios();
         try {
             const params = {
                 filter_tab: tab,
                 filter_state: state,
             };
             const response = await axiosInstance.get('/etfs/user/', { params });
+            console.log(response);
             setETFs(response.data);
         } catch (error) {
             console.error('Error fetching ETFs:', error);
@@ -33,6 +35,7 @@ const UserETFs = () => {
 
     const joinETF = async (etfId) => {
         try {
+            const axiosInstance = useAxios();
             const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
             if (response.status === 200) {
                 setETFs(prevETFs => prevETFs.map(etf => {
@@ -52,6 +55,7 @@ const UserETFs = () => {
 
     const leaveETF = async (etfId, etfName) => {
         try {
+            const axiosInstance = useAxios();
             const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
             if (response.status === 200) {
                 if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
