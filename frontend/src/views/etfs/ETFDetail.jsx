@@ -47,7 +47,7 @@ const ETFDetail = () => {
             <p>Exist End: {etf.exist_end}</p>
             <p>Currency: {etf.currency}</p>
             <p>ROI: {etf.roi}%</p>
-            <p>Users: {etf.users}</p>
+            <p>Users: {etf.users.join(', ')}</p>
             {etf.can_delete && (
                 <button onClick={handleDelete} style={{ backgroundColor: 'red', color: 'white' }}>
                     Delete ETF
