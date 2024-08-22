@@ -182,7 +182,7 @@ const CreateETF = () => {
                 </div>
                 <button type="submit">Add ETF</button>
             </form>
-            <Link to="/etfs/user">
+            <Link to="/user/etfs">
                 <button>Return to ETFs</button>
             </Link>
         </>
