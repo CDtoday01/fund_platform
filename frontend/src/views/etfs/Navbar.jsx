@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/auth'; // Ensure correct path
 
 const Navbar = () => {
@@ -7,6 +7,13 @@ const Navbar = () => {
         user: state.user,
         logout: state.logout,
     }));
+    const navigate = useNavigate(); // Initialize useNavigate
+
+    const handleLogout = () => {
+        logout(() => {
+            navigate('/'); // Redirect to homepage after logout
+        });
+    };
 
     return (
         <nav>
@@ -15,7 +22,7 @@ const Navbar = () => {
                 {user.username ? (
                     <>
                         <li><Link to="/user/etfs">My ETFs</Link></li>
-                        <li><button onClick={logout}>Logout</button></li>
+                        <li><button onClick={handleLogout}>Logout</button></li>
                         <li>Logged in as {user.username}</li>
                     </>
                 ) : (

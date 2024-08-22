@@ -22,9 +22,12 @@ const useAuthStore = create((set, get) => ({
     setLoading: (loading) => set({ loading }),
 
     isLoggedIn: () => get().allUserData !== null,
-    logout: () => {
+    logout: (onLogout) => {
         set({ allUserData: null, user: { user_id: null, username: null } });
         // Optionally, handle cookie removal and other cleanup here
+        if (onLogout) {
+            onLogout(); // Trigger the navigation callback
+        }
     }
 }));
 
