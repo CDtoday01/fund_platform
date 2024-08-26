@@ -1,56 +1,69 @@
 from rest_framework import serializers
 from .models import ETF, UserETF
 from django.contrib.auth.models import User
+from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from typing import Optional
 
 class ETFSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
+    can_delete = serializers.SerializerMethodField()
     
     class Meta:
         model = ETF
         fields = '__all__'
         read_only_fields = ['id']
 
-    def get_joined(self, obj):
-        user = self.context.get('user')
-        return obj.useretf_set.filter(user=user).exists()
-
     def get_state(self, obj) -> Optional[str]:
         current_time = timezone.now()
-        if obj.exist_end < current_time:
+        if obj.fundraising_end_date < current_time:
             return 'past'
-        elif obj.exist_start <= current_time <= obj.exist_end:
+        elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
             return 'active'
-        elif obj.exist_start > current_time:
+        elif current_time < obj.fundraising_start_date:
             return 'future'
         return None
-
-    def validate(self, data):
-        fundraising_start = data.get('fundraising_start')
-        fundraising_end = data.get('fundraising_end')
-        exist_start = data.get('exist_start')
-        exist_end = data.get('exist_end')
-
-        if fundraising_end and fundraising_start and fundraising_end <= fundraising_start:
-            raise serializers.ValidationError({
-                'fundraising_end': 'Fundraising end date must be later than the start date.'
-            })
-        if exist_end and exist_start and exist_end <= exist_start:
-            raise serializers.ValidationError({
-                'exist_end': 'Exist end date must be later than the start date.'
-            })
-        if data.get('roi') < 0 or data.get('roi') > 100:
-            raise serializers.ValidationError({
-                'roi': 'ROI must be between 0 and 100.'
-            })
-        return data
     
-    def get_user_has_delete_privilege(self, obj):
+    def get_can_delete(self, obj):
         request = self.context.get('request')
         if request and request.user.is_authenticated:
             return request.user == obj.creator or request.user.is_staff
         return False
+    
+    def validate(self, data):
+        total_amount = data.get('total_amount')
+        lowest_amount = data.get('lowest_amount')
+        announcement_duration = data.get('announcement_duration')
+        fundraising_duration = data.get('fundraising_duration')
+        announcement_start_date = data.get('announcement_start_date')
+        fundraising_start_date = data.get('fundraising_start_date')
+        ETF_duration = data.get('ETF_duration')
+        
+        fundraising_end_date = None
+        if fundraising_start_date and fundraising_duration:
+            fundraising_end_date = fundraising_start_date + relativedelta(months=fundraising_duration)
+        
+        if fundraising_end_date <= announcement_start_date:
+            raise serializers.ValidationError({
+                'date': ' fundraising_start_date must be greater than announcement_start_date.'
+            })
+        if total_amount < lowest_amount:
+            raise serializers.ValidationError({
+                'amount': 'total_amount must be greater than or equal to lowest_amount.'
+            })
+        if announcement_duration < 7 or announcement_duration > 30:
+            raise serializers.ValidationError({
+                'announcement_duration': 'announcement duration must be between 7 to 30'
+            })
+        if fundraising_duration < 1 or fundraising_duration > 6:
+            raise serializers.ValidationError({
+                'fundraising_duration': 'fundraising duration must be between 1 to 6.'
+            })
+        if ETF_duration < 3 or ETF_duration > 36:
+            raise serializers.ValidationError({
+                'ETF_duration': 'ETF duration must be between 3 to 36.'
+            })
+        return data
 
 class UserETFSerializer(serializers.ModelSerializer):
     etf = ETFSerializer()

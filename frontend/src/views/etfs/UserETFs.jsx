@@ -40,7 +40,7 @@ const UserETFs = () => {
             if (response.status === 200) {
                 // Refresh ETF list to reflect changes
                 fetchUserETFs(activeTab, activeState);
-                alert(`Joined ETF ${etfId}!`);
+                alert(`Joined ETF!`);
             } else {
                 console.error('Failed to join ETF:', response.data);
             }

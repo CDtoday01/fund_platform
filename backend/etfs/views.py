@@ -27,7 +27,7 @@ class ETFListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         current_time = timezone.now()
-        queryset = ETF.objects.filter(exist_start__lte=current_time, exist_end__gte=current_time)
+        queryset = ETF.objects.filter(fundraising_start_date__lte=current_time, fundraising_end_date__gte=current_time)
         
         name = self.request.query_params.get('name', None)
         if name:
@@ -55,14 +55,8 @@ class ETFDefaultsView(APIView):
         now = timezone.now()
         formatted_now = now.strftime('%Y-%m-%d %H:%M')
         default_values = {
-            'name': '',
             'etf_type': '全球共享經濟ETF',
-            'fundraising_start': formatted_now,
-            'fundraising_end': formatted_now,
-            'exist_start': formatted_now,
-            'exist_end': formatted_now,
-            'currency': '比特幣',
-            'roi': 0.5,
+            'fundraising_start_date': formatted_now,
         }
         return Response(default_values)
 
@@ -105,15 +99,16 @@ class UserETFView(generics.ListAPIView):
             queryset = queryset.exclude(useretf__user=self.request.user)
 
         if filter_state == 'past':
-            queryset = queryset.filter(exist_end__lt=current_time)
+            queryset = queryset.filter(fundraising_end_date__lt=current_time)
         elif filter_state == 'active':
-            queryset = queryset.filter(exist_start__lte=current_time, exist_end__gte=current_time)
+            queryset = queryset.filter(fundraising_start_date__lte=current_time, fundraising_end_date__gte=current_time)
         elif filter_state == 'future':
-            queryset = queryset.filter(exist_start__gt=current_time)
+            queryset = queryset.filter(fundraising_start_date__gt=current_time)
 
         return queryset
 
 class JoinETFView(APIView):
+    serializer_class = ETFSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, etf_id):
@@ -130,6 +125,7 @@ class JoinETFView(APIView):
         return JsonResponse({'success': 'Joined ETF successfully'})
 
 class LeaveETFView(APIView):
+    serializer_class = ETFSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, etf_id):
