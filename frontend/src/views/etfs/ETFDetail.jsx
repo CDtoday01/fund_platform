@@ -58,7 +58,7 @@ const ETFDetail = () => {
             <p>========debug欄位========</p>
             <p>ETF ID：{etf.id}</p>
             <p>創建者：{etf.creator}</p>
-            <p>用戶: {etf.users && etf.users.join(', ')}</p>
+            <p>用戶：{etf.users && etf.users.join(', ')}</p>
             {etf.can_delete && (
                 <button onClick={handleDelete} style={{ backgroundColor: 'red', color: 'white' }}>
                     Delete ETF

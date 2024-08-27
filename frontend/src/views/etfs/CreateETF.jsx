@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { createETF } from '../../services/etfService';
+import { createETF, checkNameExists } from '../../services/etfService'; // Add a service function for name check
 import { Link, useNavigate } from 'react-router-dom';
 import useAxios from '../../utils/useAxios';
 
@@ -8,32 +8,32 @@ const CreateETF = () => {
     const [type, setType] = useState('');
     const [total_amount, setTotalAmount] = useState('');
     const [lowest_amount, setLowestAmount] = useState('');
-    const [fundraising_start_date, setFundraisingStartDate] = useState('');
-    const [fundraising_duration, setFundraisingDuration] = useState('');
     const [announcement_start_date, setAnnouncementStartDate] = useState('');
     const [announcement_duration, setAnnouncementDuration] = useState('');
+    const [fundraising_duration, setFundraisingDuration] = useState('');
     const [ETF_duration, setETFDuration] = useState('');
     const [description, setDescription] = useState('');
-    
+
+    const [announcement_end_date, setAnnouncementEndDate] = useState('');
+    const [fundraising_start_date, setFundraisingStartDate] = useState('');
+    const [fundraising_end_date, setFundraisingEndDate] = useState('');
+
     const [errors, setErrors] = useState({});
-    const [nameExistsError, setNameExistsError] = useState(false);
+    const [nameExistsError, setNameExistsError] = useState(false); // Initialize as false
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+
+    const axiosInstance = useAxios();
 
     useEffect(() => {
         const fetchDefaults = async () => {
             try {
-                const axiosInstance = useAxios();
                 const response = await axiosInstance.get('/etfs/defaults/');
                 const defaults = response.data;
                 setName(defaults.name || '');
                 setType(defaults.etf_type || '');
                 setTotalAmount(defaults.total_amount || '');
                 setLowestAmount(defaults.lowest_amount || '');
-                setFundraisingStartDate(defaults.fundraising_start_date || '');
-                setFundraisingDuration(defaults.fundraising_duration || '');
-                setAnnouncementStartDate(defaults.announcement_start_date || '');
-                setAnnouncementDuration(defaults.announcement_duration || '');
                 setETFDuration(defaults.ETF_duration || '');
                 setDescription(defaults.description || '');
             } catch (error) {
@@ -43,19 +43,45 @@ const CreateETF = () => {
         fetchDefaults();
     }, []);
 
+    // Function to check if the name already exists in the database
+    const handleNameBlur = async () => {
+        if (name.trim() !== '') {
+            try {
+                const response = await checkNameExists(name); // Check if the name exists
+                setNameExistsError(response.data.exists); // Update the error state
+            } catch (error) {
+                console.error('Error checking ETF name existence:', error);
+            }
+        }
+    };
+
+    // Update dates when announcement_start_date or announcement_duration change
+    useEffect(() => {
+        if (announcement_start_date && announcement_duration) {
+            const announcementEnd = new Date(announcement_start_date);
+            announcementEnd.setDate(announcementEnd.getDate() + parseInt(announcement_duration));
+            console.log('test:', announcementEnd.toISOString().slice(0, 16));
+            setAnnouncementEndDate(announcementEnd.toISOString().slice(0, 16)); // Convert to input value format
+
+            const fundraisingStart = new Date(announcementEnd);
+            setFundraisingStartDate(fundraisingStart.toISOString().slice(0, 16));
+
+            if (fundraising_duration) {
+                const fundraisingEnd = new Date(fundraisingStart);
+                fundraisingEnd.setMonth(fundraisingEnd.getMonth() + parseInt(fundraising_duration));
+                setFundraisingEndDate(fundraisingEnd.toISOString().slice(0, 16));
+            }
+        }
+    }, [announcement_start_date, announcement_duration, fundraising_duration]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setLoading(true);
 
-        // Check if name is already taken
-        const nameExists = await checkNameExists(name);
-        if (nameExists) {
-            setNameExistsError(true);
+        if (nameExistsError) {
+            alert('Name already exists. Please choose another name.');
             setLoading(false);
             return;
-        } else {
-            setNameExistsError(false);
         }
 
         const newETF = {
@@ -63,10 +89,10 @@ const CreateETF = () => {
             type,
             total_amount,
             lowest_amount,
-            fundraising_start_date,
-            fundraising_duration,
             announcement_start_date,
             announcement_duration,
+            fundraising_start_date,
+            fundraising_duration,
             ETF_duration,
             description
         };
@@ -90,17 +116,6 @@ const CreateETF = () => {
         }
     };
 
-    const checkNameExists = async (name) => {
-        try {
-            const axiosInstance = useAxios();
-            const response = await axiosInstance.get(`/etfs/?name=${name}`);
-            return response.data.length > 0;
-        } catch (error) {
-            console.error('Error checking ETF name:', error);
-            return false; // Consider different handling here, like disabling submission
-        }
-    };
-
     return (
         <>
             <form onSubmit={handleSubmit}>
@@ -110,6 +125,7 @@ const CreateETF = () => {
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
+                        onBlur={handleNameBlur} // Trigger the name check when input loses focus
                         required
                         style={{ borderColor: nameExistsError ? 'red' : '' }}
                         disabled={loading}
@@ -178,16 +194,20 @@ const CreateETF = () => {
                     {errors.announcement_duration && <span style={{ color: 'red' }}>{errors.announcement_duration}</span>}
                 </div>
                 <div>
+                    <label>公告結束時間：</label>
+                    <input
+                        type="datetime-local"
+                        value={announcement_end_date}
+                        disabled
+                    />
+                </div>
+                <div>
                     <label>招募開始時間：</label>
                     <input
                         type="datetime-local"
                         value={fundraising_start_date}
-                        onChange={(e) => setFundraisingStartDate(e.target.value)}
-                        required
-                        style={{ borderColor: errors.fundraising_start_date ? 'red' : '' }}
-                        disabled={loading}
+                        disabled
                     />
-                    {errors.fundraising_start_date && <span style={{ color: 'red' }}>{errors.fundraising_start_date}</span>}
                 </div>
                 <div>
                     <label>招募時長（月）：</label>
@@ -201,6 +221,14 @@ const CreateETF = () => {
                         placeholder='1~6'
                     />
                     {errors.fundraising_duration && <span style={{ color: 'red' }}>{errors.fundraising_duration}</span>}
+                </div>
+                <div>
+                    <label>招募結束時間：</label>
+                    <input
+                        type="datetime-local"
+                        value={fundraising_end_date}
+                        disabled
+                    />
                 </div>
                 <div>
                     <label>存續時長（月）：</label>

@@ -16,12 +16,14 @@ class ETFSerializer(serializers.ModelSerializer):
 
     def get_state(self, obj) -> Optional[str]:
         current_time = timezone.now()
-        if obj.fundraising_end_date < current_time:
-            return 'past'
-        elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
-            return 'active'
-        elif current_time < obj.fundraising_start_date:
+        if current_time < obj.announcement_start_date:
             return 'future'
+        elif obj.announcement_start_date <= current_time < obj.announcement_end_date:
+            return 'announcing'
+        elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
+            return 'fundraising'
+        elif obj.fundraising_end_date < current_time:
+            return 'past'
         return None
     
     def get_can_delete(self, obj):
@@ -31,37 +33,33 @@ class ETFSerializer(serializers.ModelSerializer):
         return False
     
     def validate(self, data):
+        current_time = timezone.now()
         total_amount = data.get('total_amount')
         lowest_amount = data.get('lowest_amount')
         announcement_duration = data.get('announcement_duration')
         fundraising_duration = data.get('fundraising_duration')
         announcement_start_date = data.get('announcement_start_date')
-        fundraising_start_date = data.get('fundraising_start_date')
         ETF_duration = data.get('ETF_duration')
-        
-        fundraising_end_date = None
-        if fundraising_start_date and fundraising_duration:
-            fundraising_end_date = fundraising_start_date + relativedelta(months=fundraising_duration)
-        
-        if fundraising_end_date <= announcement_start_date:
+
+        if announcement_start_date < current_time:
             raise serializers.ValidationError({
-                'date': ' fundraising_start_date must be greater than announcement_start_date.'
+                'date': 'Announcement start date must be in the future.'
             })
         if total_amount < lowest_amount:
             raise serializers.ValidationError({
-                'amount': 'total_amount must be greater than or equal to lowest_amount.'
+                'amount': 'Total amount must be greater than or equal to the lowest amount.'
             })
         if announcement_duration < 7 or announcement_duration > 30:
             raise serializers.ValidationError({
-                'announcement_duration': 'announcement duration must be between 7 to 30'
+                'announcement_duration': 'Announcement duration must be between 7 to 30 days.'
             })
         if fundraising_duration < 1 or fundraising_duration > 6:
             raise serializers.ValidationError({
-                'fundraising_duration': 'fundraising duration must be between 1 to 6.'
+                'fundraising_duration': 'Fundraising duration must be between 1 to 6 months.'
             })
         if ETF_duration < 3 or ETF_duration > 36:
             raise serializers.ValidationError({
-                'ETF_duration': 'ETF duration must be between 3 to 36.'
+                'ETF_duration': 'ETF duration must be between 3 to 36 months.'
             })
         return data
 

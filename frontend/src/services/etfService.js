@@ -14,6 +14,16 @@ export const createETF = (etf) => {
     return axiosInstance.post(CREATE_ETF_URL, etf);
 };
 
+// Add this function to check if the ETF name exists
+export const checkNameExists = (name) => {
+    const axiosInstance = useAxios();
+    return axiosInstance.get(`etfs/check-name-exists/`, {
+        params: {
+            name: name,
+        },
+    });
+};
+
 export const deleteETF = (id) => {
     const axiosInstance = useAxios();
     return axiosInstance.delete(DELETE_ETF_URL(id));

@@ -73,6 +73,16 @@ class CreateETFView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class CheckNameExistsView(APIView):
+    def get(self, request, *args, **kwargs):
+        name = request.query_params.get('name', None)
+        if not name:
+            return Response({'error': 'Name parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if ETF.objects.filter(name=name).exists():
+            return Response({'exists': True}, status=status.HTTP_200_OK)
+        return Response({'exists': False}, status=status.HTTP_200_OK)
+
 class DeleteETFView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
     serializer_class = ETFSerializer
