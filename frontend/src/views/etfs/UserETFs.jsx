@@ -114,16 +114,10 @@ const UserETFs = () => {
             </div>
             <div className="state-tabs">
                 <button
-                    className={activeState === 'past' ? 'active' : ''}
-                    onClick={() => handleStateChange('past')}
+                    className={activeState === 'future' ? 'active' : ''}
+                    onClick={() => handleStateChange('future')}
                 >
-                    Past ETFs
-                </button>
-                <button
-                    className={activeState === 'fundraising' ? 'active' : ''}
-                    onClick={() => handleStateChange('fundraising')}
-                >
-                    Fundraising ETFs
+                    Future ETFs
                 </button>
                 <button
                     className={activeState === 'announcing' ? 'active' : ''}
@@ -132,10 +126,16 @@ const UserETFs = () => {
                     Announcing ETFs
                 </button>
                 <button
-                    className={activeState === 'future' ? 'active' : ''}
-                    onClick={() => handleStateChange('future')}
+                    className={activeState === 'fundraising' ? 'active' : ''}
+                    onClick={() => handleStateChange('fundraising')}
                 >
-                    Future ETFs
+                    Fundraising ETFs
+                </button>
+                <button
+                    className={activeState === 'past' ? 'active' : ''}
+                    onClick={() => handleStateChange('past')}
+                >
+                    Past ETFs
                 </button>
                 </div>
             <div className="etf-list">
