@@ -63,7 +63,7 @@ class ETFDefaultsView(APIView):
         formatted_now = now.strftime('%Y-%m-%d %H:%M')
         default_values = {
             'etf_type': '全球共享經濟ETF',
-            'fundraising_start_date': formatted_now,
+            'announcement_start_date': formatted_now,
         }
         return Response(default_values)
 

@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from dateutil.relativedelta import relativedelta
+from datetime import timedelta
 
 class ETF(models.Model):
     name = models.CharField(max_length=100, unique=True)
@@ -26,10 +26,10 @@ class ETF(models.Model):
 
     def save(self, *args, **kwargs):
         if self.announcement_start_date and self.announcement_duration:
-            self.announcement_end_date =  self.announcement_start_date + relativedelta(days=self.announcement_duration)
+            self.announcement_end_date =  self.announcement_start_date + timedelta(days=self.announcement_duration)
             self.fundraising_start_date = self.announcement_end_date
         if self.fundraising_start_date and self.fundraising_duration:
-            self.fundraising_end_date = self.fundraising_start_date + relativedelta(months=self.fundraising_duration)
+            self.fundraising_end_date = self.fundraising_start_date + timedelta(months=self.fundraising_duration)
         super(ETF, self).save(*args, **kwargs)
 
     def __str__(self):

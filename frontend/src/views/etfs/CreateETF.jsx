@@ -30,18 +30,15 @@ const CreateETF = () => {
             try {
                 const response = await axiosInstance.get('/etfs/defaults/');
                 const defaults = response.data;
-                setName(defaults.name || '');
                 setType(defaults.etf_type || '');
-                setTotalAmount(defaults.total_amount || '');
-                setLowestAmount(defaults.lowest_amount || '');
-                setETFDuration(defaults.ETF_duration || '');
-                setDescription(defaults.description || '');
+                setAnnouncementStartDate(defaults.announcement_start_date || '');
+                console.log(defaults);
             } catch (error) {
                 console.error('Error fetching default values:', error);
             }
         };
         fetchDefaults();
-    }, []);
+    }, [axiosInstance]);
 
     // Function to check if the name already exists in the database
     const handleNameBlur = async () => {
