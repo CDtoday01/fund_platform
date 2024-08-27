@@ -196,7 +196,7 @@ const CreateETF = () => {
                 <div>
                     <label>公告結束時間：</label>
                     <input
-                        type="datetime-local"
+                        type="datetime"
                         value={announcement_end_date}
                         disabled
                     />
@@ -204,7 +204,7 @@ const CreateETF = () => {
                 <div>
                     <label>招募開始時間：</label>
                     <input
-                        type="datetime-local"
+                        type="datetime"
                         value={fundraising_start_date}
                         disabled
                     />
@@ -225,7 +225,7 @@ const CreateETF = () => {
                 <div>
                     <label>招募結束時間：</label>
                     <input
-                        type="datetime-local"
+                        type="datetime"
                         value={fundraising_end_date}
                         disabled
                     />

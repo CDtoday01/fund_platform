@@ -7,7 +7,7 @@ import { useAuthStore } from '../../store/auth';
 const UserETFs = () => {
     const [etfs, setETFs] = useState([]);
     const [activeTab, setActiveTab] = useState('joined');
-    const [activeState, setActiveState] = useState('active');
+    const [activeState, setActiveState] = useState('announcing');
     const { user } = useAuthStore();
     const currentUserId = user ? user.user_id : null;
     
@@ -120,10 +120,16 @@ const UserETFs = () => {
                     Past ETFs
                 </button>
                 <button
-                    className={activeState === 'active' ? 'active' : ''}
-                    onClick={() => handleStateChange('active')}
+                    className={activeState === 'fundraising' ? 'active' : ''}
+                    onClick={() => handleStateChange('fundraising')}
                 >
-                    Active ETFs
+                    Fundraising ETFs
+                </button>
+                <button
+                    className={activeState === 'announcing' ? 'active' : ''}
+                    onClick={() => handleStateChange('announcing')}
+                >
+                    Announcing ETFs
                 </button>
                 <button
                     className={activeState === 'future' ? 'active' : ''}
@@ -131,7 +137,7 @@ const UserETFs = () => {
                 >
                     Future ETFs
                 </button>
-            </div>
+                </div>
             <div className="etf-list">
                 <ul>
                     {etfs.map(etf => (

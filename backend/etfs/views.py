@@ -20,23 +20,30 @@ from .permission import IsCreatorOrStaff, IsAdminOrReadOnly
 
 User = get_user_model()
 
-class ETFListView(generics.ListCreateAPIView):
-    queryset = ETF.objects.all()
-    serializer_class = ETFSerializer
-    permission_classes = [AllowAny]
-
-    def get_queryset(self):
+class ETFListView(APIView):
+    def get(self, request, *args, **kwargs):
+        etfs = ETF.objects.all()
+        filter_state = request.query_params.get('filter_state', None)
         current_time = timezone.now()
-        queryset = ETF.objects.filter(fundraising_start_date__lte=current_time, fundraising_end_date__gte=current_time)
-        
-        name = self.request.query_params.get('name', None)
-        if name:
-            queryset = queryset.filter(name=name)  # Use exact match
-        
-        return queryset
 
-    def perform_create(self, serializer):
-        serializer.save(creator=self.request.user)
+        if filter_state == 'future':
+            etfs = etfs.filter(announcement_start_date__gt=current_time)
+        elif filter_state == 'announcing':
+            etfs = etfs.filter(
+                announcement_start_date__lte=current_time,
+                announcement_end_date__gte=current_time
+            )
+        elif filter_state == 'fundraising':
+            etfs = etfs.filter(
+                fundraising_start_date__lte=current_time,
+                fundraising_end_date__gte=current_time
+            )
+        elif filter_state == 'past':
+            etfs = etfs.filter(fundraising_end_date__lt=current_time)
+
+        # Serialize the filtered ETFs
+        serializer = ETFSerializer(etfs, many=True)
+        return Response(serializer.data)
 
 class ETFDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ETF.objects.all()
@@ -92,30 +99,37 @@ class DeleteETFView(APIView):
         etf.delete()
         return Response({'success': 'ETF deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
-class UserETFView(generics.ListAPIView):
-    serializer_class = ETFSerializer
+class UserETFsView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        filter_tab = self.request.query_params.get('filter_tab', None)
-        filter_state = self.request.query_params.get('filter_state', None)
-        current_time = timezone.now()
-
-        queryset = ETF.objects.all()
+    def get(self, request):
+        filter_tab = request.query_params.get('filter_tab', 'joined')
+        filter_state = request.query_params.get('filter_state')
 
         if filter_tab == 'joined':
-            queryset = queryset.filter(useretf__user=self.request.user)
-        elif filter_tab == 'other':
-            queryset = queryset.exclude(useretf__user=self.request.user)
+            etfs = ETF.objects.filter(users=request.user)
+        else:
+            etfs = ETF.objects.exclude(users=request.user)
+        
+        # Handle the filter_state logic
+        current_time = timezone.now()
+        if filter_state == 'future':
+            etfs = etfs.filter(announcement_start_date__gt=current_time)
+        elif filter_state == 'announcing':
+            etfs = etfs.filter(
+                announcement_start_date__lte=current_time,
+                announcement_end_date__gte=current_time
+            )
+        elif filter_state == 'fundraising':
+            etfs = etfs.filter(
+                fundraising_start_date__lte=current_time,
+                fundraising_end_date__gte=current_time
+            )
+        elif filter_state == 'past':
+            etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
-        if filter_state == 'past':
-            queryset = queryset.filter(fundraising_end_date__lt=current_time)
-        elif filter_state == 'active':
-            queryset = queryset.filter(fundraising_start_date__lte=current_time, fundraising_end_date__gte=current_time)
-        elif filter_state == 'future':
-            queryset = queryset.filter(fundraising_start_date__gt=current_time)
-
-        return queryset
+        serializer = ETFSerializer(etfs, many=True)
+        return Response(serializer.data)
 
 class JoinETFView(APIView):
     serializer_class = ETFSerializer
