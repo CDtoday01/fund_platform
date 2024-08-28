@@ -108,6 +108,8 @@ class UserETFsView(APIView):
 
         if filter_tab == 'joined':
             etfs = ETF.objects.filter(users=request.user)
+        elif filter_tab == 'created':
+            etfs = ETF.objects.filter(creator=request.user)
         else:
             etfs = ETF.objects.exclude(users=request.user)
         
@@ -128,6 +130,7 @@ class UserETFsView(APIView):
         elif filter_state == 'past':
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
+        # Serialize the filtered ETFs
         serializer = ETFSerializer(etfs, many=True)
         return Response(serializer.data)
 

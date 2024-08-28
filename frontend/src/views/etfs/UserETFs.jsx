@@ -38,7 +38,6 @@ const UserETFs = () => {
             const axiosInstance = useAxios();
             const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
             if (response.status === 200) {
-                // Refresh ETF list to reflect changes
                 fetchUserETFs(activeTab, activeState);
                 alert(`Joined ETF!`);
             } else {
@@ -55,7 +54,6 @@ const UserETFs = () => {
             const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
             if (response.status === 200) {
                 if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
-                    // Refresh ETF list to reflect changes
                     fetchUserETFs(activeTab, activeState);
                 }
             } else {
@@ -81,21 +79,25 @@ const UserETFs = () => {
             return (
                 <button className="join-button" onClick={() => joinETF(etf.id)}>Join</button>
             );
-        } else if (tab === 'joined') {
-            if (isUserJoined) {
-                return (
-                    <button className="leave-button" onClick={() => leaveETF(etf.id, etf.name)}>Leave</button>
-                );
-            } else {
-                return null;
-            }
+        } else if (tab === 'joined' && isUserJoined) {
+            return (
+                <button className="leave-button" onClick={() => leaveETF(etf.id, etf.name)}>Leave</button>
+            );
         }
+        return null;
     };
 
     return (
         <div>
             <h1>ETFs</h1>
             <div className="tabs">
+                <button
+                    className={activeTab === 'created' ? 'active' : ''}
+                    onClick={() => handleTabChange('created')}
+                    style={{ backgroundColor: activeTab === 'created' ? 'lightgreen' : 'initial' }}
+                >
+                    Created ETFs
+                </button>
                 <button
                     className={activeTab === 'joined' ? 'active' : ''}
                     onClick={() => handleTabChange('joined')}
@@ -137,7 +139,7 @@ const UserETFs = () => {
                 >
                     Past ETFs
                 </button>
-                </div>
+            </div>
             <div className="etf-list">
                 <ul>
                     {etfs.map(etf => (
