@@ -62,7 +62,11 @@ class ETFSerializer(serializers.ModelSerializer):
                 'ETF_duration': 'ETF duration must be between 3 to 36 months.'
             })
         return data
-
+    
+    def create(self, validated_data):
+        print(validated_data)
+        return ETF.objects.create(**validated_data)  
+      
 class UserETFSerializer(serializers.ModelSerializer):
     etf = ETFSerializer()
 

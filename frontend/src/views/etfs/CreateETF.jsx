@@ -120,9 +120,9 @@ const CreateETF = () => {
             type,
             total_amount,
             lowest_amount,
-            local_announcement_start_date,
+            announcement_start_date: utc_announcement_start_date,
             announcement_duration,
-            local_fundraising_start_date,
+            fundraising_start_date: utc_fundraising_start_date,
             fundraising_duration,
             ETF_duration,
             description
