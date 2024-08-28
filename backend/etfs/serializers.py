@@ -10,7 +10,8 @@ class ETFSerializer(serializers.ModelSerializer):
     can_delete = serializers.SerializerMethodField()
     joined_date = serializers.SerializerMethodField()
     end_date = serializers.SerializerMethodField()
-
+    creator = serializers.PrimaryKeyRelatedField(read_only=True)
+    
     class Meta:
         model = ETF
         fields = '__all__'

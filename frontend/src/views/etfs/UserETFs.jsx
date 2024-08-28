@@ -74,27 +74,29 @@ const UserETFs = () => {
 
     const renderButton = (etf, tab) => {
         const isUserJoined = etf.users.includes(currentUserId);
-        
+        const isUserCreator = etf.creator === currentUserId;  // Assuming you have the creator info in the ETF data
+        const isAnnouncing = etf.state === 'announcing';  // Assuming state is returned from the serializer
+    
         if (tab === 'other') {
             return (
-                <button className="join-button" onClick={() => joinETF(etf.id)}>Join</button>
+                <button
+                    className="join-button"
+                    onClick={() => joinETF(etf.id)}
+                    disabled={isUserCreator || isAnnouncing}
+                    title={isUserCreator ? "You can't join your own ETF" : isAnnouncing ? "Announcing ETFs can't be joined" : ""}
+                >
+                    Join
+                </button>
             );
-        } else if (tab === 'joined' && isUserJoined) {
-            // Calculate the end date (joined date + ETF duration)
-            const joinedDate = new Date(etf.joined_date);
-            const endDate = new Date(joinedDate);
-            endDate.setMonth(endDate.getMonth() + etf.ETF_duration);
-
-            return (
-                <>
-                    <span>
-                        {`Period: ${joinedDate.toLocaleString()} ~ ${endDate.toLocaleString()}`}
-                    </span>
+        } else if (tab === 'joined') {
+            if (isUserJoined) {
+                return (
                     <button className="leave-button" onClick={() => leaveETF(etf.id, etf.name)}>Leave</button>
-                </>
-            );
+                );
+            } else {
+                return null;
+            }
         }
-        return null;
     };
 
     return (
