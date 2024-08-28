@@ -8,7 +8,9 @@ from typing import Optional
 class ETFSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
-    
+    joined_date = serializers.SerializerMethodField()
+    end_date = serializers.SerializerMethodField()
+
     class Meta:
         model = ETF
         fields = '__all__'
@@ -31,6 +33,15 @@ class ETFSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return request.user == obj.creator or request.user.is_staff
         return False
+    
+    def get_joined_date(self, obj):
+        return obj.joined_date if hasattr(obj, 'joined_date') else None
+    
+    def get_end_date(self, obj):
+        # Assuming `joined_date` and `duration` are properly annotated in the queryset
+        if hasattr(obj, 'joined_date') and obj.joined_date:
+            return obj.joined_date + relativedelta(months=obj.duration)
+        return None
     
     def validate(self, data):
         current_time = timezone.now()

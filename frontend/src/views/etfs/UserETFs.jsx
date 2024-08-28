@@ -80,8 +80,18 @@ const UserETFs = () => {
                 <button className="join-button" onClick={() => joinETF(etf.id)}>Join</button>
             );
         } else if (tab === 'joined' && isUserJoined) {
+            // Calculate the end date (joined date + ETF duration)
+            const joinedDate = new Date(etf.joined_date);
+            const endDate = new Date(joinedDate);
+            endDate.setMonth(endDate.getMonth() + etf.ETF_duration);
+
             return (
-                <button className="leave-button" onClick={() => leaveETF(etf.id, etf.name)}>Leave</button>
+                <>
+                    <span>
+                        {`Period: ${joinedDate.toLocaleString()} ~ ${endDate.toLocaleString()}`}
+                    </span>
+                    <button className="leave-button" onClick={() => leaveETF(etf.id, etf.name)}>Leave</button>
+                </>
             );
         }
         return null;

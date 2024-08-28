@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView
 
+from django.db.models import F
 from django.utils import timezone
 from django.contrib.auth import get_user_model, logout
 from django.http import JsonResponse
@@ -119,7 +120,10 @@ class UserETFsView(APIView):
         filter_state = request.query_params.get('filter_state')
 
         if filter_tab == 'joined':
-            etfs = ETF.objects.filter(users=request.user)
+            etfs = ETF.objects.filter(users=request.user).annotate(
+                joined_date=F('useretf__joined_date'),
+                duration=F('ETF_duration')
+            )
         elif filter_tab == 'created':
             etfs = ETF.objects.filter(creator=request.user)
         else:
@@ -142,7 +146,7 @@ class UserETFsView(APIView):
         elif filter_state == 'past':
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
-        # Serialize the filtered ETFs
+        # Serialize the filtered ETFs, including joined_date and duration for joined ETFs
         serializer = ETFSerializer(etfs, many=True)
         return Response(serializer.data)
 
