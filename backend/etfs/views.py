@@ -59,12 +59,12 @@ class ETFDefaultsView(APIView):
     serializer_class = ETFSerializer
 
     def get(self, request):
-        now = timezone.now()
-        formatted_now = now.strftime('%Y-%m-%d %H:%M')
+        now_ISO = timezone.now().isoformat()
         default_values = {
             'etf_type': '全球共享經濟ETF',
-            'announcement_start_date': formatted_now,
+            'announcement_start_date': now_ISO,
         }
+        print(now_ISO)
         return Response(default_values)
 
 class CreateETFView(APIView):

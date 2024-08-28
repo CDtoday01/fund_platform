@@ -8,15 +8,21 @@ const CreateETF = () => {
     const [type, setType] = useState('');
     const [total_amount, setTotalAmount] = useState('');
     const [lowest_amount, setLowestAmount] = useState('');
-    const [announcement_start_date, setAnnouncementStartDate] = useState('');
+    
+    const [utc_announcement_start_date, setUtcAnnouncementStartDate] = useState('');
+    const [local_announcement_start_date, setLocalAnnouncementStartDate] = useState('');
     const [announcement_duration, setAnnouncementDuration] = useState('');
+    const [utc_announcement_end_date, setUtcAnnouncementEndDate] = useState('');
+    const [local_announcement_end_date, setLocalAnnouncementEndDate] = useState('');
+    
+    const [utc_fundraising_start_date, setUtcFundraisingStartDate] = useState('');
+    const [local_fundraising_start_date, setLocalFundraisingStartDate] = useState('');
     const [fundraising_duration, setFundraisingDuration] = useState('');
+    const [utc_fundraising_end_date, setUtcFundraisingEndDate] = useState('');
+    const [local_fundraising_end_date, setLocalFundraisingEndDate] = useState('');
+
     const [ETF_duration, setETFDuration] = useState('');
     const [description, setDescription] = useState('');
-
-    const [announcement_end_date, setAnnouncementEndDate] = useState('');
-    const [fundraising_start_date, setFundraisingStartDate] = useState('');
-    const [fundraising_end_date, setFundraisingEndDate] = useState('');
 
     const [errors, setErrors] = useState({});
     const [nameExistsError, setNameExistsError] = useState(false); // Initialize as false
@@ -24,21 +30,22 @@ const CreateETF = () => {
     const navigate = useNavigate();
 
     const axiosInstance = useAxios();
-
+    
     useEffect(() => {
         const fetchDefaults = async () => {
             try {
                 const response = await axiosInstance.get('/etfs/defaults/');
                 const defaults = response.data;
+                const start_date = utcToLocalISO(defaults.announcement_start_date)
                 setType(defaults.etf_type || '');
-                setAnnouncementStartDate(defaults.announcement_start_date || '');
-                console.log(defaults);
+                setLocalAnnouncementStartDate(start_date); // get time up to minutes
+                setUtcAnnouncementStartDate(defaults.announcement_start_date);
             } catch (error) {
                 console.error('Error fetching default values:', error);
             }
         };
         fetchDefaults();
-    }, [axiosInstance]);
+    }, []);
 
     // Function to check if the name already exists in the database
     const handleNameBlur = async () => {
@@ -51,25 +58,52 @@ const CreateETF = () => {
             }
         }
     };
+    
+    const handleAnnouncementStartDateChange = (localDate) => {
+        setLocalAnnouncementStartDate(localDate);
+        const utcDate = localToUtcISO(localDate);
+        setUtcAnnouncementStartDate(utcDate);
+    };
 
+    const utcToLocalISO = (utcDateString) => {
+        const localOffset = new Date().getTimezoneOffset() * 60 * 1000; // to milliseconds
+        const localTimestamp = new Date(utcDateString).getTime() - localOffset;
+        return new Date(localTimestamp).toISOString(); // Local ISO 8601 format
+    };
+    
+    const localToUtcISO = (localDateString) => {
+        const localOffset = new Date().getTimezoneOffset() * 60 * 1000; // to milliseconds
+        const utcTimestamp = new Date(localDateString).getTime() + localOffset;
+        return new Date(utcTimestamp).toISOString(); // UTC ISO 8601 format
+    };
+    
     // Update dates when announcement_start_date or announcement_duration change
     useEffect(() => {
-        if (announcement_start_date && announcement_duration) {
-            const announcementEnd = new Date(announcement_start_date);
-            announcementEnd.setDate(announcementEnd.getDate() + parseInt(announcement_duration));
-            console.log('test:', announcementEnd.toISOString().slice(0, 16));
-            setAnnouncementEndDate(announcementEnd.toISOString().slice(0, 16)); // Convert to input value format
-
-            const fundraisingStart = new Date(announcementEnd);
-            setFundraisingStartDate(fundraisingStart.toISOString().slice(0, 16));
-
+        // This effect updates end dates based on the start date and duration
+        if (local_announcement_start_date && announcement_duration) {
+            // Calculate announcement end date
+            const local_announcementEnd = new Date(local_announcement_start_date);
+            local_announcementEnd.setDate(local_announcementEnd.getDate() + parseInt(announcement_duration));
+            
+            const localEndISO = local_announcementEnd.toISOString();
+            const utcEndISO = localToUtcISO(localEndISO);
+            
+            // Set both local and UTC dates
+            setLocalAnnouncementEndDate(localEndISO);
+            setUtcAnnouncementEndDate(utcEndISO);
+            setLocalFundraisingStartDate(localEndISO);
+            setUtcFundraisingStartDate(utcEndISO);
+            
+            // Update fundraising end date if duration is present
             if (fundraising_duration) {
-                const fundraisingEnd = new Date(fundraisingStart);
-                fundraisingEnd.setMonth(fundraisingEnd.getMonth() + parseInt(fundraising_duration));
-                setFundraisingEndDate(fundraisingEnd.toISOString().slice(0, 16));
+                const local_fundraisingEnd = new Date(local_announcementEnd);
+                local_fundraisingEnd.setMonth(local_fundraisingEnd.getMonth() + parseInt(fundraising_duration));
+                const localFundEndISO = local_fundraisingEnd.toISOString();
+                setLocalFundraisingEndDate(localFundEndISO);
+                setUtcFundraisingEndDate(localToUtcISO(localFundEndISO));
             }
         }
-    }, [announcement_start_date, announcement_duration, fundraising_duration]);
+    }, [local_announcement_start_date, announcement_duration, fundraising_duration]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -86,9 +120,9 @@ const CreateETF = () => {
             type,
             total_amount,
             lowest_amount,
-            announcement_start_date,
+            local_announcement_start_date,
             announcement_duration,
-            fundraising_start_date,
+            local_fundraising_start_date,
             fundraising_duration,
             ETF_duration,
             description
@@ -169,13 +203,18 @@ const CreateETF = () => {
                     <label>公告開始時間：</label>
                     <input
                         type="datetime-local"
-                        value={announcement_start_date}
-                        onChange={(e) => setAnnouncementStartDate(e.target.value)}
+                        value={local_announcement_start_date.slice(0, 16)}
+                        onChange={(e) => handleAnnouncementStartDateChange(e.target.value + "Z")} // restore ISO 8601 format by adding utc indicator "Z".
                         required
-                        style={{ borderColor: errors.announcement_start_date ? 'red' : '' }}
+                        style={{ borderColor: errors.local_announcement_start_date ? 'red' : '' }}
                         disabled={loading}
                     />
-                    {errors.announcement_start_date && <span style={{ color: 'red' }}>{errors.announcement_start_date}</span>}
+                    <input
+                        type="datetime-local"
+                        value={utc_announcement_start_date.slice(0, 16)}
+                        disabled
+                    />
+                    {errors.local_announcement_start_date && <span style={{ color: 'red' }}>{errors.local_announcement_start_date}</span>}
                 </div>
                 <div>
                     <label>公告時長（天）：</label>
@@ -193,16 +232,26 @@ const CreateETF = () => {
                 <div>
                     <label>公告結束時間：</label>
                     <input
-                        type="datetime"
-                        value={announcement_end_date}
+                        type="datetime-local"
+                        value={local_announcement_end_date.slice(0, 16)}
+                        disabled
+                    />
+                    <input
+                        type="datetime-local"
+                        value={utc_announcement_end_date.slice(0, 16)}
                         disabled
                     />
                 </div>
                 <div>
                     <label>招募開始時間：</label>
                     <input
-                        type="datetime"
-                        value={fundraising_start_date}
+                        type="datetime-local"
+                        value={local_fundraising_start_date.slice(0, 16)}
+                        disabled
+                    />
+                    <input
+                        type="datetime-local"
+                        value={utc_fundraising_start_date.slice(0, 16)}
                         disabled
                     />
                 </div>
@@ -222,8 +271,13 @@ const CreateETF = () => {
                 <div>
                     <label>招募結束時間：</label>
                     <input
-                        type="datetime"
-                        value={fundraising_end_date}
+                        type="datetime-local"
+                        value={local_fundraising_end_date.slice(0, 16)}
+                        disabled
+                    />
+                    <input
+                        type="datetime-local"
+                        value={utc_fundraising_end_date.slice(0, 16)}
                         disabled
                     />
                 </div>
