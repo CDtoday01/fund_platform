@@ -23,7 +23,10 @@ class ETF(models.Model):
     current_investment = models.IntegerField(default=0)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='UserETF', related_name='etfs')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
+    def can_be_deleted(self):
+        return self.users.count() == 0
+    
     def save(self, *args, **kwargs):
         if self.announcement_start_date and self.announcement_duration:
             self.announcement_end_date =  self.announcement_start_date + relativedelta(days=self.announcement_duration)

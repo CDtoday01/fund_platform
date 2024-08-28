@@ -90,14 +90,26 @@ class CheckNameExistsView(APIView):
             return Response({'exists': True}, status=status.HTTP_200_OK)
         return Response({'exists': False}, status=status.HTTP_200_OK)
 
-class DeleteETFView(APIView):
-    permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
+class DeleteETFView(generics.DestroyAPIView):
+    queryset = ETF.objects.all()
     serializer_class = ETFSerializer
+    permission_classes = [IsAuthenticated, IsCreatorOrStaff]
+    lookup_field = 'id'
 
-    def delete(self, request, etf_id):
-        etf = get_object_or_404(ETF, id=etf_id)
-        etf.delete()
-        return Response({'success': 'ETF deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+    def delete(self, request, *args, **kwargs):
+        etf = self.get_object()
+        user = request.user
+
+        # Check if the user is the creator of the ETF
+        if etf.creator != user:
+            return Response({'error': 'You do not have permission to delete this ETF.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # Check if the ETF has any users
+        if etf.users.exists():
+            return Response({'error': 'Cannot delete ETF. It has associated users.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Proceed with deletion
+        return super().delete(request, *args, **kwargs)
 
 class UserETFsView(APIView):
     permission_classes = [IsAuthenticated]
