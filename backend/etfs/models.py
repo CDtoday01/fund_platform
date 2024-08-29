@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
 
 class ETF(models.Model):
@@ -8,8 +9,8 @@ class ETF(models.Model):
     etf_type = models.CharField(max_length=50, default="全球共享經濟ETF")
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_etfs')
     
-    total_amount = models.IntegerField()  # Total investment cap
-    lowest_amount = models.IntegerField()  # Minimum investment amount
+    total_amount = models.IntegerField(validators=[MinValueValidator(100)])  # Total investment cap
+    lowest_amount = models.IntegerField(validators=[MinValueValidator(2)])  # Minimum investment amount
     announcement_start_date = models.DateTimeField(default=timezone.now)
     announcement_end_date = models.DateTimeField(blank=True, null=True)
     announcement_duration = models.IntegerField() # Duration in days

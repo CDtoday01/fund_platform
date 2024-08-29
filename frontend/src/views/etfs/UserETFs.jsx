@@ -131,26 +131,30 @@ const UserETFs = () => {
             </div>
             <div className="state-tabs">
                 <button
-                    className={activeState === 'future' ? 'active' : ''}
+                    className={activeState === 'future' && activeTab !== 'joined' ? 'active' : ''}
                     onClick={() => handleStateChange('future')}
+                    disabled={activeTab === 'joined'}
                 >
                     Future ETFs
                 </button>
                 <button
-                    className={activeState === 'announcing' ? 'active' : ''}
+                    className={activeState === 'announcing' && activeTab !== 'joined' ? 'active' : ''}
                     onClick={() => handleStateChange('announcing')}
+                    disabled={activeTab === 'joined'}
                 >
                     Announcing ETFs
                 </button>
                 <button
-                    className={activeState === 'fundraising' ? 'active' : ''}
+                    className={activeState === 'fundraising' && activeTab !== 'joined' ? 'active' : ''}
                     onClick={() => handleStateChange('fundraising')}
+                    disabled={activeTab === 'joined'}
                 >
                     Fundraising ETFs
                 </button>
                 <button
-                    className={activeState === 'past' ? 'active' : ''}
+                    className={activeState === 'past' && activeTab !== 'joined' ? 'active' : ''}
                     onClick={() => handleStateChange('past')}
+                    disabled={activeTab === 'joined'}
                 >
                     Past ETFs
                 </button>

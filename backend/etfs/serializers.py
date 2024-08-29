@@ -53,10 +53,11 @@ class ETFSerializer(serializers.ModelSerializer):
         announcement_start_date = data.get('announcement_start_date')
         ETF_duration = data.get('ETF_duration')
 
-        if announcement_start_date < current_time:
-            raise serializers.ValidationError({
-                'date': 'Announcement start date must be in the future.'
-            })
+        # comment out for debug purpose
+        # if announcement_start_date < current_time:
+        #     raise serializers.ValidationError({
+        #         'date': 'Announcement start date must be in the future.'
+        #     })
         if total_amount < lowest_amount:
             raise serializers.ValidationError({
                 'amount': 'Total amount must be greater than or equal to the lowest amount.'
@@ -76,8 +77,9 @@ class ETFSerializer(serializers.ModelSerializer):
         return data
     
     def create(self, validated_data):
-        print(validated_data)
-        return ETF.objects.create(**validated_data)  
+        request = self.context.get('request')  # Access the request object from context
+        validated_data['creator'] = request.user  # Ensure creator is set
+        return super().create(validated_data)
       
 class UserETFSerializer(serializers.ModelSerializer):
     etf = ETFSerializer()

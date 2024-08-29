@@ -73,14 +73,15 @@ class CreateETFView(APIView):
     serializer_class = ETFSerializer
 
     def post(self, request):
-        data = request.data
+        data = request.data.copy()  # Make a mutable copy of request data
         data['creator'] = request.user.id  # Assign current user's ID to creator field
-        serializer = ETFSerializer(data=data)
+        
+        serializer = ETFSerializer(data=data, context={'request': request})  # Pass context
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
+    
 class CheckNameExistsView(APIView):
     def get(self, request, *args, **kwargs):
         name = request.query_params.get('name', None)
@@ -129,24 +130,23 @@ class UserETFsView(APIView):
         else:
             etfs = ETF.objects.exclude(users=request.user).exclude(creator=request.user)
         
-        # Handle the filter_state logic
-        current_time = timezone.now()
-        if filter_state == 'future':
-            etfs = etfs.filter(announcement_start_date__gt=current_time)
-        elif filter_state == 'announcing':
-            etfs = etfs.filter(
-                announcement_start_date__lte=current_time,
-                announcement_end_date__gte=current_time
-            )
-        elif filter_state == 'fundraising':
-            etfs = etfs.filter(
-                fundraising_start_date__lte=current_time,
-                fundraising_end_date__gte=current_time
-            )
-        elif filter_state == 'past':
-            etfs = etfs.filter(fundraising_end_date__lt=current_time)
+        if filter_tab != 'joined':
+            current_time = timezone.now()
+            if filter_state == 'future':
+                etfs = etfs.filter(announcement_start_date__gt=current_time)
+            elif filter_state == 'announcing':
+                etfs = etfs.filter(
+                    announcement_start_date__lte=current_time,
+                    announcement_end_date__gte=current_time
+                )
+            elif filter_state == 'fundraising':
+                etfs = etfs.filter(
+                    fundraising_start_date__lte=current_time,
+                    fundraising_end_date__gte=current_time
+                )
+            elif filter_state == 'past':
+                etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
-        # Serialize the filtered ETFs, including joined_date and duration for joined ETFs
         serializer = ETFSerializer(etfs, many=True)
         return Response(serializer.data)
 
