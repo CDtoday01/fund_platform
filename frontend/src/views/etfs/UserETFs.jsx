@@ -76,7 +76,8 @@ const UserETFs = () => {
         const isUserJoined = etf.users.includes(currentUserId);
         const isUserCreator = etf.creator === currentUserId;  // Assuming you have the creator info in the ETF data
         const isAnnouncing = etf.state === 'announcing';  // Assuming state is returned from the serializer
-    
+        const isDisabled = isUserCreator || isAnnouncing;
+
         if (tab === 'other') {
             return (
                 <button
@@ -96,6 +97,8 @@ const UserETFs = () => {
             } else {
                 return null;
             }
+        } else {
+            return <button className="join-button" disabled={isDisabled}>{isDisabled ? 'Disabled' : 'Join'}</button>;
         }
     };
 

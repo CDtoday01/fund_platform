@@ -127,7 +127,7 @@ class UserETFsView(APIView):
         elif filter_tab == 'created':
             etfs = ETF.objects.filter(creator=request.user)
         else:
-            etfs = ETF.objects.exclude(users=request.user)
+            etfs = ETF.objects.exclude(users=request.user).exclude(creator=request.user)
         
         # Handle the filter_state logic
         current_time = timezone.now()

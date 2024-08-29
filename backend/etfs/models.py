@@ -17,7 +17,7 @@ class ETF(models.Model):
     fundraising_end_date = models.DateTimeField(blank=True, null=True)
     fundraising_duration = models.IntegerField() # Duration in months
     ETF_duration = models.IntegerField()  # Duration in months
-    description = models.TextField(blank=True, null=True)  # Description of the ETF
+    description = models.TextField(max_length=500, blank=True, null=True)  # Description of the ETF
 
     # Other fields retained
     current_investment = models.IntegerField(default=0)
