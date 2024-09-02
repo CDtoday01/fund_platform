@@ -39,6 +39,8 @@ class ETFListView(APIView):
                 fundraising_start_date__lte=current_time,
                 fundraising_end_date__gte=current_time
             )
+        elif filter_state == 'progressing':
+            etfs = ETF.objects.progressing()
         elif filter_state == 'past':
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
@@ -144,6 +146,8 @@ class UserETFsView(APIView):
                     fundraising_start_date__lte=current_time,
                     fundraising_end_date__gte=current_time
                 )
+            elif filter_state == 'progressing':
+                etfs = ETF.objects.progressing()
             elif filter_state == 'past':
                 etfs = etfs.filter(fundraising_end_date__lt=current_time)
 

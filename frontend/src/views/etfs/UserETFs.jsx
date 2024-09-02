@@ -152,6 +152,13 @@ const UserETFs = () => {
                     Fundraising ETFs
                 </button>
                 <button
+                    className={activeState === 'progressing' && activeTab !== 'joined' ? 'active' : ''}
+                    onClick={() => handleStateChange('progressing')}
+                    disabled={activeTab === 'joined'}
+                >
+                    Progressing ETFs
+                </button>
+                <button
                     className={activeState === 'past' && activeTab !== 'joined' ? 'active' : ''}
                     onClick={() => handleStateChange('past')}
                     disabled={activeTab === 'joined'}
