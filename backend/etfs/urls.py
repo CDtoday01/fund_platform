@@ -1,8 +1,9 @@
 from django.urls import path
-from .views import ETFDefaultsView, ETFListView, CreateETFView, CheckNameExistsView, DeleteETFView, ETFDetailView, UserETFsView, JoinETFView, LeaveETFView
+from .views import ETFDefaultsView, ETFListView, ETFTypeListAPIView, CreateETFView, CheckNameExistsView, DeleteETFView, ETFDetailView, UserETFsView, JoinETFView, LeaveETFView
 
 urlpatterns = [
     path('', ETFListView.as_view(), name='etf-list'),
+    path('etf-types/', ETFTypeListAPIView.as_view(), name='get_etf_types'),
     path('defaults/', ETFDefaultsView.as_view(), name='etf-defaults'),
     path('create/', CreateETFView.as_view(), name='create-etf'),
     path('check-name-exists/', CheckNameExistsView.as_view(), name='check-name-exists'),

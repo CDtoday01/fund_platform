@@ -2,12 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { createETF, checkNameExists } from '../../services/etfService'; // Add a service function for name check
 import { Link, useNavigate } from 'react-router-dom';
 import useAxios from '../../utils/useAxios';
+import ETFFilter from './ETFFilter';
 
 const CreateETF = () => {
     const [name, setName] = useState('');
     const [type, setType] = useState('');
     const [total_amount, setTotalAmount] = useState('');
     const [lowest_amount, setLowestAmount] = useState('');
+    
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [selectedSubcategory, setSelectedSubcategory] = useState('');
+    const [allSubcategories, setAllSubcategories] = useState([]);
     
     const [utc_announcement_start_date, setUtcAnnouncementStartDate] = useState('');
     const [local_announcement_start_date, setLocalAnnouncementStartDate] = useState('');
@@ -46,6 +51,25 @@ const CreateETF = () => {
         };
         fetchDefaults();
     }, []);
+
+    // Handle selection of category
+    const handleCategoryChange = (newCategory) => {
+        // Check if newCategory is correctly received
+        console.log("Selected Category:", newCategory);
+        setSelectedCategory(newCategory);
+
+        // Filter subcategories based on the selected category code
+        const filteredSubcategories = allSubcategories.filter(subcat => subcat.category === newCategory);
+        setAllSubcategories(filteredSubcategories);
+        setSelectedSubcategory(''); // Reset the selected subcategory
+    };
+
+    // Handle selection of subcategory
+    const handleSubcategoryNameChange = (newSubcategory) => {
+        // Check if newSubcategory is correctly received
+        console.log("Selected Subcategory:", newSubcategory);
+        setSelectedSubcategory(newSubcategory);
+    };
 
     // Function to check if the name already exists in the database
     const handleNameBlur = async () => {
@@ -150,6 +174,11 @@ const CreateETF = () => {
     return (
         <>
             <form onSubmit={handleSubmit}>
+                <h1>Create ETF</h1>
+                <ETFFilter
+                    onCategoryChange={handleCategoryChange}
+                    onSubcategoryChange={handleSubcategoryNameChange}
+                />
                 <div>
                     <label>名稱：</label>
                     <input

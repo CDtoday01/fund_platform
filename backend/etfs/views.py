@@ -15,7 +15,7 @@ from django.middleware.csrf import get_token
 
 import json
 
-from .models import ETF, UserETF
+from .models import ETF, ETFType, UserETF
 from .serializers import ETFSerializer
 from .permission import IsCreatorOrStaff, IsAdminOrReadOnly
 
@@ -57,7 +57,6 @@ class ETFDetailView(generics.RetrieveUpdateDestroyAPIView):
         else:
             return [AllowAny()]
 
-
 class ETFDefaultsView(APIView):
     serializer_class = ETFSerializer
 
@@ -69,6 +68,11 @@ class ETFDefaultsView(APIView):
         }
         print(now_ISO)
         return Response(default_values)
+
+class ETFTypeListAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        etf_types = ETFType.objects.values('category_code', 'category', 'subcategory_name', 'etf_code')
+        return Response(etf_types)
 
 class CreateETFView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
