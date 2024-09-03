@@ -10,7 +10,6 @@ const CreateETF = () => {
     const [total_amount, setTotalAmount] = useState('');
     const [lowest_amount, setLowestAmount] = useState('');
     
-    const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedSubcategory, setSelectedSubcategory] = useState('');
     const [allSubcategories, setAllSubcategories] = useState([]);
     
@@ -56,7 +55,6 @@ const CreateETF = () => {
     const handleCategoryChange = (newCategory) => {
         // Check if newCategory is correctly received
         console.log("Selected Category:", newCategory);
-        setSelectedCategory(newCategory);
 
         // Filter subcategories based on the selected category code
         const filteredSubcategories = allSubcategories.filter(subcat => subcat.category === newCategory);
@@ -132,6 +130,12 @@ const CreateETF = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        
+        if (!selectedSubcategory) {
+            alert('Please select a subcategory.');
+            setLoading(false);
+            return;
+        }
 
         if (nameExistsError) {
             alert('Name already exists. Please choose another name.');

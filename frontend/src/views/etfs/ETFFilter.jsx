@@ -58,7 +58,11 @@ const ETFFilter = ({ onCategoryChange, onSubcategoryChange }) => {
         <div>
             <div>
                 <label htmlFor="category-code">分類：</label>
-                <select id="category-code" value={selectedCategory} onChange={handleCategoryChange}>
+                <select 
+                    id="category-code"
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                >
                     <option value="">選擇分類</option>
                     {categories.map(category => (
                         <option key={category} value={category}>{category}</option>
@@ -67,7 +71,12 @@ const ETFFilter = ({ onCategoryChange, onSubcategoryChange }) => {
             </div>
             <div>
                 <label htmlFor="subcategory-name">次類別：</label>
-                <select id="subcategory-name" value={selectedSubcategory} onChange={handleSubcategoryChange} disabled={!selectedCategory}>
+                <select
+                    id="subcategory-name"
+                    value={selectedSubcategory}
+                    onChange={handleSubcategoryChange}
+                    disabled={!selectedCategory}
+                >
                     <option value="">選擇次類別</option>
                     {filteredSubcategories.map(subcat => (
                         <option key={subcat.subcategory_name} value={subcat.subcategory_name}>{subcat.subcategory_name}</option>
