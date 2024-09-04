@@ -1,9 +1,14 @@
 from rest_framework import serializers
-from .models import ETF, UserETF
+from .models import ETFCategoryType, ETF, UserETF
 from django.contrib.auth.models import User
 from dateutil.relativedelta import relativedelta
 from django.utils import timezone
 from typing import Optional
+
+class ETFCategoryTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ETFCategoryType
+        fields = '__all__'
 
 class ETFSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()

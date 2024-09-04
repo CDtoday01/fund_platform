@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import useAxios from '../../utils/useAxios';
 
-const ETFFilter = ({ onCategoryChange, onSubcategoryChange }) => {
+const ETFFilter = ({ onCategoryChange, onSubcategoryChange, category_error, subcategory_error}) => {
     const [allSubcategories, setAllSubcategories] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [filteredSubcategories, setFilteredSubcategories] = useState([]);
     const [selectedSubcategory, setSelectedSubcategory] = useState('');
-
+    const [subcategoryCode, setSubCategoryCode] = useState('');
+    
     const axiosInstance = useAxios();
 
     useEffect(() => {
@@ -55,7 +56,7 @@ const ETFFilter = ({ onCategoryChange, onSubcategoryChange }) => {
     };
 
     return (
-        <div>
+        <>
             <div>
                 <label htmlFor="category-code">分類：</label>
                 <select 
@@ -68,6 +69,7 @@ const ETFFilter = ({ onCategoryChange, onSubcategoryChange }) => {
                         <option key={category} value={category}>{category}</option>
                     ))}
                 </select>
+                {category_error && <span style={{ color: 'red' }}>{category_error}</span>}
             </div>
             <div>
                 <label htmlFor="subcategory-name">次類別：</label>
@@ -82,8 +84,9 @@ const ETFFilter = ({ onCategoryChange, onSubcategoryChange }) => {
                         <option key={subcat.subcategory_name} value={subcat.subcategory_name}>{subcat.subcategory_name}</option>
                     ))}
                 </select>
+                {subcategory_error && <span style={{ color: 'red' }}>{subcategory_error}</span>}
             </div>
-        </div>
+        </>
     );
 };
 

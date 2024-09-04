@@ -1,6 +1,6 @@
 import json
 from django.core.management.base import BaseCommand
-from etfs.models import ETFType
+from etfs.models import ETFCategoryType
 
 class Command(BaseCommand):
     help = 'Load ETF types from a JSON file into the database'
@@ -16,14 +16,14 @@ class Command(BaseCommand):
                 data = json.load(f)
 
             for item in data:
-                etf_code = item.get("代碼")
+                subcategory_code = item.get("代碼")
                 category_code = item.get("種類代碼")
                 category = item.get("種類")
                 subcategory_name = item.get("中類名稱")
 
                 # Create or update the ETFType entry
-                ETFType.objects.update_or_create(
-                    etf_code=etf_code,
+                ETFCategoryType.objects.update_or_create(
+                    subcategory_code=subcategory_code,
                     defaults={
                         'category_code': category_code,
                         'category': category,

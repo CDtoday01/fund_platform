@@ -15,7 +15,7 @@ from django.middleware.csrf import get_token
 
 import json
 
-from .models import ETF, ETFType, UserETF
+from .models import ETF, ETFCategoryType, UserETF
 from .serializers import ETFSerializer
 from .permission import IsCreatorOrStaff, IsAdminOrReadOnly
 
@@ -71,7 +71,7 @@ class ETFDefaultsView(APIView):
 
 class ETFTypeListAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        etf_types = ETFType.objects.values('category_code', 'category', 'subcategory_name', 'etf_code')
+        etf_types = ETFCategoryType.objects.values('category_code', 'category', 'subcategory_code', 'subcategory_name')
         return Response(etf_types)
 
 class CreateETFView(APIView):

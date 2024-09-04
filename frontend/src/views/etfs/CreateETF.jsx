@@ -10,7 +10,9 @@ const CreateETF = () => {
     const [total_amount, setTotalAmount] = useState('');
     const [lowest_amount, setLowestAmount] = useState('');
     
+    const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedSubcategory, setSelectedSubcategory] = useState('');
+    const [selectedSubcategoryCode, setSelectedSubcategoryCode] = useState("");
     const [allSubcategories, setAllSubcategories] = useState([]);
     
     const [utc_announcement_start_date, setUtcAnnouncementStartDate] = useState('');
@@ -29,6 +31,9 @@ const CreateETF = () => {
     const [description, setDescription] = useState('');
 
     const [errors, setErrors] = useState({});
+    const [category_error, setCategoryError] = useState('');
+    const [subcategory_error, setSubcategoryError] = useState('');
+    
     const [nameExistsError, setNameExistsError] = useState(false); // Initialize as false
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -50,12 +55,25 @@ const CreateETF = () => {
         };
         fetchDefaults();
     }, []);
-
+    
+    useEffect(() => {
+        const fetchSubcategories = async () => {
+            try {
+                const response = await axiosInstance.get('/etfs/etf-types/');
+                setAllSubcategories(response.data);
+            } catch (error) {
+                console.error('Error fetching subcategories:', error);
+            }
+        };
+        fetchSubcategories();
+    }, []);
+    
     // Handle selection of category
     const handleCategoryChange = (newCategory) => {
         // Check if newCategory is correctly received
         console.log("Selected Category:", newCategory);
-
+        setSelectedCategory(newCategory);
+        
         // Filter subcategories based on the selected category code
         const filteredSubcategories = allSubcategories.filter(subcat => subcat.category === newCategory);
         setAllSubcategories(filteredSubcategories);
@@ -67,6 +85,11 @@ const CreateETF = () => {
         // Check if newSubcategory is correctly received
         console.log("Selected Subcategory:", newSubcategory);
         setSelectedSubcategory(newSubcategory);
+
+        // Find and set the corresponding subcategory_code
+        const selectedSub = allSubcategories.find(subcat => subcat.subcategory_name === newSubcategory);
+        setSelectedSubcategoryCode(selectedSub?.subcategory_code || ''); // Handle case where subcategory isn't found
+        console.log(allSubcategories);
     };
 
     // Function to check if the name already exists in the database
@@ -131,8 +154,20 @@ const CreateETF = () => {
         e.preventDefault();
         setLoading(true);
         
+        // Reset errors
+        setCategoryError('');
+        setSubcategoryError('');
+
+        // Check if category is selected
+        if (!selectedCategory) {
+            setCategoryError('Please select a category.');
+            setLoading(false);
+            return;
+        }
+
+        // Check if subcategory is selected
         if (!selectedSubcategory) {
-            alert('Please select a subcategory.');
+            setSubcategoryError('Please select a subcategory.');
             setLoading(false);
             return;
         }
@@ -146,6 +181,7 @@ const CreateETF = () => {
         const newETF = {
             name,
             type,
+            subcategory_code: selectedSubcategoryCode,
             total_amount,
             lowest_amount,
             announcement_start_date: utc_announcement_start_date,
@@ -182,6 +218,8 @@ const CreateETF = () => {
                 <ETFFilter
                     onCategoryChange={handleCategoryChange}
                     onSubcategoryChange={handleSubcategoryNameChange}
+                    category_error={category_error}
+                    subcategory_error={subcategory_error}
                 />
                 <div>
                     <label>名稱：</label>
