@@ -26,6 +26,7 @@ class ETFListView(APIView):
         etfs = ETF.objects.all()
         filter_state = request.query_params.get('filter_state', None)
         current_time = timezone.now()
+        user = request.user
 
         if filter_state == 'future':
             etfs = etfs.filter(announcement_start_date__gt=current_time)
@@ -40,7 +41,11 @@ class ETFListView(APIView):
                 fundraising_end_date__gte=current_time
             )
         elif filter_state == 'progressing':
-            etfs = ETF.objects.progressing()
+            etfs = etfs.filter(
+                useretf__user=user,
+                useretf__joined_date__lte=current_time,
+                useretf__leave_date__gte=current_time
+            )
         elif filter_state == 'past':
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
@@ -81,7 +86,7 @@ class CreateETFView(APIView):
     def post(self, request):
         data = request.data.copy()  # Make a mutable copy of request data
         data['creator'] = request.user.id  # Assign current user's ID to creator field
-        
+
         serializer = ETFSerializer(data=data, context={'request': request})  # Pass context
         if serializer.is_valid():
             serializer.save()
@@ -125,6 +130,7 @@ class UserETFsView(APIView):
     def get(self, request):
         filter_tab = request.query_params.get('filter_tab', 'joined')
         filter_state = request.query_params.get('filter_state')
+        user = request.user
 
         if filter_tab == 'joined':
             etfs = ETF.objects.filter(users=request.user).annotate(
@@ -151,7 +157,11 @@ class UserETFsView(APIView):
                     fundraising_end_date__gte=current_time
                 )
             elif filter_state == 'progressing':
-                etfs = ETF.objects.progressing()
+                etfs = etfs.filter(
+                    useretf__user=user,
+                    useretf__joined_date__lte=current_time,
+                    useretf__leave_date__gte=current_time
+                )
             elif filter_state == 'past':
                 etfs = etfs.filter(fundraising_end_date__lt=current_time)
 

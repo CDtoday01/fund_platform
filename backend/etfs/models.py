@@ -8,27 +8,10 @@ from datetime import datetime
 import shortuuid
 import time
 
-class ETFQuerySet(models.QuerySet):
-    def progressing(self):
-        current_date = datetime.now().date()
-        progressing_etfs = []
-
-        # Iterate through ETFs and manually filter based on ETF duration
-        for etf in self:
-            # Calculate the end date for each user in this ETF
-            for user_etf in etf.useretf_set.all():
-                end_date = user_etf.joined_date.date() + relativedelta(months=etf.ETF_duration)
-                if user_etf.joined_date.date() <= current_date <= end_date:
-                    progressing_etfs.append(etf)
-                    break
-
-        # Return the filtered ETFs
-        return self.filter(id__in=[etf.id for etf in progressing_etfs])
-
 class ETFCategoryType(models.Model):
     category_code = models.CharField(max_length=10)  # Store "種類代碼"
     category = models.CharField(max_length=100)  # Store "種類"
-    subcategory_code = models.CharField(max_length=10, unique=True)  # Store "代碼" here
+    subcategory_code = models.CharField(max_length=10, unique=True)  # Store "代碼"
     subcategory_name = models.CharField(max_length=100)  # Store "中類名稱"
 
     def __str__(self):
@@ -36,7 +19,7 @@ class ETFCategoryType(models.Model):
     
 class ETF(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    subcategory_code = models.ForeignKey(ETFCategoryType, on_delete=models.CASCADE, related_name='category_types', to_field='subcategory_code')  # Link to category type
+    category = models.ForeignKey(ETFCategoryType, on_delete=models.CASCADE, related_name='category_types', to_field='subcategory_code')  # Link to category type
     etf_type = models.CharField(max_length=50, default="全球共享經濟ETF")
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_etfs')
     code = models.CharField(max_length=50, blank=True, null=True, unique=True)
@@ -51,9 +34,6 @@ class ETF(models.Model):
     fundraising_duration = models.IntegerField()  # Duration in months
     ETF_duration = models.IntegerField()  # Duration in months
     description = models.TextField(max_length=500, blank=True, null=True)  # Description of the ETF
-
-    # Custom QuerySet manager
-    objects = ETFQuerySet.as_manager()
 
     # Other fields retained
     current_investment = models.IntegerField(default=0)
@@ -81,7 +61,7 @@ class ETF(models.Model):
         
         # Generate code if not already set
         if not self.code:
-            self.code = self.generate_code(self.subcategory_code.subcategory_code)
+            self.code = self.generate_code(self.category.subcategory_code)
         
         # Save the instance
         super().save(*args, **kwargs)
@@ -93,6 +73,12 @@ class UserETF(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     etf = models.ForeignKey(ETF, on_delete=models.CASCADE)
     joined_date = models.DateTimeField(auto_now_add=True)
+    leave_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ('user', 'etf')
+
+    def save(self, *args, **kwargs):
+        if self.etf.ETF_duration:
+            self.leave_date = self.joined_date + relativedelta(months=self.etf.ETF_duration)
+        super().save(*args, **kwargs)
