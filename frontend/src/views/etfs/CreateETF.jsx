@@ -87,9 +87,8 @@ const CreateETF = () => {
         setSelectedSubcategory(newSubcategory);
 
         // Find and set the corresponding subcategory_code
-        const selectedSub = allSubcategories.find(subcat => subcat.subcategory_name === newSubcategory);
+        const selectedSub = allSubcategories.find(subcat => subcat.subcategory_name === newSubcategory);    
         setSelectedSubcategoryCode(selectedSub?.subcategory_code || ''); // Handle case where subcategory isn't found
-        console.log(allSubcategories);
     };
 
     // Function to check if the name already exists in the database
@@ -181,7 +180,7 @@ const CreateETF = () => {
         const newETF = {
             name,
             type,
-            subcategory_code: selectedSubcategoryCode,
+            category: selectedSubcategoryCode,
             total_amount,
             lowest_amount,
             announcement_start_date: utc_announcement_start_date,
@@ -191,6 +190,8 @@ const CreateETF = () => {
             ETF_duration,
             description
         };
+        
+        console.log(newETF);
 
         try {
             const response = await createETF(newETF);

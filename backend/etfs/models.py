@@ -72,13 +72,16 @@ class ETF(models.Model):
 class UserETF(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     etf = models.ForeignKey(ETF, on_delete=models.CASCADE)
-    joined_date = models.DateTimeField(auto_now_add=True)
+    joined_date = models.DateTimeField(default=timezone.now)
     leave_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         unique_together = ('user', 'etf')
 
     def save(self, *args, **kwargs):
+        if self.joined_date is None:
+            raise ValueError("Joined date is not set.")
+        
         if self.etf.ETF_duration:
             self.leave_date = self.joined_date + relativedelta(months=self.etf.ETF_duration)
         super().save(*args, **kwargs)

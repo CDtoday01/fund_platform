@@ -7,7 +7,6 @@ const ETFFilter = ({ onCategoryChange, onSubcategoryChange, category_error, subc
     const [selectedCategory, setSelectedCategory] = useState('');
     const [filteredSubcategories, setFilteredSubcategories] = useState([]);
     const [selectedSubcategory, setSelectedSubcategory] = useState('');
-    const [subcategoryCode, setSubCategoryCode] = useState('');
     
     const axiosInstance = useAxios();
 

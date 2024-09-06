@@ -25,6 +25,7 @@ class ETFListView(APIView):
     def get(self, request, *args, **kwargs):
         etfs = ETF.objects.all()
         filter_state = request.query_params.get('filter_state', None)
+        tab = request.query_params.get('tab', None)  # Assuming you pass the tab as a query parameter
         current_time = timezone.now()
         user = request.user
 
@@ -41,11 +42,25 @@ class ETFListView(APIView):
                 fundraising_end_date__gte=current_time
             )
         elif filter_state == 'progressing':
-            etfs = etfs.filter(
-                useretf__user=user,
-                useretf__joined_date__lte=current_time,
-                useretf__leave_date__gte=current_time
-            )
+            if tab == 'created':
+                # Progressing if any user is in the ETF (for created ETFs)
+                etfs = etfs.filter(
+                    useretf__joined_date__lte=current_time,
+                    useretf__leave_date__gte=current_time
+                ).distinct()
+            elif tab == 'joined':
+                # Progressing if the current user is in the ETF (for joined ETFs)
+                etfs = etfs.filter(
+                    useretf__user=user,
+                    useretf__joined_date__lte=current_time,
+                    useretf__leave_date__gte=current_time
+                ).distinct()
+            else:
+                # Progressing if any user is in the ETF (for other ETFs)
+                etfs = etfs.filter(
+                    useretf__joined_date__lte=current_time,
+                    useretf__leave_date__gte=current_time
+                ).distinct()
         elif filter_state == 'past':
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
 

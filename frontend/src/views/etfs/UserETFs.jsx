@@ -33,34 +33,38 @@ const UserETFs = () => {
         }
     };
 
-    const joinETF = async (etfId) => {
-        try {
-            const axiosInstance = useAxios();
-            const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
-            if (response.status === 200) {
-                fetchUserETFs(activeTab, activeState);
-                alert(`Joined ETF!`);
-            } else {
-                console.error('Failed to join ETF:', response.data);
+    const joinETF = async (etfId, etfName) => {
+        if (window.confirm(`Are you sure you want to invest in ${etfName}?`)) {
+            try {
+                const axiosInstance = useAxios();
+                const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
+                if (response.status === 200) {
+                    fetchUserETFs(activeTab, activeState);
+                    alert('Joined ETF!');
+                } else {
+                    console.error('Failed to join ETF:', response.data);
+                }
+            } catch (error) {
+                console.error('Error joining ETF:', error);
             }
-        } catch (error) {
-            console.error('Error joining ETF:', error);
         }
     };
 
     const leaveETF = async (etfId, etfName) => {
-        try {
-            const axiosInstance = useAxios();
-            const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
-            if (response.status === 200) {
-                if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
+        if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
+            try {
+                const axiosInstance = useAxios();
+                const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
+                if (response.status === 200) {
+                    
                     fetchUserETFs(activeTab, activeState);
+                    alert('Left ETF!');
+                } else {
+                    console.error('Failed to leave ETF');
                 }
-            } else {
-                console.error('Failed to leave ETF');
+            } catch (error) {
+                console.error('Error leaving ETF:', error);
             }
-        } catch (error) {
-            console.error('Error leaving ETF:', error);
         }
     };
 
@@ -82,7 +86,7 @@ const UserETFs = () => {
             return (
                 <button
                     className="join-button"
-                    onClick={() => joinETF(etf.id)}
+                    onClick={() => joinETF(etf.id, etf.name)}
                     disabled={isUserCreator || isAnnouncing}
                     title={isUserCreator ? "You can't join your own ETF" : isAnnouncing ? "Announcing ETFs can't be joined" : ""}
                 >
