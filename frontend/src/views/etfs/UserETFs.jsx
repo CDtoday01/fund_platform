@@ -10,6 +10,13 @@ const UserETFs = () => {
     const [activeState, setActiveState] = useState('announcing');
     const { user } = useAuthStore();
     const currentUserId = user ? user.user_id : null;
+
+    useEffect(() => {
+        // Auto-switch to 'progressing' when the tab is 'joined'
+        if (activeTab === 'joined') {
+            setActiveState('progressing');
+        }
+    }, [activeTab]); // This effect runs whenever activeTab changes
     
     useEffect(() => {
         if (user) {
@@ -156,16 +163,14 @@ const UserETFs = () => {
                     Fundraising ETFs
                 </button>
                 <button
-                    className={activeState === 'progressing' && activeTab !== 'joined' ? 'active' : ''}
+                    className={activeState === 'progressing' ? 'active' : ''}
                     onClick={() => handleStateChange('progressing')}
-                    disabled={activeTab === 'joined'}
                 >
                     Progressing ETFs
                 </button>
                 <button
-                    className={activeState === 'past' && activeTab !== 'joined' ? 'active' : ''}
+                    className={activeState === 'past' ? 'active' : ''}
                     onClick={() => handleStateChange('past')}
-                    disabled={activeTab === 'joined'}
                 >
                     Past ETFs
                 </button>

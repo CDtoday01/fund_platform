@@ -146,19 +146,42 @@ class UserETFsView(APIView):
         filter_tab = request.query_params.get('filter_tab', 'joined')
         filter_state = request.query_params.get('filter_state')
         user = request.user
+        current_time = timezone.now()
 
         if filter_tab == 'joined':
-            etfs = ETF.objects.filter(users=request.user).annotate(
+            # Separate progressing and past ETFs
+            progressing_etfs = ETF.objects.filter(
+                users=user,
+                useretf__joined_date__lte=current_time,
+                useretf__leave_date__gte=current_time
+            ).annotate(
                 joined_date=F('useretf__joined_date'),
                 duration=F('ETF_duration')
             )
+
+            past_etfs = ETF.objects.filter(
+                users=user,
+                useretf__leave_date__lt=current_time
+            ).annotate(
+                joined_date=F('useretf__joined_date'),
+                duration=F('ETF_duration')
+            )
+
+            if filter_state == 'progressing':
+                etfs = progressing_etfs
+            elif filter_state == 'past':
+                etfs = past_etfs
+            else:
+                # If no specific filter_state, return both progressing and past
+                etfs = progressing_etfs | past_etfs
+
         elif filter_tab == 'created':
             etfs = ETF.objects.filter(creator=request.user)
         else:
             etfs = ETF.objects.exclude(users=request.user).exclude(creator=request.user)
-        
+
+        # Handle other filter states for non-joined ETFs
         if filter_tab != 'joined':
-            current_time = timezone.now()
             if filter_state == 'future':
                 etfs = etfs.filter(announcement_start_date__gt=current_time)
             elif filter_state == 'announcing':
@@ -182,6 +205,7 @@ class UserETFsView(APIView):
 
         serializer = ETFSerializer(etfs, many=True)
         return Response(serializer.data)
+
 
 class JoinETFView(APIView):
     serializer_class = ETFSerializer
