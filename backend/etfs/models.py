@@ -4,7 +4,7 @@ from django.utils import timezone
 from django.core.validators import MinValueValidator
 from dateutil.relativedelta import relativedelta
 from datetime import datetime
-
+from corps.models import Corp
 import shortuuid
 import time
 
@@ -23,7 +23,8 @@ class ETF(models.Model):
     etf_type = models.CharField(max_length=50, default="全球共享經濟ETF")
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_etfs')
     code = models.CharField(max_length=50, blank=True, null=True, unique=True)
-
+    corp = models.ForeignKey(Corp, null=True, blank=True, on_delete=models.CASCADE, related_name='etfs')
+    
     total_amount = models.IntegerField(validators=[MinValueValidator(100)])  # Total investment cap
     lowest_amount = models.IntegerField(validators=[MinValueValidator(2)])  # Minimum investment amount
     announcement_start_date = models.DateTimeField(default=timezone.now)
@@ -39,7 +40,10 @@ class ETF(models.Model):
     current_investment = models.IntegerField(default=0)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='UserETF', related_name='etfs')
     created_at = models.DateTimeField(auto_now_add=True)
-
+    
+    def is_corp_etf(self):
+        return self.corp is not None
+    
     def can_be_deleted(self):
         return self.users.count() == 0
 

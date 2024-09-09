@@ -21,6 +21,21 @@ from .permission import IsCreatorOrStaff, IsAdminOrReadOnly
 
 User = get_user_model()
 
+class SwitchRoleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        role = request.data.get('role')
+        
+        if role not in ['individual', 'corp']:
+            return Response({'error': 'Invalid role'}, status=400)
+        
+        user.current_role = role
+        user.save()
+        
+        return Response({'success': 'Role switched successfully'}, status=200)
+
 class ETFListView(APIView):
     def get(self, request, *args, **kwargs):
         etfs = ETF.objects.all()
@@ -96,13 +111,17 @@ class ETFTypeListAPIView(APIView):
 
 class CreateETFView(APIView):
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
-    serializer_class = ETFSerializer
 
     def post(self, request):
-        data = request.data.copy()  # Make a mutable copy of request data
-        data['creator'] = request.user.id  # Assign current user's ID to creator field
+        user = request.user
+        data = request.data.copy()
+        
+        if user.current_role == 'corp':
+            data['corp'] = user.corp_set.first().id
+        else:
+            data['creator'] = user.id
 
-        serializer = ETFSerializer(data=data, context={'request': request})  # Pass context
+        serializer = ETFSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -148,37 +167,43 @@ class UserETFsView(APIView):
         user = request.user
         current_time = timezone.now()
 
-        if filter_tab == 'joined':
-            # Separate progressing and past ETFs
-            progressing_etfs = ETF.objects.filter(
-                users=user,
-                useretf__joined_date__lte=current_time,
-                useretf__leave_date__gte=current_time
-            ).annotate(
-                joined_date=F('useretf__joined_date'),
-                duration=F('ETF_duration')
-            )
-
-            past_etfs = ETF.objects.filter(
-                users=user,
-                useretf__leave_date__lt=current_time
-            ).annotate(
-                joined_date=F('useretf__joined_date'),
-                duration=F('ETF_duration')
-            )
-
-            if filter_state == 'progressing':
-                etfs = progressing_etfs
-            elif filter_state == 'past':
-                etfs = past_etfs
-            else:
-                # If no specific filter_state, return both progressing and past
-                etfs = progressing_etfs | past_etfs
-
-        elif filter_tab == 'created':
-            etfs = ETF.objects.filter(creator=request.user)
+        if user.current_role == 'corp':
+            # Only display the corp's own ETFs
+            corp = user.corps.first()
+            etfs = ETF.objects.filter(corp=corp)
         else:
-            etfs = ETF.objects.exclude(users=request.user).exclude(creator=request.user)
+
+            if filter_tab == 'joined':
+                # Separate progressing and past ETFs
+                progressing_etfs = ETF.objects.filter(
+                    users=user,
+                    useretf__joined_date__lte=current_time,
+                    useretf__leave_date__gte=current_time
+                ).annotate(
+                    joined_date=F('useretf__joined_date'),
+                    duration=F('ETF_duration')
+                )
+
+                past_etfs = ETF.objects.filter(
+                    users=user,
+                    useretf__leave_date__lt=current_time
+                ).annotate(
+                    joined_date=F('useretf__joined_date'),
+                    duration=F('ETF_duration')
+                )
+
+                if filter_state == 'progressing':
+                    etfs = progressing_etfs
+                elif filter_state == 'past':
+                    etfs = past_etfs
+                else:
+                    # If no specific filter_state, return both progressing and past
+                    etfs = progressing_etfs | past_etfs
+
+            elif filter_tab == 'created':
+                etfs = ETF.objects.filter(creator=request.user)
+            else:
+                etfs = ETF.objects.exclude(users=request.user).exclude(creator=request.user)
 
         # Handle other filter states for non-joined ETFs
         if filter_tab != 'joined':
@@ -208,15 +233,17 @@ class UserETFsView(APIView):
 
 
 class JoinETFView(APIView):
-    serializer_class = ETFSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, etf_id):
-        etf = get_object_or_404(ETF, id=etf_id)
         user = request.user
+        etf = get_object_or_404(ETF, id=etf_id)
+
+        if user.current_role == 'corp':
+            return JsonResponse({'error': 'Corporations cannot join ETFs'}, status=400)
 
         # Check if the user has already joined the ETF
-        if etf.users.filter(id=user.id).exists():
+        elif etf.users.filter(id=user.id).exists():
             return JsonResponse({'error': 'Already joined'}, status=400)
 
         # Log the creation of UserETF
