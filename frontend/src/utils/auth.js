@@ -87,7 +87,7 @@ export const setUser = async () => {
 export const setAuthUser = (access_token, refresh_token) => {
     // console.log("Setting access_token in cookie", access_token);
     Cookies.set('access_token', access_token, {
-        expires: 4/24,
+        expires: 4/24, // 4 hrs
         // secure: true //生產環境時要true表示 Cookie 只会在 HTTPS 连接中被发送,
         // httpOnly: true // 禁止 JavaScript 訪問 Cookie
     })

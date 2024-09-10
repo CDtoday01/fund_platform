@@ -1,35 +1,76 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import useAxios from '../../utils/useAxios';
-
+import formatDate from '../../utils/formatDate';  // Ensure you have a date formatting utility
+import fetchUserETFs from '../../utils/fetchUserETFs';
 const ETFs = () => {
-    const [etfs, setETFs] = useState([]);
-
-    const fetchActiveETFs = async () => {
-        try {
-            const axiosInstance = useAxios();
-            const response = await axiosInstance.get(`/etfs/`);
-            setETFs(response.data);
-        } catch (error) {
-            console.error("Error fetching active ETFs:", error);
-        }
-    };
-
-    useEffect(() => {
-        fetchActiveETFs();
-    }, []);
-
+    const [announcingETFs, setAnnouncingETFs] = useState([]);
+    const [fundraisingETFs, setFundraisingETFs] = useState([]);
+    useEffect(() =>{
+        fetchUserETFs('all', 'announcing', setAnnouncingETFs);
+        fetchUserETFs('all', 'fundraising', setFundraisingETFs);
+        
+    },[]);
+    
     return (
-        <div>
-            <h1>Active ETFs</h1>
-            <ul>
-                {etfs.map(etf => (
-                    <li key={etf.id}>
-                        <Link to={`/etfs/${etf.id}`}>{etf.name}</Link>
-                    </li>
-                ))}
-            </ul>
-        </div>
+        <>
+            <div>
+                <h1>Announcing E.T.F (coming soon)</h1>
+                <table className="table-box">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Fundraising Start</th>
+                            <th>Fundraising End</th>
+                            <th>Category</th>
+                            <th>Duration</th>
+                            <th>Investor Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {announcingETFs.map(etf => (
+                            <tr key={etf.id} onClick={() => window.location.href = `/etfs/${etf.id}`} style={{ cursor: 'pointer' }}>
+                                <td>{etf.name}</td>
+                                <td>{etf.code}</td>
+                                <td>{formatDate(etf.fundraising_start_date)}</td>
+                                <td>{formatDate(etf.fundraising_end_date)}</td>
+                                <td>{etf.subcategory_name}</td>
+                                <td>{etf.ETF_duration}</td>
+                                <td>{etf.users.length}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+            <div>
+                <h1>Fundraising E.T.F</h1>
+                <table className="table-box">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Fundraising Start</th>
+                            <th>Fundraising End</th>
+                            <th>Category</th>
+                            <th>Duration</th>
+                            <th>Investor Count</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {fundraisingETFs.map(etf => (
+                            <tr key={etf.id} onClick={() => window.location.href = `/etfs/${etf.id}`} style={{ cursor: 'pointer' }}>
+                                <td>{etf.name}</td>
+                                <td>{etf.code}</td>
+                                <td>{formatDate(etf.fundraising_start_date)}</td>
+                                <td>{formatDate(etf.fundraising_end_date)}</td>
+                                <td>{etf.subcategory_name}</td>
+                                <td>{etf.ETF_duration}</td>
+                                <td>{etf.users.length}</td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </>
     );
 };
 

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import '../../css/tab.css';
 import useAxios from '../../utils/useAxios';
 import { useAuthStore } from '../../store/auth';
+import formatDate from '../../utils/formatDate';
+import fetchUserETFs from '../../utils/fetchUserETFs';
 
 const UserETFs = () => {
     const [etfs, setETFs] = useState([]);
@@ -20,25 +22,9 @@ const UserETFs = () => {
     
     useEffect(() => {
         if (user) {
-            fetchUserETFs(activeTab, activeState);
+            fetchUserETFs(activeTab, activeState, setETFs);
         }
     }, [user, activeTab, activeState]);
-
-    const fetchUserETFs = async (tab, state) => {
-        const axiosInstance = useAxios();
-        try {
-            const params = {
-                filter_tab: tab,
-                filter_state: state,
-            };
-            const response = await axiosInstance.get('/etfs/user/', { params });
-            console.log(response);
-            setETFs(response.data);
-        } catch (error) {
-            console.error('Error fetching ETFs:', error);
-            setETFs([]); // Set etfs to an empty array on error
-        }
-    };
 
     const joinETF = async (etfId, etfName) => {
         if (window.confirm(`Are you sure you want to invest in ${etfName}?`)) {
@@ -113,11 +99,6 @@ const UserETFs = () => {
         }
     };
 
-    const formatDate = (dateString) => {
-        const date = new Date(dateString);
-        return date.toLocaleString();  // Locale-aware formatting
-    };
-
     return (
         <div>
             <h1>ETFs</h1>
@@ -189,7 +170,7 @@ const UserETFs = () => {
                             <th>Fundraising Start</th>
                             <th>Fundraising End</th>
                             <th>Category</th>
-                            <th>Duration</th>
+                            <th>ETF Duration</th>
                             <th>Investor Count</th>
                             <th>Actions</th>
                         </tr>

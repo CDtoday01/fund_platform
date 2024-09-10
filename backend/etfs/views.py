@@ -37,10 +37,11 @@ class SwitchRoleView(APIView):
         return Response({'success': 'Role switched successfully'}, status=200)
 
 class ETFListView(APIView):
+    permission_classes = [AllowAny]
     def get(self, request, *args, **kwargs):
         etfs = ETF.objects.all()
         filter_state = request.query_params.get('filter_state', None)
-        tab = request.query_params.get('tab', None)  # Assuming you pass the tab as a query parameter
+        filter_tab = request.query_params.get('filter_tab', None)
         current_time = timezone.now()
         user = request.user
 
@@ -57,13 +58,13 @@ class ETFListView(APIView):
                 fundraising_end_date__gte=current_time
             )
         elif filter_state == 'progressing':
-            if tab == 'created':
+            if filter_tab == 'created':
                 # Progressing if any user is in the ETF (for created ETFs)
                 etfs = etfs.filter(
                     useretf__joined_date__lte=current_time,
                     useretf__leave_date__gte=current_time
                 ).distinct()
-            elif tab == 'joined':
+            elif filter_tab == 'joined':
                 # Progressing if the current user is in the ETF (for joined ETFs)
                 etfs = etfs.filter(
                     useretf__user=user,
@@ -172,7 +173,6 @@ class UserETFsView(APIView):
             corp = user.corps.first()
             etfs = ETF.objects.filter(corp=corp)
         else:
-
             if filter_tab == 'joined':
                 # Separate progressing and past ETFs
                 progressing_etfs = ETF.objects.filter(
