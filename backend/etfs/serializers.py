@@ -14,6 +14,7 @@ class ETFSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
     creator = serializers.PrimaryKeyRelatedField(read_only=True)
+    subcategory_name = serializers.CharField(source='category.subcategory_name', read_only=True)
     
     class Meta:
         model = ETF

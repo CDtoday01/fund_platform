@@ -6,8 +6,8 @@ import { useAuthStore } from '../../store/auth';
 
 const UserETFs = () => {
     const [etfs, setETFs] = useState([]);
-    const [activeTab, setActiveTab] = useState('joined');
-    const [activeState, setActiveState] = useState('announcing');
+    const [activeTab, setActiveTab] = useState('created');
+    const [activeState, setActiveState] = useState('future');
     const { user } = useAuthStore();
     const currentUserId = user ? user.user_id : null;
 
@@ -113,6 +113,11 @@ const UserETFs = () => {
         }
     };
 
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleString();  // Locale-aware formatting
+    };
+
     return (
         <div>
             <h1>ETFs</h1>
@@ -176,14 +181,36 @@ const UserETFs = () => {
                 </button>
             </div>
             <div className="etf-list">
-                <ul>
-                    {etfs.map(etf => (
-                        <li key={etf.id}>
-                            <Link to={`/etfs/${etf.id}`}>{etf.name}</Link>
-                            {renderButton(etf, activeTab)}
-                        </li>
-                    ))}
-                </ul>
+                <table className="table-box">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Code</th>
+                            <th>Fundraising Start</th>
+                            <th>Fundraising End</th>
+                            <th>Category</th>
+                            <th>Duration</th>
+                            <th>Investor Count</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {etfs.map(etf => (
+                            <tr key={etf.id} onClick={() => window.location.href = `/etfs/${etf.id}`} style={{ cursor: 'pointer' }}>
+                                <td>{etf.name}</td>
+                                <td>{etf.code}</td>
+                                <td>{formatDate(etf.fundraising_start_date)}</td>
+                                <td>{formatDate(etf.fundraising_end_date)}</td>
+                                <td>{etf.subcategory_name}</td>
+                                <td>{etf.ETF_duration}個月</td>
+                                <td>{etf.users.length}</td>
+                                <td onClick={(e) => { e.stopPropagation();}}>
+                                    {renderButton(etf, activeTab)}
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
             </div>
         </div>
     );

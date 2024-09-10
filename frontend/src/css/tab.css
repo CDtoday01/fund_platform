@@ -14,3 +14,33 @@ button.active {
 button:not(.active):hover {
     background-color: #ddd;
 }
+
+.table-box{
+    border-collapse: collapse;
+  }
+  .table-box th,
+  .table-box td{
+    padding: 5px 20px;
+    border:1px solid #ccc;
+    text-align: center;
+    width: 60px;
+  }
+  .table-box th{
+    border-bottom: 0;
+    background-color: #332f2d;
+    color: #fff;
+  }
+  .table-box td{
+    min-height: 30px;
+    vertical-align: middle;
+  }
+  .table-box thead tr{
+    border-bottom:3px solid #ffc107;
+  }
+  .table-box tbody tr:nth-child(2n+2){
+    background-color: #efefef;
+  }
+  .table-box tbody tr:hover,
+  .table-box tbody tr:nth-child(2n+2):hover{
+    background-color: #e1eaef;
+  }
