@@ -1,40 +1,38 @@
 import { useAuthStore } from "../store/auth";
-import axios from './axios'
-import {jwtDecode} from 'jwt-decode'
-import Cookies from 'js-cookie'
-import Swal from 'sweetalert2'
+import axios from './axios';
+import { jwtDecode } from 'jwt-decode';
+import Cookies from 'js-cookie';
+import Swal from 'sweetalert2';
 
 const Toast = Swal.mixin({
-  toast:true,
+  toast: true,
   position: "top",
   showConfirmButton: false,
   timer: 1500,
   timerProgressBar: true
-})
+});
 
 export const login = async (email, password) => {
-    // console.log(email,password)
     try {
-        const {data, status} = await axios.post("user/token/", {
+        const { data, status } = await axios.post("user/token/", {
             email,
             password
-        })
-        if (status === 200){
-            setAuthUser(data.access, data.refresh)
-            // alert - sign in successfully
+        });
+        if (status === 200) {
+            setAuthUser(data.access, data.refresh);
             Toast.fire({
-                icon:"success",
-                title:"Login Successfully"
-            })
+                icon: "success",
+                title: "Login Successfully"
+            });
         }
-        return { data, error: null }
+        return { data, error: null };
     } catch (error) {
         return {
             data: null,
-            error: error.response.data?.detail || 'something went wrong!'
+            error: error.response?.data?.detail || 'Something went wrong!'
         }
     }
-}
+};
 
 export const register = async (full_name, email, phone, password, password2) => {
     try {
@@ -44,91 +42,118 @@ export const register = async (full_name, email, phone, password, password2) => 
             phone,
             password,
             password2
-        })
-        await login(email, password)
-        // alert - signed up successfully
+        });
+        await login(email, password);
         Toast.fire({
-            icon:"success",
-            title:"Register Successfully"
-        })
-        return { data, error: null }
+            icon: "success",
+            title: "Register Successfully"
+        });
+        return { data, error: null };
     } catch (error) {
-        console.error(error.response.data) // debug用
+        console.error(error.response?.data); // For debugging
         return {
             data: null,
-            error: error.response.data?.email || error.response.data?.password || error.response.data?.username || 'Something go wrong'
+            error: error.response?.data?.email || error.response?.data?.password || 'Something went wrong!'
         }
     }
-}
+};
 
 export const logout = () => {
-    Cookies.remove("access_token")
-    Cookies.remove("refresh_token")
-    useAuthStore.getState().setUser(null)
-    // alert - signed out successfully
-}
+    Cookies.remove("access_token", { path: "/" });
+    Cookies.remove("refresh_token", { path: "/" });
+    useAuthStore.getState().setUser(null);
+
+    Toast.fire({
+        icon: "success",
+        title: "Logged out successfully"
+    });
+};
 
 export const setUser = async () => {
-    const accessToken = Cookies.get("access_token")
-    const refreshToken = Cookies.get("refresh_token")
-    
+    const accessToken = Cookies.get("access_token");
+    const refreshToken = Cookies.get("refresh_token");
+
     if (!accessToken || !refreshToken) {
-        return
+        return;
     }
 
-    if (isAccessTokenExpired(accessToken)){
-       const response = await getRefreshToken()
-       setAuthUser(response.access, response.refresh) 
+    // If access token is expired, refresh it
+    if (!accessToken || isAccessTokenExpired(accessToken)) {
+        try {
+            const response = await getRefreshToken();
+            setAuthUser(response.access, response.refresh);
+        } catch (error) {
+            // Handle token refresh failure (e.g., refresh token expired)
+            console.error('Token refresh failed:', error);
+        }
     } else {
-        setAuthUser(accessToken, refreshToken)
+        setAuthUser(accessToken, refreshToken);
     }
-}
+};
 
 export const setAuthUser = (access_token, refresh_token) => {
-    // console.log("Setting access_token in cookie", access_token);
     Cookies.set('access_token', access_token, {
-        expires: 4/24, // 4 hrs
-        // secure: true //生產環境時要true表示 Cookie 只会在 HTTPS 连接中被发送,
-        // httpOnly: true // 禁止 JavaScript 訪問 Cookie
-    })
-    console.log("access_token set successfully")
-    
+        expires: 4 / 24 // 4 hours
+    });
     Cookies.set('refresh_token', refresh_token, {
-        expires: 14,
-        // secure:true,
-        // httpOnly: true // 禁止 JavaScript 訪問 Cookie
-    })
-    console.log("refresh_token set successfully")
+        expires: 14 // 14 days
+    });
 
-    const user = jwtDecode(access_token) ?? null
-    // console.log(666, user)
+    const user = jwtDecode(access_token) ?? null;
 
-    if(user) {
-        useAuthStore.getState().setUser(user)
+    if (user) {
+        useAuthStore.getState().setUser(user);
     }
-    useAuthStore.getState().setLoading(false)
-}
+    useAuthStore.getState().setLoading(false);
+};
 
 export const getRefreshToken = async () => {
-    const refresh_token = Cookies.get("refresh_token")
-    const response = await axios.post("user/token/refresh/", {
-        refresh: refresh_token
-    })
+    const refresh_token = Cookies.get("refresh_token");
+    // If no refresh token is present, return or handle gracefully
+    if (!refresh_token) {
+        console.error('No refresh token found, user may not be logged in.');
+        return null; // or you can throw an error depending on how you want to handle it
+    }
 
-    return response.data
-}
+    try {
+        const response = await axios.post("user/token/refresh/", {
+            refresh: refresh_token // Ensure this key matches what the API expects
+        });
+        return response.data;
+    } catch (error) {
+        if (error.response && error.response.status === 400) {
+            console.error('Invalid or expired refresh token.');
+            // Optional: log out the user, clear cookies, and reset state
+            Cookies.remove("access_token", { path: "/" });
+            Cookies.remove("refresh_token", { path: "/" });
+            useAuthStore.getState().setUser(null);
+            throw new Error('Refresh token is invalid or expired. Please log in again.');
+        } else {
+            console.error('An unexpected error occurred:', error);
+            throw error; // Re-throw other errors
+        }
+    }
+};
+
 
 export const isAccessTokenExpired = (accessToken) => {
-    if (!accessToken || typeof accessToken !== 'string') {
-        console.error('Invalid token specified: must be a string');
+    // If no accessToken is provided, return false to skip token check
+    if (accessToken === undefined || accessToken === null) {
+        console.log('No access token provided, user is not logged in.');
+        return false; // Return false to skip the refresh token logic
+    }
+
+    // Ensure that the accessToken is a valid string
+    if (typeof accessToken !== 'string') {
+        console.log('Invalid access token format.');
         return true;
     }
-    
+
     try {
-        const decodedToken = jwtDecode(accessToken)
-        return decodedToken.exp < Date.now() /1000
+        const decodedToken = jwtDecode(accessToken);
+        return decodedToken.exp < Date.now() / 1000;
     } catch (error) {
-        console.log(error)
-        return true
+        console.error('Error decoding token:', error);
+        return true; // Return true if there's an error decoding the token
     }
-}
+};

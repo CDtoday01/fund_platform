@@ -3,7 +3,7 @@ import useAxios from './useAxios';
 const fetchUserETFs = async (tab, state, setETFs) => {
     const axiosInstance = useAxios();
     try {
-        const params = {}
+        const params = {};
         if (tab && tab !== 'all') {
             params.filter_tab = tab;
         }
@@ -22,7 +22,7 @@ const fetchUserETFs = async (tab, state, setETFs) => {
         setETFs(response.data);
     } catch (error) {
         console.error('Error fetching ETFs:', error);
-        setETFs([]);  // Set etfs to an empty array on error
+        setETFs([]); // Set ETFs to an empty array on error
     }
 };
 
