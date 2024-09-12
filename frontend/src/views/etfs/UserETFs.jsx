@@ -49,7 +49,6 @@ const UserETFs = () => {
                 const axiosInstance = useAxios();
                 const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
                 if (response.status === 200) {
-                    
                     fetchUserETFs(activeTab, activeState);
                     alert('Left ETF!');
                 } else {

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import formatDate from '../../utils/formatDate';  // Ensure you have a date formatting utility
 import fetchUserETFs from '../../utils/fetchUserETFs';
+import { useNavigate } from 'react-router-dom';
 
 const ETFs = () => {
     const [announcingETFs, setAnnouncingETFs] = useState([]);
     const [fundraisingETFs, setFundraisingETFs] = useState([]);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchETFs = async () => {

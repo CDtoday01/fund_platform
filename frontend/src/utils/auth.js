@@ -135,7 +135,6 @@ export const getRefreshToken = async () => {
     }
 };
 
-
 export const isAccessTokenExpired = (accessToken) => {
     // If no accessToken is provided, return false to skip token check
     if (accessToken === undefined || accessToken === null) {
