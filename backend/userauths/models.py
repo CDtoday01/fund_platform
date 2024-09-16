@@ -8,11 +8,11 @@ class User(AbstractUser):
     phone = models.CharField(max_length=100, null=True, blank=True)
     otp = models.CharField(max_length=100, null=True, blank=True)
     reset_token  = models.CharField(max_length=1000, null=True, blank=True)
-    current_role = models.CharField(max_length=10, choices=[('individual', 'Individual'), ('corp', 'Corp')], default='individual')
-    corp = models.ForeignKey('corps.Corp', on_delete=models.SET_NULL, null=True, blank=True, related_name='members')  # Link to the corp the user belongs to
+    current_role = models.CharField(max_length=10, choices=[("individual", "Individual"), ("corp", "Corp")], default="individual")
+    corp = models.ForeignKey("corps.Corp", on_delete=models.SET_NULL, null=True, blank=True, related_name="members")  # Link to the corp the user belongs to
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    USERNAME_FIELD = "email"
+    REQUIRED_FIELDS = ["username"]
 
     def __str__(self):
         return self.email

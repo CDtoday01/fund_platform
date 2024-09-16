@@ -7,13 +7,13 @@ import django.utils.timezone
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('etfs', '0002_initial'),
+        ("etfs", "0002_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='useretf',
-            name='joined_date',
+            model_name="useretf",
+            name="joined_date",
             field=models.DateTimeField(default=django.utils.timezone.now),
         ),
     ]

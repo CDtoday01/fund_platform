@@ -1,11 +1,11 @@
-import { create } from 'zustand';
-import { mountStoreDevtool } from 'simple-zustand-devtools';
+import { create } from "zustand";
+import { mountStoreDevtool } from "simple-zustand-devtools";
 
 const useAuthStore = create((set, get) => ({
     allUserData: null, // Use this to store all user data
     loading: false,
 
-    // Define a 'user' state directly
+    // Define a "user" state directly
     user: {
         user_id: null,
         username: null,
@@ -32,7 +32,7 @@ const useAuthStore = create((set, get) => ({
 }));
 
 if (import.meta.env.DEV) {
-    mountStoreDevtool('Store', useAuthStore);
+    mountStoreDevtool("Store", useAuthStore);
 }
 
 export { useAuthStore };

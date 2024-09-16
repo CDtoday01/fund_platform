@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/auth';
-import useAxios from '../../utils/useAxios';
-import { logout as authLogout } from '../../utils/auth';  // Renaming to avoid conflict with store's logout
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuthStore } from "../../store/auth";
+import useAxios from "../../utils/useAxios";
+import { logout as authLogout } from "../../utils/auth";  // Renaming to avoid conflict with store"s logout
 
 const Navbar = () => {
     const { user, logout } = useAuthStore((state) => ({
@@ -12,39 +12,39 @@ const Navbar = () => {
 
     const navigate = useNavigate();
     const axiosInstance = useAxios();
-    const [currentRole, setCurrentRole] = useState(user?.current_role || 'individual');
+    const [currentRole, setCurrentRole] = useState(user?.current_role || "individual");
     
     const handleLogout = () => {
         // Call the authLogout to properly clear cookies
         authLogout();  
         logout();  // Clear the store state
-        navigate('/login');  // Redirect to login after logout
+        navigate("/login");  // Redirect to login after logout
     };
 
     const switchRole = async (role) => {
         try {
-            const response = await axiosInstance.post('etfs/switch-role/', { role });
+            const response = await axiosInstance.post("etfs/switch-role/", { role });
             if (response.status === 200) {
                 setCurrentRole(role);  // Update the state to reflect the new role
             } else {
-                console.error('Failed to switch role:', response.data);
+                console.error("Failed to switch role:", response.data);
             }
         } catch (error) {
-            console.error('Error switching role:', error);
+            console.error("Error switching role:", error);
         }
     };
 
     const RoleSwitcher = ({ currentRole, switchRole }) => (
         <div>
             <button 
-                onClick={() => switchRole('individual')}
-                disabled={currentRole === 'individual'}
+                onClick={() => switchRole("individual")}
+                disabled={currentRole === "individual"}
             >
                 Switch to Individual
             </button>
             <button 
-                onClick={() => switchRole('corp')}
-                disabled={currentRole === 'corp'}
+                onClick={() => switchRole("corp")}
+                disabled={currentRole === "corp"}
             >
                 Switch to Corp
             </button>

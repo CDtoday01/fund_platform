@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import apiInstance from '../../utils/axios';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import apiInstance from "../../utils/axios";
+import { useNavigate } from "react-router-dom";
 
 function ForgotPassword() {
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -12,9 +12,9 @@ function ForgotPassword() {
     try {
       const res = await apiInstance.post(`user/password-reset/${email}/`);
       console.log(res.data);
-      alert('An email has been sent to you!');
+      alert("An email has been sent to you!");
       setIsLoading(false);
-      navigate('/create-new-password');
+      navigate("/create-new-password");
     } catch (error) {
       console.log(error);
       setIsLoading(false);
@@ -53,7 +53,7 @@ function ForgotPassword() {
                               className="btn btn-primary w-100"
                               disabled={isLoading}
                             >
-                              {isLoading ? 'Processing...' : 'Reset Password'}
+                              {isLoading ? "Processing..." : "Reset Password"}
                             </button>
                           </div>
                         </div>

@@ -1,18 +1,18 @@
-import { useState, useEffect } from 'react';
-import Cookies from 'js-cookie';
-import { isAccessTokenExpired, getRefreshToken, setAuthUser, logout } from '../utils/auth'; // Adjust path if necessary
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import Cookies from "js-cookie";
+import { isAccessTokenExpired, getRefreshToken, setAuthUser, logout } from "../utils/auth"; // Adjust path if necessary
+import { useNavigate } from "react-router-dom";
 
 const useAuth = () => {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
     const checkAndRefreshToken = async () => {
-        let accessToken = Cookies.get('access_token');
+        let accessToken = Cookies.get("access_token");
 
         if (!accessToken) {
-            console.warn('No access token found, user is not logged in.');
-            navigate('/login'); // Redirect to login page
+            console.warn("No access token found, user is not logged in.");
+            navigate("/login"); // Redirect to login page
             setIsAuthenticated(false);
             return;
         }
@@ -23,9 +23,9 @@ const useAuth = () => {
                 accessToken = tokenData.access;
                 setAuthUser(tokenData.access, tokenData.refresh);
             } catch (error) {
-                console.error('Failed to refresh token, logging out user:', error);
+                console.error("Failed to refresh token, logging out user:", error);
                 logout(); // Log out the user
-                navigate('/login'); // Redirect to login page
+                navigate("/login"); // Redirect to login page
                 setIsAuthenticated(false);
                 return;
             }

@@ -11,32 +11,32 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('etfs', '0001_initial'),
+        ("etfs", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='useretf',
-            name='user',
+            model_name="useretf",
+            name="user",
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='etf',
-            name='category',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='category_types', to='etfs.etfcategorytype', to_field='subcategory_code'),
+            model_name="etf",
+            name="category",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="category_types", to="etfs.etfcategorytype", to_field="subcategory_code"),
         ),
         migrations.AddField(
-            model_name='etf',
-            name='creator',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='created_etfs', to=settings.AUTH_USER_MODEL),
+            model_name="etf",
+            name="creator",
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name="created_etfs", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='etf',
-            name='users',
-            field=models.ManyToManyField(related_name='etfs', through='etfs.UserETF', to=settings.AUTH_USER_MODEL),
+            model_name="etf",
+            name="users",
+            field=models.ManyToManyField(related_name="etfs", through="etfs.UserETF", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AlterUniqueTogether(
-            name='useretf',
-            unique_together={('user', 'etf')},
+            name="useretf",
+            unique_together={("user", "etf")},
         ),
     ]

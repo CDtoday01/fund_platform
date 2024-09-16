@@ -3,16 +3,16 @@ from django.core.management.base import BaseCommand
 from etfs.models import ETFCategoryType
 
 class Command(BaseCommand):
-    help = 'Load ETF types from a JSON file into the database'
+    help = "Load ETF types from a JSON file into the database"
 
     def add_arguments(self, parser):
-        parser.add_argument('json_file', type=str, help='The path to the JSON file containing ETF types')
+        parser.add_argument("json_file", type=str, help="The path to the JSON file containing ETF types")
 
     def handle(self, *args, **kwargs):
-        json_file = kwargs['json_file']
+        json_file = kwargs["json_file"]
 
         try:
-            with open(json_file, 'r', encoding='utf-8') as f:
+            with open(json_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
             for item in data:
@@ -25,13 +25,13 @@ class Command(BaseCommand):
                 ETFCategoryType.objects.update_or_create(
                     subcategory_code=subcategory_code,
                     defaults={
-                        'category_code': category_code,
-                        'category': category,
-                        'subcategory_name': subcategory_name,
+                        "category_code": category_code,
+                        "category": category,
+                        "subcategory_name": subcategory_name,
                     }
                 )
             
-            self.stdout.write(self.style.SUCCESS('Successfully loaded ETF types from JSON file'))
+            self.stdout.write(self.style.SUCCESS("Successfully loaded ETF types from JSON file"))
         
         except FileNotFoundError:
             self.stdout.write(self.style.ERROR(f"File not found: {json_file}"))

@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { useAuthStore } from '../../store/auth'
-import { register } from '../../utils/auth'
-import { Link } from 'react-router-dom'
+import React, { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { useAuthStore } from "../../store/auth"
+import { register } from "../../utils/auth"
+import { Link } from "react-router-dom"
 
 function Register() {
     console.log("Register component is being rendered")
@@ -124,11 +124,11 @@ function Register() {
                                                         className="form-control"
                                                     />
                                                 </div>
-                                                <p className='fw-bold text-danger'>
-                                                    {password2 !== password ? 'Passwords do not match' : ''}
+                                                <p className="fw-bold text-danger">
+                                                    {password2 !== password ? "Passwords do not match" : ""}
                                                 </p>
 
-                                                <button className='btn btn-primary w-100' type="submit" disabled={isLoading}>
+                                                <button className="btn btn-primary w-100" type="submit" disabled={isLoading}>
                                                     {isLoading ? (
                                                         <>
                                                             <span className="mr-2 ">Processing...</span>
@@ -143,7 +143,7 @@ function Register() {
                                                 </button>
 
                                                 <div className="text-center">
-                                                    <p className='mt-4'>
+                                                    <p className="mt-4">
                                                         Already have an account? <Link to="/login">Login</Link>
                                                     </p>
                                                 </div>

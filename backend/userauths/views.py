@@ -20,14 +20,14 @@ class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
 
 def generate_numeric_otp(length=7):
-    return ''.join([str(random.randint(0, 9)) for _ in range(length)])
+    return "".join([str(random.randint(0, 9)) for _ in range(length)])
 
 class PasswordResetEmailVerify(generics.RetrieveAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserSerializer
     
     def get_object(self):
-        email = self.kwargs['email']
+        email = self.kwargs["email"]
         user = User.objects.get(email=email)
         
         if user:
@@ -39,7 +39,7 @@ class PasswordResetEmailVerify(generics.RetrieveAPIView):
             user.save()
 
             link = f"http://localhost:5173/create-new-password?otp={user.otp}&uidb64={uidb64}&reset_token={reset_token}"
-            merge_data = {'link': link, 'username': user.username}
+            merge_data = {"link": link, "username": user.username}
             subject = "Password Reset Request"
             text_body = render_to_string("email/password_reset.txt", merge_data)
             html_body = render_to_string("email/password_reset.html", merge_data)
@@ -55,9 +55,9 @@ class PasswordChangeView(generics.CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         payload = request.data
-        otp = payload['otp']
-        uidb64 = payload['uidb64']
-        password = payload['password']
+        otp = payload["otp"]
+        uidb64 = payload["uidb64"]
+        password = payload["password"]
 
         try:
             user = User.objects.get(id=uidb64, otp=otp)

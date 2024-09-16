@@ -7,17 +7,17 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('corps', '0001_initial'),
-        ('userauths', '0002_user_current_role_corp_user_corp'),
+        ("corps", "0001_initial"),
+        ("userauths", "0002_user_current_role_corp_user_corp"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='user',
-            name='corp',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='members', to='corps.corp'),
+            model_name="user",
+            name="corp",
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name="members", to="corps.corp"),
         ),
         migrations.DeleteModel(
-            name='Corp',
+            name="Corp",
         ),
     ]

@@ -1,8 +1,8 @@
-import React from 'react'
-import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom' //取得ｕｒｌ參數
-import { useNavigate } from 'react-router-dom'
-import apiInstance from '../../utils/axios'
+import React from "react"
+import { useState } from "react"
+import { useSearchParams } from "react-router-dom" //取得ｕｒｌ參數
+import { useNavigate } from "react-router-dom"
+import apiInstance from "../../utils/axios"
 
 function CreatePassword() {
     const [password, setPassword] = useState("")
@@ -26,14 +26,14 @@ function CreatePassword() {
         } else{
             setError(false)
             const formdata = new FormData()
-            formdata.append('password', password)
-            formdata.append('otp', otp)
-            formdata.append('uidb64', uidb64)
+            formdata.append("password", password)
+            formdata.append("otp", otp)
+            formdata.append("uidb64", uidb64)
 
             try {
-                const res = await apiInstance.post('user/password-change/', formdata)
+                const res = await apiInstance.post("user/password-change/", formdata)
                 console.log(res.data)
-                alert("Password  change succfully!") 
+                alert("Password  change successfully!") 
                 navigate("/login")
                 setIsLoading(false)
             } catch (error) {
@@ -49,17 +49,17 @@ function CreatePassword() {
     //     <form onSubmit={handleSubmitPassword}>
     //         <input 
     //             type="password"
-    //             placeholder='enter password'
+    //             placeholder="enter password"
     //             onChange={(e) => setPassword(e.target.value)}
     //         />
     //         <br />
     //         <input 
     //             type="password"
-    //             placeholder='confirm password'
+    //             placeholder="confirm password"
     //             onChange={(e) => setConfirmPassword(e.target.value)}
     //         />
     //         <br />
-    //         <button type='submit'>Save new password</button>
+    //         <button type="submit">Save new password</button>
     //     </form>
     // </div>
 <section>
@@ -113,21 +113,21 @@ function CreatePassword() {
                                                     <>
                                                         {error === true
 
-                                                            ? <p className='text-danger fw-bold mt-2'>Password Does Not Match</p>
-                                                            : <p className='text-success fw-bold mt-2'>Password Matched</p>
+                                                            ? <p className="text-danger fw-bold mt-2">Password Does Not Match</p>
+                                                            : <p className="text-success fw-bold mt-2">Password Matched</p>
                                                         }
                                                     </>
                                                 } */}
 
                                                 {isLoading === true
-                                                ? <button disabled type="button" className='btn btn-primary btn-rounded w-100 mb-4'>Processing...</button>
-                                                : <button type="submit" className='btn btn-primary btn-rounded w-100 mb-4'>Save Password <i className='fas fa-check-circle' /></button>
+                                                ? <button disabled type="button" className="btn btn-primary btn-rounded w-100 mb-4">Processing...</button>
+                                                : <button type="submit" className="btn btn-primary btn-rounded w-100 mb-4">Save Password <i className="fas fa-check-circle" /></button>
                                                 }
                                             </div>
 
 
                                             {/* <div className="text-center">
-                                                <button type='submit' className='btn btn-primary w-100'>Reset Password</button>
+                                                <button type="submit" className="btn btn-primary w-100">Reset Password</button>
                                             </div> */}
 
                                         </form>

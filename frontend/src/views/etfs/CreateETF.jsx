@@ -1,38 +1,38 @@
-import React, { useState, useEffect } from 'react';
-import { createETF, checkNameExists } from '../../services/etfService'; // Add a service function for name check
-import { Link, useNavigate } from 'react-router-dom';
-import useAxios from '../../utils/useAxios';
-import ETFFilter from './ETFFilter';
+import React, { useState, useEffect } from "react";
+import { createETF, checkNameExists } from "../../services/etfService"; // Add a service function for name check
+import { Link, useNavigate } from "react-router-dom";
+import useAxios from "../../utils/useAxios";
+import ETFFilter from "./ETFFilter";
 
 const CreateETF = () => {
-    const [name, setName] = useState('');
-    const [type, setType] = useState('');
-    const [total_amount, setTotalAmount] = useState('');
-    const [lowest_amount, setLowestAmount] = useState('');
+    const [name, setName] = useState("");
+    const [type, setType] = useState("");
+    const [total_amount, setTotalAmount] = useState("");
+    const [lowest_amount, setLowestAmount] = useState("");
     
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const [selectedSubcategory, setSelectedSubcategory] = useState('');
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedSubcategory, setSelectedSubcategory] = useState("");
     const [selectedSubcategoryCode, setSelectedSubcategoryCode] = useState("");
     const [allSubcategories, setAllSubcategories] = useState([]);
     
-    const [utc_announcement_start_date, setUtcAnnouncementStartDate] = useState('');
-    const [local_announcement_start_date, setLocalAnnouncementStartDate] = useState('');
-    const [announcement_duration, setAnnouncementDuration] = useState('');
-    const [utc_announcement_end_date, setUtcAnnouncementEndDate] = useState('');
-    const [local_announcement_end_date, setLocalAnnouncementEndDate] = useState('');
+    const [utc_announcement_start_date, setUtcAnnouncementStartDate] = useState("");
+    const [local_announcement_start_date, setLocalAnnouncementStartDate] = useState("");
+    const [announcement_duration, setAnnouncementDuration] = useState("");
+    const [utc_announcement_end_date, setUtcAnnouncementEndDate] = useState("");
+    const [local_announcement_end_date, setLocalAnnouncementEndDate] = useState("");
     
-    const [utc_fundraising_start_date, setUtcFundraisingStartDate] = useState('');
-    const [local_fundraising_start_date, setLocalFundraisingStartDate] = useState('');
-    const [fundraising_duration, setFundraisingDuration] = useState('');
-    const [utc_fundraising_end_date, setUtcFundraisingEndDate] = useState('');
-    const [local_fundraising_end_date, setLocalFundraisingEndDate] = useState('');
+    const [utc_fundraising_start_date, setUtcFundraisingStartDate] = useState("");
+    const [local_fundraising_start_date, setLocalFundraisingStartDate] = useState("");
+    const [fundraising_duration, setFundraisingDuration] = useState("");
+    const [utc_fundraising_end_date, setUtcFundraisingEndDate] = useState("");
+    const [local_fundraising_end_date, setLocalFundraisingEndDate] = useState("");
 
-    const [ETF_duration, setETFDuration] = useState('');
-    const [description, setDescription] = useState('');
+    const [ETF_duration, setETFDuration] = useState("");
+    const [description, setDescription] = useState("");
 
     const [errors, setErrors] = useState({});
-    const [category_error, setCategoryError] = useState('');
-    const [subcategory_error, setSubcategoryError] = useState('');
+    const [category_error, setCategoryError] = useState("");
+    const [subcategory_error, setSubcategoryError] = useState("");
     
     const [nameExistsError, setNameExistsError] = useState(false); // Initialize as false
     const [loading, setLoading] = useState(false);
@@ -43,14 +43,14 @@ const CreateETF = () => {
     useEffect(() => {
         const fetchDefaults = async () => {
             try {
-                const response = await axiosInstance.get('/etfs/defaults/');
+                const response = await axiosInstance.get("/etfs/defaults/");
                 const defaults = response.data;
                 const start_date = utcToLocalISO(defaults.announcement_start_date)
-                setType(defaults.etf_type || '');
+                setType(defaults.etf_type || "");
                 setLocalAnnouncementStartDate(start_date); // get time up to minutes
                 setUtcAnnouncementStartDate(defaults.announcement_start_date);
             } catch (error) {
-                console.error('Error fetching default values:', error);
+                console.error("Error fetching default values:", error);
             }
         };
         fetchDefaults();
@@ -59,10 +59,10 @@ const CreateETF = () => {
     useEffect(() => {
         const fetchSubcategories = async () => {
             try {
-                const response = await axiosInstance.get('/etfs/etf-types/');
+                const response = await axiosInstance.get("/etfs/etf-types/");
                 setAllSubcategories(response.data);
             } catch (error) {
-                console.error('Error fetching subcategories:', error);
+                console.error("Error fetching subcategories:", error);
             }
         };
         fetchSubcategories();
@@ -77,7 +77,7 @@ const CreateETF = () => {
         // Filter subcategories based on the selected category code
         const filteredSubcategories = allSubcategories.filter(subcat => subcat.category === newCategory);
         setAllSubcategories(filteredSubcategories);
-        setSelectedSubcategory(''); // Reset the selected subcategory
+        setSelectedSubcategory(""); // Reset the selected subcategory
     };
 
     // Handle selection of subcategory
@@ -88,17 +88,17 @@ const CreateETF = () => {
 
         // Find and set the corresponding subcategory_code
         const selectedSub = allSubcategories.find(subcat => subcat.subcategory_name === newSubcategory);    
-        setSelectedSubcategoryCode(selectedSub?.subcategory_code || ''); // Handle case where subcategory isn't found
+        setSelectedSubcategoryCode(selectedSub?.subcategory_code || ""); // Handle case where subcategory isn"t found
     };
 
     // Function to check if the name already exists in the database
     const handleNameBlur = async () => {
-        if (name.trim() !== '') {
+        if (name.trim() !== "") {
             try {
                 const response = await checkNameExists(name); // Check if the name exists
                 setNameExistsError(response.data.exists); // Update the error state
             } catch (error) {
-                console.error('Error checking ETF name existence:', error);
+                console.error("Error checking ETF name existence:", error);
             }
         }
     };
@@ -154,25 +154,25 @@ const CreateETF = () => {
         setLoading(true);
         
         // Reset errors
-        setCategoryError('');
-        setSubcategoryError('');
+        setCategoryError("");
+        setSubcategoryError("");
 
         // Check if category is selected
         if (!selectedCategory) {
-            setCategoryError('Please select a category.');
+            setCategoryError("Please select a category.");
             setLoading(false);
             return;
         }
 
         // Check if subcategory is selected
         if (!selectedSubcategory) {
-            setSubcategoryError('Please select a subcategory.');
+            setSubcategoryError("Please select a subcategory.");
             setLoading(false);
             return;
         }
 
         if (nameExistsError) {
-            alert('Name already exists. Please choose another name.');
+            alert("Name already exists. Please choose another name.");
             setLoading(false);
             return;
         }
@@ -195,17 +195,17 @@ const CreateETF = () => {
 
         try {
             const response = await createETF(newETF);
-            alert('ETF added successfully');
+            alert("ETF added successfully");
             setErrors({});
             navigate(`/etfs/${response.data.id}`);
         } catch (error) {
             if (error.response && error.response.data) {
                 setErrors(error.response.data);
-                console.error('Error adding ETF:', error.response.data);
-                alert('Failed to add ETF. Please fix the errors and try again.');
+                console.error("Error adding ETF:", error.response.data);
+                alert("Failed to add ETF. Please fix the errors and try again.");
             } else {
-                console.error('Error adding ETF:', error.message);
-                alert('An unexpected error occurred.');
+                console.error("Error adding ETF:", error.message);
+                alert("An unexpected error occurred.");
             }
         } finally {
             setLoading(false);
@@ -230,10 +230,10 @@ const CreateETF = () => {
                         onChange={(e) => setName(e.target.value)}
                         onBlur={handleNameBlur} // Trigger the name check when input loses focus
                         required
-                        style={{ borderColor: nameExistsError ? 'red' : '' }}
+                        style={{ borderColor: nameExistsError ? "red" : "" }}
                         disabled={loading}
                     />
-                    {nameExistsError && <span style={{ color: 'red' }}>Name already exists</span>}
+                    {nameExistsError && <span style={{ color: "red" }}>Name already exists</span>}
                 </div>
                 <div>
                     <label>類別：</label>
@@ -242,10 +242,10 @@ const CreateETF = () => {
                         value={type}
                         onChange={(e) => setType(e.target.value)}
                         required
-                        style={{ borderColor: errors.etf_type ? 'red' : '' }}
+                        style={{ borderColor: errors.etf_type ? "red" : "" }}
                         disabled={loading}
                     />
-                    {errors.etf_type && <span style={{ color: 'red' }}>{errors.etf_type}</span>}
+                    {errors.etf_type && <span style={{ color: "red" }}>{errors.etf_type}</span>}
                 </div>
                 <div>
                     <label>總金額（萬）：</label>
@@ -254,10 +254,10 @@ const CreateETF = () => {
                         value={total_amount}
                         onChange={(e) => setTotalAmount(e.target.value)}
                         required
-                        style={{ borderColor: errors.total_amount ? 'red': '' }}
+                        style={{ borderColor: errors.total_amount ? "red": "" }}
                         disabled={loading}
                     />
-                    {errors.total_amount && <span style={{ color: 'red'}}>{errors.total_amount}</span>}
+                    {errors.total_amount && <span style={{ color: "red"}}>{errors.total_amount}</span>}
                 </div>
                 <div>
                     <label>每單最低金額（萬）：</label>
@@ -266,10 +266,10 @@ const CreateETF = () => {
                         value={lowest_amount}
                         onChange={(e) => setLowestAmount(e.target.value)}
                         required
-                        style={{ borderColor: errors.lowest_amount ? 'red': '' }}
+                        style={{ borderColor: errors.lowest_amount ? "red": "" }}
                         disabled={loading}
                     />
-                    {errors.lowest_amount && <span style={{ color: 'red'}}>{errors.lowest_amount}</span>}
+                    {errors.lowest_amount && <span style={{ color: "red"}}>{errors.lowest_amount}</span>}
                 </div>
                 <div>
                     <label>公告開始時間：</label>
@@ -278,7 +278,7 @@ const CreateETF = () => {
                         value={local_announcement_start_date.slice(0, 16)}
                         onChange={(e) => handleAnnouncementStartDateChange(e.target.value + "Z")} // restore ISO 8601 format by adding utc indicator "Z".
                         required
-                        style={{ borderColor: errors.local_announcement_start_date ? 'red' : '' }}
+                        style={{ borderColor: errors.local_announcement_start_date ? "red" : "" }}
                         disabled={loading}
                     />
                     <input
@@ -286,7 +286,7 @@ const CreateETF = () => {
                         value={utc_announcement_start_date.slice(0, 16)}
                         disabled
                     />
-                    {errors.local_announcement_start_date && <span style={{ color: 'red' }}>{errors.local_announcement_start_date}</span>}
+                    {errors.local_announcement_start_date && <span style={{ color: "red" }}>{errors.local_announcement_start_date}</span>}
                 </div>
                 <div>
                     <label>公告時長（天）：</label>
@@ -295,11 +295,11 @@ const CreateETF = () => {
                         value={announcement_duration}
                         onChange={(e) => setAnnouncementDuration(e.target.value)}
                         required
-                        style={{ borderColor: errors.announcement_duration ? 'red' : '' }}
+                        style={{ borderColor: errors.announcement_duration ? "red" : "" }}
                         disabled={loading}
-                        placeholder='7~30'
+                        placeholder="7~30"
                     />
-                    {errors.announcement_duration && <span style={{ color: 'red' }}>{errors.announcement_duration}</span>}
+                    {errors.announcement_duration && <span style={{ color: "red" }}>{errors.announcement_duration}</span>}
                 </div>
                 <div>
                     <label>公告結束時間：</label>
@@ -334,11 +334,11 @@ const CreateETF = () => {
                         value={fundraising_duration}
                         onChange={(e) => setFundraisingDuration(e.target.value)}
                         required
-                        style={{ borderColor: errors.fundraising_duration ? 'red' : '' }}
+                        style={{ borderColor: errors.fundraising_duration ? "red" : "" }}
                         disabled={loading}
-                        placeholder='1~6'
+                        placeholder="1~6"
                     />
-                    {errors.fundraising_duration && <span style={{ color: 'red' }}>{errors.fundraising_duration}</span>}
+                    {errors.fundraising_duration && <span style={{ color: "red" }}>{errors.fundraising_duration}</span>}
                 </div>
                 <div>
                     <label>招募結束時間：</label>
@@ -360,24 +360,24 @@ const CreateETF = () => {
                         value={ETF_duration}
                         onChange={(e) => setETFDuration(e.target.value)}
                         required
-                        style={{ borderColor: errors.ETF_duration ? 'red' : '' }}
+                        style={{ borderColor: errors.ETF_duration ? "red" : "" }}
                         disabled={loading}
-                        placeholder='3~36'
+                        placeholder="3~36"
                     />
-                    {errors.ETF_duration && <span style={{ color: 'red' }}>{errors.ETF_duration}</span>}
+                    {errors.ETF_duration && <span style={{ color: "red" }}>{errors.ETF_duration}</span>}
                 </div>
                 <div>
                     <label>產品說明：</label>
                     <textarea
                         onChange={(e) => setDescription(e.target.value)}
-                        style={{ borderColor: errors.description ? 'red' : '' }}
+                        style={{ borderColor: errors.description ? "red" : "" }}
                         disabled={loading}
-                        placeholder='請輸入產品說明。'
+                        placeholder="請輸入產品說明。"
                     ></textarea>
-                    {errors.description && <span style={{ color: 'red' }}>{errors.description}</span>}
+                    {errors.description && <span style={{ color: "red" }}>{errors.description}</span>}
                 </div>
                 <button type="submit" disabled={loading}>
-                    {loading ? 'Adding...' : 'Add ETF'}
+                    {loading ? "Adding..." : "Add ETF"}
                 </button>
             </form>
             <Link to="/user/etfs">

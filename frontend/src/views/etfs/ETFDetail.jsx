@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import useAxios from '../../utils/useAxios';
-import { deleteETF } from '../../services/etfService';
+import React, { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import useAxios from "../../utils/useAxios";
+import { deleteETF } from "../../services/etfService";
 
 const ETFDetail = () => {
     const { id } = useParams();
@@ -16,7 +16,7 @@ const ETFDetail = () => {
                 console.log(response.data);
             })
             .catch(error => {
-                console.error('Error fetching ETF details:', error);
+                console.error("Error fetching ETF details:", error);
             });
     }, [id]);
     
@@ -25,11 +25,11 @@ const ETFDetail = () => {
         if (confirmed) {
             try {
                 await deleteETF(id);
-                alert('ETF deleted successfully');
-                navigate('/etfs');
+                alert("ETF deleted successfully");
+                navigate("/etfs");
             } catch (error) {
-                console.error('Error deleting ETF:', error);
-                alert('Failed to delete ETF');
+                console.error("Error deleting ETF:", error);
+                alert("Failed to delete ETF");
             }
         }
     };
@@ -58,9 +58,9 @@ const ETFDetail = () => {
             <p>========debug欄位========</p>
             <p>ETF ID：{etf.id}</p>
             <p>創建者：{etf.creator}</p>
-            <p>用戶：{etf.users && etf.users.join(', ')}</p>
+            <p>用戶：{etf.users && etf.users.join(", ")}</p>
             {etf.can_delete && (
-                <button onClick={handleDelete} style={{ backgroundColor: 'red', color: 'white' }}>
+                <button onClick={handleDelete} style={{ backgroundColor: "red", color: "white" }}>
                     Delete ETF
                 </button>
             )}

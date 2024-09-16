@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import formatDate from '../../utils/formatDate';  // Ensure you have a date formatting utility
-import fetchUserETFs from '../../utils/fetchUserETFs';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import formatDate from "../../utils/formatDate";  // Ensure you have a date formatting utility
+import fetchUserETFs from "../../utils/fetchUserETFs";
+import { useNavigate } from "react-router-dom";
 
 const ETFs = () => {
     const [announcingETFs, setAnnouncingETFs] = useState([]);
@@ -13,12 +13,11 @@ const ETFs = () => {
         const fetchETFs = async () => {
             try {
                 // Fetching ETFs based on their state
-                await Promise.all([
-                    fetchUserETFs('all', 'announcing', setAnnouncingETFs),
-                    fetchUserETFs('all', 'fundraising', setFundraisingETFs),
-                ]);
+                await fetchUserETFs("all", "announcing", setAnnouncingETFs);
+                await fetchUserETFs("all", "fundraising", setFundraisingETFs);
+                
             } catch (error) {
-                console.error('Error fetching ETFs:', error);
+                console.error("Error fetching all ETFs:", error);
             }
 
             setLoading(false);
@@ -50,7 +49,7 @@ const ETFs = () => {
                     <tbody>
                         {announcingETFs.length > 0 ? (
                             announcingETFs.map(etf => (
-                                <tr key={etf.id} onClick={() => navigate(`/etfs/${etf.id}`)} style={{ cursor: 'pointer' }}>
+                                <tr key={etf.id} onClick={() => navigate(`/etfs/${etf.id}`)} style={{ cursor: "pointer" }}>
                                     <td>{etf.name}</td>
                                     <td>{etf.code}</td>
                                     <td>{formatDate(etf.fundraising_start_date)}</td>
@@ -83,7 +82,7 @@ const ETFs = () => {
                     <tbody>
                         {fundraisingETFs.length > 0 ? (
                             fundraisingETFs.map(etf => (
-                                <tr key={etf.id} onClick={() => navigate(`/etfs/${etf.id}`)} style={{ cursor: 'pointer' }}>
+                                <tr key={etf.id} onClick={() => navigate(`/etfs/${etf.id}`)} style={{ cursor: "pointer" }}>
                                     <td>{etf.name}</td>
                                     <td>{etf.code}</td>
                                     <td>{formatDate(etf.fundraising_start_date)}</td>

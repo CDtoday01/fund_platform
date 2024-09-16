@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 
 const Filters = ({ onFilterChange }) => {
-    const [filterTab, setFilterTab] = useState('all');
-    const [filterState, setFilterState] = useState('all');
+    const [filterTab, setFilterTab] = useState("all");
+    const [filterState, setFilterState] = useState("all");
 
     const handleTabChange = (e) => {
         const selectedTab = e.target.value;

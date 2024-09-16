@@ -1,3 +1,3 @@
 export const getToken = () => {
-    return localStorage.getItem('jwtToken');
+    return localStorage.getItem("jwtToken");
 };

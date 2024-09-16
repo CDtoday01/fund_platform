@@ -19,11 +19,11 @@ class ETFCategoryType(models.Model):
     
 class ETF(models.Model):
     name = models.CharField(max_length=100, unique=True)
-    category = models.ForeignKey(ETFCategoryType, on_delete=models.CASCADE, related_name='category_types', to_field='subcategory_code')  # Link to category type
+    category = models.ForeignKey(ETFCategoryType, on_delete=models.CASCADE, related_name="category_types", to_field="subcategory_code")  # Link to category type
     etf_type = models.CharField(max_length=50, default="全球共享經濟ETF")
-    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='created_etfs')
+    creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="created_etfs")
     code = models.CharField(max_length=50, blank=True, null=True, unique=True)
-    corp = models.ForeignKey(Corp, null=True, blank=True, on_delete=models.CASCADE, related_name='etfs')
+    corp = models.ForeignKey(Corp, null=True, blank=True, on_delete=models.CASCADE, related_name="etfs")
     
     total_amount = models.IntegerField(validators=[MinValueValidator(100)])  # Total investment cap
     lowest_amount = models.IntegerField(validators=[MinValueValidator(2)])  # Minimum investment amount
@@ -38,7 +38,7 @@ class ETF(models.Model):
 
     # Other fields retained
     current_investment = models.IntegerField(default=0)
-    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through='UserETF', related_name='etfs')
+    users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UserETF", related_name="etfs")
     created_at = models.DateTimeField(auto_now_add=True)
     
     def is_corp_etf(self):
@@ -80,11 +80,11 @@ class UserETF(models.Model):
     leave_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ('user', 'etf')
+        unique_together = ("user", "etf")
 
     def save(self, *args, **kwargs):
         if self.joined_date is None:
-            raise ValueError("Joined date is not set.")
+            raise ValueError("Joined date is not set."  )
         
         if self.etf.ETF_duration:
             self.leave_date = self.joined_date + relativedelta(months=self.etf.ETF_duration)

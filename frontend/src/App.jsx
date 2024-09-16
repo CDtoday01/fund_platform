@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react';
-import { Route, Routes, BrowserRouter } from 'react-router-dom';
-import { setUser } from './utils/auth';
-import PrivateRoute from './views/etfs/PrivateRoute';
-import Home from './views/auth/dashboard';
-import Login from './views/auth/login';
-import Register from './views/auth/register';
-import Logout from './views/auth/logout';
-import ForgotPassword from './views/auth/forgotPassword';
-import CreatePassword from './views/auth/createPassword';
-import ETFs from './views/etfs/ETFs';
-import ETFDetail from './views/etfs/ETFDetail';
-import CreateETF from './views/etfs/CreateETF';
-import UserETFs from './views/etfs/UserETFs';
-import Navbar from './views/etfs/Navbar';
+import React, { useEffect } from "react";
+import { Route, Routes, BrowserRouter } from "react-router-dom";
+import { setUser } from "./utils/auth";
+import PrivateRoute from "./views/etfs/PrivateRoute";
+import Home from "./views/auth/dashboard";
+import Login from "./views/auth/login";
+import Register from "./views/auth/register";
+import Logout from "./views/auth/logout";
+import ForgotPassword from "./views/auth/forgotPassword";
+import CreatePassword from "./views/auth/createPassword";
+import ETFs from "./views/etfs/ETFs";
+import ETFDetail from "./views/etfs/ETFDetail";
+import CreateETF from "./views/etfs/CreateETF";
+import UserETFs from "./views/etfs/UserETFs";
+import Navbar from "./views/etfs/Navbar";
 
 function App() {
   useEffect(() => {

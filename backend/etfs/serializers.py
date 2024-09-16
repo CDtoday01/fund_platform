@@ -8,92 +8,92 @@ from typing import Optional
 class ETFCategoryTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ETFCategoryType
-        fields = '__all__'
+        fields = "__all__"
 
 class ETFSerializer(serializers.ModelSerializer):
     state = serializers.SerializerMethodField()
     can_delete = serializers.SerializerMethodField()
     creator = serializers.PrimaryKeyRelatedField(read_only=True)
-    subcategory_name = serializers.CharField(source='category.subcategory_name', read_only=True)
+    subcategory_name = serializers.CharField(source="category.subcategory_name", read_only=True)
     
     class Meta:
         model = ETF
-        fields = '__all__'
-        read_only_fields = ['id']
+        fields = "__all__"
+        read_only_fields = ["id"]
 
     def get_state(self, obj) -> Optional[str]:
         current_time = timezone.now()
         if current_time < obj.announcement_start_date:
-            return 'future'
+            return "future"
         elif obj.announcement_start_date <= current_time < obj.announcement_end_date:
-            return 'announcing'
+            return "announcing"
         elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
-            return 'fundraising'
+            return "fundraising"
         elif obj.fundraising_end_date < current_time:
-            return 'past'
+            return "past"
         return None
     
     def get_can_delete(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request and request.user.is_authenticated:
             return request.user == obj.creator or request.user.is_staff
         return False
     
     def validate(self, data):
         current_time = timezone.now()
-        total_amount = data.get('total_amount')
-        lowest_amount = data.get('lowest_amount')
-        announcement_duration = data.get('announcement_duration')
-        fundraising_duration = data.get('fundraising_duration')
-        announcement_start_date = data.get('announcement_start_date')
-        ETF_duration = data.get('ETF_duration')
+        total_amount = data.get("total_amount")
+        lowest_amount = data.get("lowest_amount")
+        announcement_duration = data.get("announcement_duration")
+        fundraising_duration = data.get("fundraising_duration")
+        announcement_start_date = data.get("announcement_start_date")
+        ETF_duration = data.get("ETF_duration")
 
         # comment out for debug purpose
         # if announcement_start_date < current_time:
         #     raise serializers.ValidationError({
-        #         'date': 'Announcement start date must be in the future.'
+        #         "date": "Announcement start date must be in the future."
         #     })
         if total_amount < lowest_amount:
             raise serializers.ValidationError({
-                'amount': 'Total amount must be greater than or equal to the lowest amount.'
+                "amount": "Total amount must be greater than or equal to the lowest amount."
             })
         if announcement_duration < 7 or announcement_duration > 30:
             raise serializers.ValidationError({
-                'announcement_duration': 'Announcement duration must be between 7 to 30 days.'
+                "announcement_duration": "Announcement duration must be between 7 to 30 days."
             })
         if fundraising_duration < 1 or fundraising_duration > 6:
             raise serializers.ValidationError({
-                'fundraising_duration': 'Fundraising duration must be between 1 to 6 months.'
+                "fundraising_duration": "Fundraising duration must be between 1 to 6 months."
             })
         if ETF_duration < 3 or ETF_duration > 36:
             raise serializers.ValidationError({
-                'ETF_duration': 'ETF duration must be between 3 to 36 months.'
+                "ETF_duration": "ETF duration must be between 3 to 36 months."
             })
         return data
     
     def create(self, validated_data):
-        request = self.context.get('request')  # Access the request object from context
-        validated_data['creator'] = request.user  # Ensure creator is set
+        request = self.context.get("request")  # Access the request object from context
+        validated_data["creator"] = request.user  # Ensure creator is set
         return super().create(validated_data)
       
 class UserETFSerializer(serializers.ModelSerializer):
-    etf = ETFSerializer()
+    etf = ETFSerializer()  # Serialize the related ETF object
 
     class Meta:
         model = UserETF
-        fields = '__all__'
+        fields = "__all__"
+  
+# class UserETFKnownSerializer(serializers.ModelSerializer):
+#     user_username = serializers.CharField(source="user.username")
+#     etf_name = serializers.CharField(source="etf.name")
 
-class UserETFKnownSerializer(serializers.ModelSerializer):
-    user_username = serializers.CharField(source='user.username')
-    etf_name = serializers.CharField(source='etf.name')
+#     class Meta:
+#         model = UserETF
+#         fields = ["id", "user_username", "etf_name", "joined_date"]
 
-    class Meta:
-        model = UserETF
-        fields = ['id', 'user_username', 'etf_name', 'joined_date']
+# class UserSerializer(serializers.ModelSerializer):
+#     etfs = ETFSerializer(many=True, read_only=True)
 
-class UserSerializer(serializers.ModelSerializer):
-    etfs = ETFSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = User
-        fields = ['id', 'username', 'etfs']
+#     class Meta:
+#         model = User
+#         fields = ["id", "username", "etfs"]

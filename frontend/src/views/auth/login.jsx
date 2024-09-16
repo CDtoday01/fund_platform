@@ -1,24 +1,24 @@
-import { useState, useEffect } from 'react';
-import { login } from '../../utils/auth';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuthStore } from '../../store/auth';
+import { useState, useEffect } from "react";
+import { login } from "../../utils/auth";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuthStore } from "../../store/auth";
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const isLoggedIn = useAuthStore((state) => state.isLoggedIn);
 
   useEffect(() => {
     if (isLoggedIn()) {
-      navigate('/');
+      navigate("/");
     }
   }, [isLoggedIn]);
 
   const resetForm = () => {
-    setEmail('');
-    setPassword('');
+    setEmail("");
+    setPassword("");
   };
 
   const handleLogin = async (e) => {
@@ -29,7 +29,7 @@ function Login() {
     if (error) {
       alert(error);
     } else {
-      navigate('/');
+      navigate("/");
       resetForm();
     }
     setIsLoading(false);
@@ -76,11 +76,11 @@ function Login() {
                             />
                           </div>
                           <button className="btn btn-primary w-100" type="submit" disabled={isLoading}>
-                            {isLoading ? 'Processing...' : 'Sign In'}
+                            {isLoading ? "Processing..." : "Sign In"}
                           </button>
                           <div className="text-center">
                             <p className="mt-4">
-                              Don't have an account? <Link to="/register">Register</Link>
+                              Don"t have an account? <Link to="/register">Register</Link>
                             </p>
                             <p className="mt-0">
                               <Link to="/forgot-password" className="text-danger">

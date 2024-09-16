@@ -1,5 +1,5 @@
-import Cookie from 'js-cookie'
-import {jwtDecode} from 'jwt-decode'
+import Cookie from "js-cookie"
+import {jwtDecode} from "jwt-decode"
 
 function UserData () {
     let access_token = Cookie.get("access_token")
@@ -10,7 +10,7 @@ function UserData () {
         const decoded =jwtDecode(token)
         return decoded
     } else {
-        console.log('user token does not exist!')
+        console.log("user token does not exist!")
     }
 }
 

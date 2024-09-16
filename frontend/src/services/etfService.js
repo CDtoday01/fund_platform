@@ -1,7 +1,7 @@
-import useAxios from '../utils/useAxios';
+import useAxios from "../utils/useAxios";
 
-const GET_ETFS_URL = 'etfs/';
-const CREATE_ETF_URL = 'etfs/create/';
+const GET_ETFS_URL = "etfs/";
+const CREATE_ETF_URL = "etfs/create/";
 const DELETE_ETF_URL = (id) => `etfs/delete/${id}/`;
 
 export const getETFs = () => {

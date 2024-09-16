@@ -1,8 +1,8 @@
 import { useAuthStore } from "../store/auth";
-import axios from './axios';
-import { jwtDecode } from 'jwt-decode';
-import Cookies from 'js-cookie';
-import Swal from 'sweetalert2';
+import axios from "./axios";
+import { jwtDecode } from "jwt-decode";
+import Cookies from "js-cookie";
+import Swal from "sweetalert2";
 
 const Toast = Swal.mixin({
   toast: true,
@@ -29,14 +29,14 @@ export const login = async (email, password) => {
     } catch (error) {
         return {
             data: null,
-            error: error.response?.data?.detail || 'Something went wrong!'
+            error: error.response?.data?.detail || "Something went wrong!"
         }
     }
 };
 
 export const register = async (full_name, email, phone, password, password2) => {
     try {
-        const { data } = await axios.post('user/register/', {
+        const { data } = await axios.post("user/register/", {
             full_name,
             email,
             phone,
@@ -53,7 +53,7 @@ export const register = async (full_name, email, phone, password, password2) => 
         console.error(error.response?.data); // For debugging
         return {
             data: null,
-            error: error.response?.data?.email || error.response?.data?.password || 'Something went wrong!'
+            error: error.response?.data?.email || error.response?.data?.password || "Something went wrong!"
         }
     }
 };
@@ -84,7 +84,7 @@ export const setUser = async () => {
             setAuthUser(response.access, response.refresh);
         } catch (error) {
             // Handle token refresh failure (e.g., refresh token expired)
-            console.error('Token refresh failed:', error);
+            console.error("Token refresh failed:", error);
         }
     } else {
         setAuthUser(accessToken, refreshToken);
@@ -92,10 +92,10 @@ export const setUser = async () => {
 };
 
 export const setAuthUser = (access_token, refresh_token) => {
-    Cookies.set('access_token', access_token, {
+    Cookies.set("access_token", access_token, {
         expires: 4 / 24 // 4 hours
     });
-    Cookies.set('refresh_token', refresh_token, {
+    Cookies.set("refresh_token", refresh_token, {
         expires: 14 // 14 days
     });
 
@@ -111,7 +111,7 @@ export const getRefreshToken = async () => {
     const refresh_token = Cookies.get("refresh_token");
     // If no refresh token is present, return or handle gracefully
     if (!refresh_token) {
-        console.error('No refresh token found, user may not be logged in.');
+        console.error("No refresh token found, user may not be logged in.");
         return null; // or you can throw an error depending on how you want to handle it
     }
 
@@ -122,14 +122,14 @@ export const getRefreshToken = async () => {
         return response.data;
     } catch (error) {
         if (error.response && error.response.status === 400) {
-            console.error('Invalid or expired refresh token.');
+            console.error("Invalid or expired refresh token.");
             // Optional: log out the user, clear cookies, and reset state
             Cookies.remove("access_token", { path: "/" });
             Cookies.remove("refresh_token", { path: "/" });
             useAuthStore.getState().setUser(null);
-            throw new Error('Refresh token is invalid or expired. Please log in again.');
+            throw new Error("Refresh token is invalid or expired. Please log in again.");
         } else {
-            console.error('An unexpected error occurred:', error);
+            console.error("An unexpected error occurred:", error);
             throw error; // Re-throw other errors
         }
     }
@@ -138,13 +138,13 @@ export const getRefreshToken = async () => {
 export const isAccessTokenExpired = (accessToken) => {
     // If no accessToken is provided, return false to skip token check
     if (accessToken === undefined || accessToken === null) {
-        console.log('No access token provided, user is not logged in.');
+        console.log("No access token provided, user is not logged in.");
         return false; // Return false to skip the refresh token logic
     }
 
     // Ensure that the accessToken is a valid string
-    if (typeof accessToken !== 'string') {
-        console.log('Invalid access token format.');
+    if (typeof accessToken !== "string") {
+        console.log("Invalid access token format.");
         return true;
     }
 
@@ -152,7 +152,7 @@ export const isAccessTokenExpired = (accessToken) => {
         const decodedToken = jwtDecode(accessToken);
         return decodedToken.exp < Date.now() / 1000;
     } catch (error) {
-        console.error('Error decoding token:', error);
-        return true; // Return true if there's an error decoding the token
+        console.error("Error decoding token:", error);
+        return true; // Return true if there"s an error decoding the token
     }
 };

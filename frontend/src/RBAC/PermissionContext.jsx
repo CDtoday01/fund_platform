@@ -16,7 +16,7 @@ export const PermissProvider = ({ children}) => {
             const userPermissions = await getUserPermissions();
             setPermissions(userPermissions);
         } catch (error) {
-            console.error('Error fetching user permissions', error);
+            console.error("Error fetching user permissions", error);
             setPermissions([]);
         } finally {
             setLoading(false);
