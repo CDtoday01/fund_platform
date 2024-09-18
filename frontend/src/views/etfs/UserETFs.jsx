@@ -1,30 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "../../css/tab.css";
-import useAxios from "../../utils/useAxios";
 import { useAuthStore } from "../../store/auth";
 import formatDate from "../../utils/formatDate";
 import fetchUserETFs from "../../utils/fetchUserETFs";
 
 const UserETFs = () => {
-    const [etfs, setETFs] = useState([]);
+    const [etfs, setETFs] = useState({ results: [], count: 0 });
+    const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
     const [activeTab, setActiveTab] = useState("created");
     const [activeState, setActiveState] = useState("future");
+    const [currentPage, setCurrentPage] = useState(1);
     const { user } = useAuthStore();
     const currentUserId = user ? user.user_id : null;
 
     useEffect(() => {
-        // Auto-switch to "progressing" when the tab is "joined"
-        if (activeTab === "joined") {
-            setActiveState("progressing");
-        }
-    }, [activeTab]); // This effect runs whenever activeTab changes
-    
-    useEffect(() => {
         if (user) {
-            fetchUserETFs(activeTab, activeState, setETFs);
+            fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
         }
-    }, [user, activeTab, activeState]);
+        console.log(etfs);
+    }, [user, activeTab, activeState, currentPage]);
 
     const joinETF = async (etfId, etfName) => {
         if (window.confirm(`Are you sure you want to invest in ${etfName}?`)) {
@@ -32,7 +27,7 @@ const UserETFs = () => {
                 const axiosInstance = useAxios();
                 const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
                 if (response.status === 200) {
-                    fetchUserETFs(activeTab, activeState);
+                    fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
                     alert("Joined ETF!");
                 } else {
                     console.error("Failed to join ETF:", response.data);
@@ -49,7 +44,7 @@ const UserETFs = () => {
                 const axiosInstance = useAxios();
                 const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
                 if (response.status === 200) {
-                    fetchUserETFs(activeTab, activeState);
+                    fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
                     alert("Left ETF!");
                 } else {
                     console.error("Failed to leave ETF");
@@ -68,10 +63,18 @@ const UserETFs = () => {
         setActiveState(state);
     };
 
+    const handlePageChange = (direction) => {
+        if (direction === 'next' && pagination.next) {
+            setCurrentPage(prevPage => prevPage + 1);
+        } else if (direction === 'previous' && pagination.previous) {
+            setCurrentPage(prevPage => prevPage - 1);
+        }
+    };
+
     const renderButton = (etf, tab) => {
         const isUserJoined = etf.users.includes(currentUserId);
-        const isUserCreator = etf.creator === currentUserId;  // Assuming you have the creator info in the ETF data
-        const isAnnouncing = etf.state === "announcing";  // Assuming state is returned from the serializer
+        const isUserCreator = etf.creator === currentUserId;
+        const isAnnouncing = etf.state === "announcing";
         const isDisabled = isUserCreator || isAnnouncing;
 
         if (tab === "other") {
@@ -175,7 +178,7 @@ const UserETFs = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {etfs.map(etf => (
+                        {etfs.results.map(etf => (
                             <tr key={etf.id} onClick={() => window.location.href = `/etfs/${etf.id}`} style={{ cursor: "pointer" }}>
                                 <td>{etf.name}</td>
                                 <td>{etf.code}</td>
@@ -193,13 +196,27 @@ const UserETFs = () => {
                                 <td>{etf.subcategory_name}</td>
                                 <td>{etf.ETF_duration} months</td>
                                 <td>{etf.users.length}</td>
-                                <td onClick={(e) => { e.stopPropagation();}}>
+                                <td onClick={(e) => { e.stopPropagation(); }}>
                                     {renderButton(etf, activeTab)}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
+                <div className="pagination">
+                    <button
+                        onClick={() => handlePageChange('previous')}
+                        disabled={!pagination.previous}
+                    >
+                        Previous
+                    </button>
+                    <button
+                        onClick={() => handlePageChange('next')}
+                        disabled={!pagination.next}
+                    >
+                        Next
+                    </button>
+                </div>
             </div>
         </div>
     );

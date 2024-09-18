@@ -1,6 +1,6 @@
 import React from "react"
 import { useState } from "react"
-import { useSearchParams } from "react-router-dom" //取得ｕｒｌ參數
+import { useSearchParams } from "react-router-dom" //取得url參數
 import { useNavigate } from "react-router-dom"
 import apiInstance from "../../utils/axios"
 

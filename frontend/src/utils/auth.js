@@ -112,7 +112,7 @@ export const getRefreshToken = async () => {
     // If no refresh token is present, return or handle gracefully
     if (!refresh_token) {
         console.error("No refresh token found, user may not be logged in.");
-        return null; // or you can throw an error depending on how you want to handle it
+        return null // or you can throw an error depending on how you want to handle it
     }
 
     try {
@@ -139,13 +139,13 @@ export const isAccessTokenExpired = (accessToken) => {
     // If no accessToken is provided, return false to skip token check
     if (accessToken === undefined || accessToken === null) {
         console.log("No access token provided, user is not logged in.");
-        return false; // Return false to skip the refresh token logic
+        return false // Return false to skip the refresh token logic
     }
 
     // Ensure that the accessToken is a valid string
     if (typeof accessToken !== "string") {
         console.log("Invalid access token format.");
-        return true;
+        return true
     }
 
     try {
@@ -153,6 +153,6 @@ export const isAccessTokenExpired = (accessToken) => {
         return decodedToken.exp < Date.now() / 1000;
     } catch (error) {
         console.error("Error decoding token:", error);
-        return true; // Return true if there"s an error decoding the token
+        return true // Return true if there's an error decoding the token
     }
 };

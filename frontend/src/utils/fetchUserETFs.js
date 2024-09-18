@@ -1,3 +1,4 @@
+import ETFs from "../views/etfs/ETFs";
 import useAxios from "./useAxios";
 
 const fetchUserETFs = async (tab, state, setETFs, setPagination, page = 1) => {
@@ -19,7 +20,6 @@ const fetchUserETFs = async (tab, state, setETFs, setPagination, page = 1) => {
         } else {
             response = await axiosInstance.get("/etfs/user/", { params });
         }
-
         // Ensure that we always have `results` in the response
         setETFs({
             results: response.data.results || [],  // Fallback to an empty array
