@@ -36,15 +36,18 @@ class SwitchRoleView(APIView):
         
         return Response({"success": "Role switched successfully"}, status=200)
 
-class ETFListView(APIView):
+class ETFListView(generics.ListAPIView):
+    queryset = ETF.objects.all()
+    serializer_class = ETFSerializer
     permission_classes = [AllowAny]
-    def get(self, request, *args, **kwargs):
-        etfs = ETF.objects.all()
-        filter_state = request.query_params.get("filter_state", None)
-        filter_tab = request.query_params.get("filter_tab", None)
+
+    def get_queryset(self):
+        etfs = super().get_queryset()
+        filter_state = self.request.query_params.get("filter_state", None)
+        filter_tab = self.request.query_params.get("filter_tab", None)
         current_time = timezone.now()
-        user = request.user
-        
+        user = self.request.user
+
         if filter_state == "future":
             etfs = etfs.filter(announcement_start_date__gt=current_time)
         elif filter_state == "announcing":
@@ -80,9 +83,7 @@ class ETFListView(APIView):
         elif filter_state == "past":
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
-        # Serialize the filtered ETFs
-        serializer = ETFSerializer(etfs, many=True)
-        return Response(serializer.data)
+        return etfs
 
 class ETFDetailView(generics.RetrieveUpdateDestroyAPIView):
     queryset = ETF.objects.all()

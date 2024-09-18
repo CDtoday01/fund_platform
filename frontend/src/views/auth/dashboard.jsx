@@ -5,7 +5,7 @@ import ETFs from "../etfs/ETFs";
 
 function Dashboard() {
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
-
+  console.log('isLoggedIn', isLoggedIn());
   return (
     <>
       {isLoggedIn() ? (
