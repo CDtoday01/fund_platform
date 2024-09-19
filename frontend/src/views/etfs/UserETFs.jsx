@@ -4,6 +4,7 @@ import "../../css/tab.css";
 import { useAuthStore } from "../../store/auth";
 import formatDate from "../../utils/formatDate";
 import fetchUserETFs from "../../utils/fetchUserETFs";
+import useAxios from "../../utils/useAxios";
 
 const UserETFs = () => {
     const [etfs, setETFs] = useState({ results: [], count: 0 });
@@ -15,10 +16,16 @@ const UserETFs = () => {
     const currentUserId = user ? user.user_id : null;
 
     useEffect(() => {
+        // Auto-switch to "progressing" when the tab is "joined"
+        if (activeTab === "joined") {
+            setActiveState("progressing");
+        }
+    }, [activeTab]);
+
+    useEffect(() => {
         if (user) {
             fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
         }
-        console.log(etfs);
     }, [user, activeTab, activeState, currentPage]);
 
     const joinETF = async (etfId, etfName) => {
@@ -169,8 +176,17 @@ const UserETFs = () => {
                         <tr>
                             <th>Name</th>
                             <th>Code</th>
-                            <th>Fundraising Start</th>
-                            <th>Fundraising End</th>
+                            {activeState === "progressing" ? (
+                            <>
+                                <th>Joined Date</th>
+                                <th>Leave Date</th>
+                            </>
+                            ) : (
+                            <>
+                                <th>Fundraising Start</th>
+                                <th>Fundraising End</th>
+                            </>
+                            )}
                             <th>Category</th>
                             <th>ETF Duration</th>
                             <th>Investor Count</th>

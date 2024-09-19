@@ -48,12 +48,10 @@ class ETF(models.Model):
         return self.users.count() == 0
 
     @staticmethod
-    def generate_code(subcategory_code):
-        if len(subcategory_code) != 2:
-            raise ValueError("ETF code must be exactly 2 characters long.")
+    def generate_code():
         timestamp = int(time.time())  # Get current time in seconds since epoch
-        unique_id = shortuuid.ShortUUID().random(length=8)  # Adjust length for uniqueness
-        return f"{subcategory_code}{timestamp}{unique_id}"
+        unique_id = shortuuid.ShortUUID().random(length=4)  # Adjust length for uniqueness
+        return f"{timestamp}{unique_id}"
 
     def save(self, *args, **kwargs):
         # Calculate end dates
@@ -65,7 +63,7 @@ class ETF(models.Model):
         
         # Generate code if not already set
         if not self.code:
-            self.code = self.generate_code(self.category.subcategory_code)
+            self.code = self.generate_code()
         
         # Save the instance
         super().save(*args, **kwargs)

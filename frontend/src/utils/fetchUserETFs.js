@@ -1,4 +1,3 @@
-import ETFs from "../views/etfs/ETFs";
 import useAxios from "./useAxios";
 
 const fetchUserETFs = async (tab, state, setETFs, setPagination, page = 1) => {
@@ -25,6 +24,8 @@ const fetchUserETFs = async (tab, state, setETFs, setPagination, page = 1) => {
             results: response.data.results || [],  // Fallback to an empty array
             count: response.data.count || 0,       // Fallback to 0 count
         });
+
+        console.log(response.data.results);
 
         setPagination({
             next: response.data.next,

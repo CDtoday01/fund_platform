@@ -20,6 +20,12 @@ class ETFSerializer(serializers.ModelSerializer):
         model = ETF
         fields = "__all__"
         read_only_fields = ["id"]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Adding custom fields
+        self.fields['joined_date'] = serializers.SerializerMethodField()
+        self.fields['leave_date'] = serializers.SerializerMethodField()
 
     def get_state(self, obj) -> Optional[str]:
         current_time = timezone.now()
@@ -38,6 +44,22 @@ class ETFSerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return request.user == obj.creator or request.user.is_staff
         return False
+    
+    def get_joined_date(self, obj):
+        user_etf = obj.useretf_set.filter(user=self.context['request'].user).first()
+        if user_etf:
+            print(f"Joined Date: {user_etf.joined_date}")
+        else:
+            print("No UserETF found for this ETF and user")
+        return user_etf.joined_date if user_etf else None
+
+    def get_leave_date(self, obj):
+        user_etf = obj.useretf_set.filter(user=self.context['request'].user).first()
+        if user_etf:
+            print(f"Leave Date: {user_etf.leave_date}")
+        else:
+            print("No UserETF found for this ETF and user")
+        return user_etf.leave_date if user_etf else None
     
     def validate(self, data):
         current_time = timezone.now()
