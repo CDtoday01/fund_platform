@@ -8,33 +8,34 @@ function Dashboard() {
   
   return (
     <>
-      {isLoggedIn() ? (
-        <div>
-          <h1>Dashboard</h1>
-          <div className="d-flex">
-            <Link to={"/logout"}>Logout</Link>
-          </div>
-          <ETFs />
-        </div>
-      ) : (
-        <div>
-          <h1>Home page</h1>
-          <div className="d-flex">
-            <div>
-              <Link className="btn btn-success ms-4" to={"/login"}>
-                Login
-              </Link>
+      {/* <div>
+        {isLoggedIn() ? (
+          <>
+            <h1>Dashboard</h1>
+            <div className="d-flex">
+              <Link to={"/logout"}>Logout</Link>
             </div>
-            <div>
-              Do not have an account? 
-              <Link className="btn btn-primary" to={"/register"}>
-                Register
-              </Link>
+          </>
+        ) : (
+          <>
+            <h1>Home page</h1>
+            <div className="d-flex">
+              <div>
+                <Link className="btn btn-success ms-4" to={"/login"}>
+                  Login
+                </Link>
+              </div>
+              <div>
+                Do not have an account? 
+                <Link className="btn btn-primary" to={"/register"}>
+                  Register
+                </Link>
+              </div>
             </div>
-          </div>
-          <ETFs />
-        </div>
-      )}
+          </>
+        )}
+      </div> */}
+      <ETFs />
     </>
   );
 }

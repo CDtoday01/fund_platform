@@ -46,20 +46,20 @@ class ETFSerializer(serializers.ModelSerializer):
         return False
     
     def get_joined_date(self, obj):
-        user_etf = obj.useretf_set.filter(user=self.context['request'].user).first()
-        if user_etf:
-            print(f"Joined Date: {user_etf.joined_date}")
-        else:
-            print("No UserETF found for this ETF and user")
-        return user_etf.joined_date if user_etf else None
-
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            user_etf = obj.useretf_set.filter(user=request.user).first()
+            if user_etf:
+                return user_etf.joined_date
+        return None 
+    
     def get_leave_date(self, obj):
-        user_etf = obj.useretf_set.filter(user=self.context['request'].user).first()
-        if user_etf:
-            print(f"Leave Date: {user_etf.leave_date}")
-        else:
-            print("No UserETF found for this ETF and user")
-        return user_etf.leave_date if user_etf else None
+        request = self.context.get("request")
+        if request and request.user.is_authenticated:
+            user_etf = obj.useretf_set.filter(user=request.user).first()
+            if user_etf:
+                return user_etf.leave_date
+        return None
     
     def validate(self, data):
         current_time = timezone.now()
