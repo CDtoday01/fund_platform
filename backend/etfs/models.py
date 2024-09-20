@@ -80,11 +80,11 @@ class UserETF(models.Model):
     leave_date = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        unique_together = ("user", "etf")
+        unique_together = ("user", "etf", "joined_date")
 
     def save(self, *args, **kwargs):
         if self.joined_date is None:
-            raise ValueError("Joined date is not set."  )
+            raise ValueError("Joined date is not set.")
         
         if self.etf.ETF_duration:
             self.leave_date = self.joined_date + relativedelta(months=self.etf.ETF_duration)

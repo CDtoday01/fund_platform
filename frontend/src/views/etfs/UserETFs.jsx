@@ -5,9 +5,11 @@ import { useAuthStore } from "../../store/auth";
 import formatDate from "../../utils/formatDate";
 import fetchUserETFs from "../../utils/fetchUserETFs";
 import useAxios from "../../utils/useAxios";
+import fetchTransactions from "../../utils/fetchTransactions";
 
 const UserETFs = () => {
     const [etfs, setETFs] = useState({ results: [], count: 0 });
+    const [transactions, setTransactions] = useState({ results: [], count: 0 });
     const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
     const [activeTab, setActiveTab] = useState("created");
     const [activeState, setActiveState] = useState("future");
@@ -16,18 +18,23 @@ const UserETFs = () => {
     const currentUserId = user ? user.user_id : null;
 
     useEffect(() => {
-        // Auto-switch to "progressing" when the tab is "joined"
-        if (activeTab === "joined") {
+        // Auto-switch to "progressing" when the tab is "joined", and its state is in forbidden categories.
+        if (activeTab === "joined" && ["created", "announcing", "fundraising"].includes(activeState)) {
             setActiveState("progressing");
         }
     }, [activeTab]);
 
     useEffect(() => {
         if (user) {
-            fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
+            if (activeTab === "joined") {
+                fetchTransactions(activeState, setTransactions, setPagination, currentPage);
+            } else {
+                fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
+            }
+            
         }
     }, [user, activeTab, activeState, currentPage]);
-
+    
     const joinETF = async (etfId, etfName) => {
         if (window.confirm(`Are you sure you want to invest in ${etfName}?`)) {
             try {
@@ -108,134 +115,182 @@ const UserETFs = () => {
         }
     };
 
-    return (
-        <div>
-            <h1>ETFs</h1>
-            <Link to="/etfs/new">
-                <button>Add ETF</button>
-            </Link>
-            <div className="tabs">
-                <button
-                    className={activeTab === "created" ? "active" : ""}
-                    onClick={() => handleTabChange("created")}
-                    style={{ backgroundColor: activeTab === "created" ? "lightgreen" : "initial" }}
-                >
-                    Created ETFs
-                </button>
-                <button
-                    className={activeTab === "joined" ? "active" : ""}
-                    onClick={() => handleTabChange("joined")}
-                >
-                    Joined ETFs
-                </button>
-                <button
-                    className={activeTab === "other" ? "active" : ""}
-                    onClick={() => handleTabChange("other")}
-                >
-                    Other ETFs
-                </button>
-            </div>
-            <div className="state-tabs">
-                <button
-                    className={activeState === "future" && activeTab !== "joined" ? "active" : ""}
-                    onClick={() => handleStateChange("future")}
-                    disabled={activeTab === "joined"}
-                >
-                    Future ETFs
-                </button>
-                <button
-                    className={activeState === "announcing" && activeTab !== "joined" ? "active" : ""}
-                    onClick={() => handleStateChange("announcing")}
-                    disabled={activeTab === "joined"}
-                >
-                    Announcing ETFs
-                </button>
-                <button
-                    className={activeState === "fundraising" && activeTab !== "joined" ? "active" : ""}
-                    onClick={() => handleStateChange("fundraising")}
-                    disabled={activeTab === "joined"}
-                >
-                    Fundraising ETFs
-                </button>
-                <button
-                    className={activeState === "progressing" ? "active" : ""}
-                    onClick={() => handleStateChange("progressing")}
-                >
-                    Progressing ETFs
-                </button>
-                <button
-                    className={activeState === "past" ? "active" : ""}
-                    onClick={() => handleStateChange("past")}
-                >
-                    Past ETFs
-                </button>
-            </div>
-            <div className="etf-list">
-                <table className="table-box">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Code</th>
-                            {activeState === "progressing" ? (
+    const renderETFsTable = () => {
+        return (
+            <table className="table-box">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Code</th>
+                        <th>Category</th>
+                        {activeState === "progressing" ? (
                             <>
                                 <th>Joined Date</th>
                                 <th>Leave Date</th>
                             </>
-                            ) : (
+                        ) : (
                             <>
                                 <th>Fundraising Start</th>
                                 <th>Fundraising End</th>
                             </>
+                        )}
+                        <th>ETF Duration</th>
+                        <th>Investor Count</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {etfs.results.map(etf => (
+                        <tr key={etf.id}>
+                            <td><Link to={`/etfs/${etf.id}`}>{etf.name}</Link></td>
+                            <td>{etf.code}</td>
+                            <td>{etf.subcategory_name}</td>
+                            {activeState === "progressing" ? (
+                                <>
+                                    <td>{formatDate(etf.joined_date)}</td>
+                                    <td>{formatDate(etf.leave_date)}</td>
+                                </>
+                            ) : (
+                                <>
+                                    <td>{formatDate(etf.fundraising_start_date)}</td>
+                                    <td>{formatDate(etf.fundraising_end_date)}</td>
+                                </>
                             )}
-                            <th>Category</th>
-                            <th>ETF Duration</th>
-                            <th>Investor Count</th>
-                            <th>Actions</th>
+                            <td>{etf.ETF_duration} months</td>
+                            <td>{etf.users.length}</td>
+                            <td onClick={(e) => { e.stopPropagation(); }}>
+                                {renderButton(etf, activeTab)}
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody>
-                        {etfs.results.map(etf => (
-                            <tr key={etf.id} onClick={() => window.location.href = `/etfs/${etf.id}`} style={{ cursor: "pointer" }}>
-                                <td>{etf.name}</td>
-                                <td>{etf.code}</td>
-                                {activeState === "progressing" ? (
-                                    <>
-                                        <td>{formatDate(etf.joined_date)}</td>
-                                        <td>{etf.leave_date ? formatDate(etf.leave_date) : "Still joined"}</td>
-                                    </>
-                                ) : (
-                                    <>
-                                        <td>{formatDate(etf.fundraising_start_date)}</td>
-                                        <td>{formatDate(etf.fundraising_end_date)}</td>
-                                    </>
-                                )}
-                                <td>{etf.subcategory_name}</td>
-                                <td>{etf.ETF_duration} months</td>
-                                <td>{etf.users.length}</td>
-                                <td onClick={(e) => { e.stopPropagation(); }}>
-                                    {renderButton(etf, activeTab)}
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-                <div className="pagination">
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+
+    const renderTransactionsTable = () => {
+        return (
+            <table className="table-box">
+                <thead>
+                    <tr>
+                        <th>Leave</th>
+                        <th>ETF Name</th>
+                        <th>Transaction Number</th>
+                        <th>Category</th>
+                        <th>Joined Date</th>
+                        <th>Leave Date</th>
+                        <th>ETF Duration</th>
+                        <th>Raising Funds</th>
+                        <th>Invested Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {transactions.results.map(transaction => (
+                        <tr key={transaction.id}>
+                            <td>
+                                <button onClick={() => leaveETF(transaction.etf_id, transaction.etf_name)}>✖</button>
+                            </td>
+                            <td><Link to={`/etfs/${transaction.etf}`}>{transaction.etf_name}</Link></td>
+                            <td>{transaction.transaction_number}</td>
+                            <td>{transaction.category_name}</td>
+                            <td>{formatDate(transaction.joined_date)}</td>
+                            <td>{formatDate(transaction.leave_date)}</td>
+                            <td>{transaction.ETF_duration} months</td>
+                            <td>{transaction.is_fundraising ? "Yes" : "No"}</td>
+                            <td>{transaction.invested_amount}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        );
+    };
+
+    return (
+        <>
+            <div>
+                <h1>ETFs</h1>
+                <Link to="/etfs/new">
+                    <button>Add ETF</button>
+                </Link>
+                <div className="tabs">
                     <button
-                        onClick={() => handlePageChange('previous')}
-                        disabled={!pagination.previous}
+                        className={activeTab === "created" ? "active" : ""}
+                        onClick={() => handleTabChange("created")}
+                        style={{ backgroundColor: activeTab === "created" ? "lightgreen" : "initial" }}
                     >
-                        Previous
+                        Created ETFs
                     </button>
                     <button
-                        onClick={() => handlePageChange('next')}
-                        disabled={!pagination.next}
+                        className={activeTab === "joined" ? "active" : ""}
+                        onClick={() => handleTabChange("joined")}
                     >
-                        Next
+                        Joined ETFs
+                    </button>
+                    <button
+                        className={activeTab === "other" ? "active" : ""}
+                        onClick={() => handleTabChange("other")}
+                    >
+                        Other ETFs
                     </button>
                 </div>
+                <div className="state-tabs">
+                    <button
+                        className={activeState === "future" && activeTab !== "joined" ? "active" : ""}
+                        onClick={() => handleStateChange("future")}
+                        disabled={activeTab === "joined"}
+                    >
+                        Future ETFs
+                    </button>
+                    <button
+                        className={activeState === "announcing" && activeTab !== "joined" ? "active" : ""}
+                        onClick={() => handleStateChange("announcing")}
+                        disabled={activeTab === "joined"}
+                    >
+                        Announcing ETFs
+                    </button>
+                    <button
+                        className={activeState === "fundraising" && activeTab !== "joined" ? "active" : ""}
+                        onClick={() => handleStateChange("fundraising")}
+                        disabled={activeTab === "joined"}
+                    >
+                        Fundraising ETFs
+                    </button>
+                    <button
+                        className={activeState === "progressing" ? "active" : ""}
+                        onClick={() => handleStateChange("progressing")}
+                    >
+                        Progressing ETFs
+                    </button>
+                    <button
+                        className={activeState === "past" ? "active" : ""}
+                        onClick={() => handleStateChange("past")}
+                    >
+                        Past ETFs
+                    </button>
+                </div>
+                <div className="etf-list">
+                    
+                    <div className="pagination">
+                        <button
+                            onClick={() => handlePageChange('previous')}
+                            disabled={!pagination.previous}
+                        >
+                            Previous
+                        </button>
+                        <button
+                            onClick={() => handlePageChange('next')}
+                            disabled={!pagination.next}
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
+            {activeTab !== "joined" && renderETFsTable()}
+            {activeTab === "joined" && renderTransactionsTable()}
+        </>
     );
+    
 };
 
 export default UserETFs;

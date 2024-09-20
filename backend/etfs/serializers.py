@@ -1,8 +1,8 @@
 from rest_framework import serializers
 from .models import ETFCategoryType, ETF, UserETF
 from django.contrib.auth.models import User
-from dateutil.relativedelta import relativedelta
 from django.utils import timezone
+from django.urls import reverse
 from typing import Optional
 
 class ETFCategoryTypeSerializer(serializers.ModelSerializer):
@@ -15,12 +15,12 @@ class ETFSerializer(serializers.ModelSerializer):
     can_delete = serializers.SerializerMethodField()
     creator = serializers.PrimaryKeyRelatedField(read_only=True)
     subcategory_name = serializers.CharField(source="category.subcategory_name", read_only=True)
-    
+
     class Meta:
         model = ETF
         fields = "__all__"
         read_only_fields = ["id"]
-    
+        
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # Adding custom fields
@@ -98,13 +98,22 @@ class ETFSerializer(serializers.ModelSerializer):
         validated_data["creator"] = request.user  # Ensure creator is set
         return super().create(validated_data)
       
-class UserETFSerializer(serializers.ModelSerializer):
-    etf = ETFSerializer()  # Serialize the related ETF object
+# class UserETFSerializer(serializers.ModelSerializer):
+#     etf = ETFSerializer()  # Serialize the related ETF object
+
+#     class Meta:
+#         model = UserETF
+#         fields = "__all__"
+
+class UserETFTransactionSerializer(serializers.ModelSerializer):
+    etf_name = serializers.CharField(source='etf.name', read_only=True)
+    etf_code = serializers.CharField(source='etf.code', read_only=True)
+    category_name = serializers.CharField(source='etf.category.subcategory_name', read_only=True)
 
     class Meta:
         model = UserETF
         fields = "__all__"
-  
+
 # class UserETFKnownSerializer(serializers.ModelSerializer):
 #     user_username = serializers.CharField(source="user.username")
 #     etf_name = serializers.CharField(source="etf.name")

@@ -122,9 +122,9 @@ const ETFs = () => {
                         <tr>
                             <th>Name</th>
                             <th>Code</th>
+                            <th>Category</th>
                             <th>Fundraising Start</th>
                             <th>Fundraising End</th>
-                            <th>Category</th>
                             <th>Duration</th>
                             <th>Investor Count</th>
                         </tr>
@@ -135,9 +135,9 @@ const ETFs = () => {
                                 <tr key={etf.id} onClick={() => navigate(`/etfs/${etf.id}`)} style={{ cursor: "pointer" }}>
                                     <td>{etf.name}</td>
                                     <td>{etf.code}</td>
+                                    <td>{etf.subcategory_name}</td>
                                     <td>{formatDate(etf.fundraising_start_date)}</td>
                                     <td>{formatDate(etf.fundraising_end_date)}</td>
-                                    <td>{etf.subcategory_name}</td>
                                     <td>{etf.ETF_duration} months</td>
                                     <td>{etf.users.length}</td>
                                 </tr>

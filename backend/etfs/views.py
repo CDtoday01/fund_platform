@@ -16,7 +16,7 @@ from django.middleware.csrf import get_token
 import json
 
 from .models import ETF, ETFCategoryType, UserETF
-from .serializers import ETFSerializer
+from .serializers import ETFSerializer, UserETFTransactionSerializer
 from .permission import IsCreatorOrStaff, IsAdminOrReadOnly
 
 User = get_user_model()
@@ -220,17 +220,27 @@ class UserETFsView(generics.ListAPIView):
                     fundraising_end_date__gte=current_time
                 )
             elif filter_state == "progressing":
-                pass  # Progressing ETFs are already handled
+                pass  # Handled by progressingView
             elif filter_state == "past":
                 etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
-        return etfs
+        return etfs.order_by("id")
     
     def get_serializer_context(self):
         # Pass the request object to the serializer to access the user
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
+class UserETFTransactionListView(generics.ListAPIView):
+    serializer_class = UserETFTransactionSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        queryset = UserETF.objects.filter(user=user).select_related('etf').order_by('-joined_date') # Sort by most recent first
+        print(queryset)
+        return queryset
     
 class ProgressingETFView(generics.ListAPIView):
     serializer_class = ETFSerializer
@@ -242,12 +252,8 @@ class ProgressingETFView(generics.ListAPIView):
         filter_tab = self.request.query_params.get("filter_tab")
 
         if filter_tab == "joined":
-            # Fetch ETFs where the user has joined and the ETF is progressing
-            etfs = ETF.objects.filter(
-                users=user,
-                useretf__joined_date__lte=current_time,  # ETF is joined by the user
-                useretf__leave_date__gte=current_time    # User has not left the ETF
-            )
+            # Handled by UserETFTransactionListView
+            pass
         elif filter_tab == "created":
             # Fetch ETFs created by the user that are still progressing
             etfs = ETF.objects.annotate(
@@ -278,27 +284,35 @@ class JoinETFView(APIView):
         if user.current_role == "corp":
             return JsonResponse({"error": "Corporations cannot join ETFs"}, status=400)
 
-        # Check if the user has already joined the ETF
-        elif etf.users.filter(id=user.id).exists():
-            return JsonResponse({"error": "Already joined"}, status=400)
-
-        # Log the creation of UserETF
+        # Create a new UserETF instance without checking for existing entries
         UserETF.objects.create(user=user, etf=etf)
-        etf.users.add(user)
+
+        # Add the user to the ETF's users set if they haven't joined before
+        if not etf.users.filter(id=user.id).exists():
+            etf.users.add(user)
+
         return JsonResponse({"success": "Joined ETF successfully"})
 
 class LeaveETFView(APIView):
-    serializer_class = ETFSerializer
     permission_classes = [IsAuthenticated]
 
     def post(self, request, etf_id):
         etf = get_object_or_404(ETF, id=etf_id)
         user = request.user
         
-        if not etf.users.filter(id=user.id).exists():
+        # Check for the existence of a UserETF instance
+        user_etf_instance = UserETF.objects.filter(user=user, etf=etf).first()
+
+        if not user_etf_instance:
             return Response({"error": "Not a member"}, status=status.HTTP_400_BAD_REQUEST)
-        
-        etf.users.remove(user)
+
+        # Remove the UserETF instance
+        user_etf_instance.delete()
+
+        # Optionally: Check if this is the last instance for the user
+        if UserETF.objects.filter(user=user, etf=etf).count() == 0:
+            etf.users.remove(user)  # Remove the user from ETF's users only if they have no instances left
+
         return Response({"success": "Left ETF successfully"}, status=status.HTTP_200_OK)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
