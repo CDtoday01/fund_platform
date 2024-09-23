@@ -202,8 +202,26 @@ class UserETFsView(generics.ListAPIView):
         elif filter_tab == "created":
             etfs = ETF.objects.filter(creator=user)
 
+            if filter_state == "progressing":
+                # Fetch ETFs created by the user that are still progressing
+                etfs = etfs.annotate(
+                    latest_leave_date=Max("useretf__leave_date")  # Get the latest leave date for each ETF
+                ).filter(
+                    fundraising_end_date__lt=current_time,  # current time > fundraising end date
+                    latest_leave_date__gt=current_time  # latest leave date > current time
+                )
+
         else:
             etfs = ETF.objects.exclude(useretf__user=user).exclude(creator=user)
+
+            if filter_state == "progressing":
+                # Fetch ETFs not created by the user and that the user hasn't joined
+                etfs = etfs.annotate(
+                    latest_leave_date=Max("useretf__leave_date")  # Get the latest leave date for each ETF
+                ).filter(
+                    fundraising_end_date__lt=current_time,  # current time > fundraising end date
+                    latest_leave_date__gt=current_time  # latest leave date > current time
+                )
 
         # Further filtering based on state if filter_tab is not 'joined'
         if filter_tab != "joined":
@@ -219,18 +237,17 @@ class UserETFsView(generics.ListAPIView):
                     fundraising_start_date__lte=current_time,
                     fundraising_end_date__gte=current_time
                 )
-            elif filter_state == "progressing":
-                pass  # Handled by progressingView
             elif filter_state == "past":
                 etfs = etfs.filter(fundraising_end_date__lt=current_time)
 
         return etfs.order_by("id")
-    
+
     def get_serializer_context(self):
         # Pass the request object to the serializer to access the user
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
+
 
 class UserETFTransactionListView(generics.ListAPIView):
     serializer_class = UserETFTransactionSerializer
@@ -242,38 +259,6 @@ class UserETFTransactionListView(generics.ListAPIView):
         print(queryset)
         return queryset
     
-class ProgressingETFView(generics.ListAPIView):
-    serializer_class = ETFSerializer
-    permission_classes = [IsAuthenticated]
-
-    def get_queryset(self):
-        user = self.request.user
-        current_time = timezone.now()
-        filter_tab = self.request.query_params.get("filter_tab")
-
-        if filter_tab == "joined":
-            # Handled by UserETFTransactionListView
-            pass
-        elif filter_tab == "created":
-            # Fetch ETFs created by the user that are still progressing
-            etfs = ETF.objects.annotate(
-                latest_leave_date=Max("useretf__leave_date")  # Get the latest leave date for each ETF
-            ).filter(
-                fundraising_end_date__lt=current_time,  # current time > fundraising end date
-                latest_leave_date__gt=current_time,  # latest leave date > current time
-                creator=user  # Ensure it's the user's created ETF
-            )
-        elif filter_tab == "other":
-            # Fetch ETFs not created by the user and that the user hasn't joined
-            etfs = ETF.objects.annotate(
-                latest_leave_date=Max("useretf__leave_date")  # Get the latest leave date for each ETF
-            ).filter(
-                fundraising_end_date__lt=current_time,  # current time > fundraising end date
-                latest_leave_date__gt=current_time  # latest leave date > current time
-            ).exclude(creator=user).exclude(users=user)
-
-        return etfs
-
 class JoinETFView(APIView):
     permission_classes = [IsAuthenticated]
 

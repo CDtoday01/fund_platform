@@ -1,6 +1,6 @@
 from django.urls import path
 from .views import SwitchRoleView, ETFDefaultsView, ETFListView, ETFTypeListAPIView, CreateETFView, CheckNameExistsView, DeleteETFView, \
-                   ProgressingETFView, ETFDetailView, UserETFsView, UserETFTransactionListView, JoinETFView, LeaveETFView
+                   ETFDetailView, UserETFsView, UserETFTransactionListView, JoinETFView, LeaveETFView
 
 
 urlpatterns = [
@@ -13,7 +13,6 @@ urlpatterns = [
     path("delete/<int:id>/", DeleteETFView.as_view(), name="delete-etf"),                       # Delete an ETF by its ID
     path("user/", UserETFsView.as_view(), name="user-etfs"),                                    # List ETFs associated with the current user
     path("user-etf-transactions/", UserETFTransactionListView.as_view(), name="transactions"),  # List transcations associated with the current user and ETF
-    path("progressing/", ProgressingETFView.as_view(), name="progressing-etfs"),                # List ETFs that are in progress (not completed)
     path("<int:pk>/", ETFDetailView.as_view(), name="etf-detail"),                              # View the details of a specific ETF by its primary key (ID)
     path("<int:etf_id>/join/", JoinETFView.as_view(), name="join_etf"),                         # Allow a user to join an ETF by its ID
     path("<int:etf_id>/leave/", LeaveETFView.as_view(), name="leave_etf"),                      # Allow a user to leave an ETF by its ID

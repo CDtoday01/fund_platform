@@ -14,8 +14,6 @@ const fetchUserETFs = async (tab, state, setETFs, setPagination, page = 1) => {
         let response;
         if (tab === "all") {
             response = await axiosInstance.get("/etfs/", { params });
-        } else if (state === "progressing") {
-            response = await axiosInstance.get("/etfs/progressing/", { params });
         } else {
             response = await axiosInstance.get("/etfs/user/", { params });
         }
