@@ -106,14 +106,20 @@ class ETFSerializer(serializers.ModelSerializer):
 #         fields = "__all__"
 
 class UserETFTransactionSerializer(serializers.ModelSerializer):
-    etf_name = serializers.CharField(source='etf.name', read_only=True)
-    etf_code = serializers.CharField(source='etf.code', read_only=True)
-    category_name = serializers.CharField(source='etf.category.subcategory_name', read_only=True)
+    etf_name = serializers.CharField(source="etf.name", read_only=True)
+    etf_code = serializers.CharField(source="etf.code", read_only=True)
+    category_name = serializers.CharField(source="etf.category.subcategory_name", read_only=True)
+    duration = serializers.IntegerField(source="etf.ETF_duration", read_only=True)
+    is_fundraising = serializers.SerializerMethodField()
 
     class Meta:
         model = UserETF
         fields = "__all__"
 
+    def get_is_fundraising(self, obj):
+        now = timezone.now()
+        return obj.etf.fundraising_start_date <= now <= obj.etf.fundraising_end_date
+    
 # class UserETFKnownSerializer(serializers.ModelSerializer):
 #     user_username = serializers.CharField(source="user.username")
 #     etf_name = serializers.CharField(source="etf.name")

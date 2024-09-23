@@ -35,7 +35,7 @@ class ETF(models.Model):
     fundraising_duration = models.IntegerField()  # Duration in months
     ETF_duration = models.IntegerField()  # Duration in months
     description = models.TextField(max_length=500, blank=True, null=True)  # Description of the ETF
-
+    total_invested = models.IntegerField()
     # Other fields retained
     current_investment = models.IntegerField(default=0)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UserETF", related_name="etfs")
@@ -46,6 +46,10 @@ class ETF(models.Model):
     
     def can_be_deleted(self):
         return self.users.count() == 0
+
+    def update_investment(self, amount):
+        self.total_invested += amount
+        self.save()
 
     @staticmethod
     def generate_code(subcategory_code):
@@ -78,14 +82,16 @@ class UserETF(models.Model):
     etf = models.ForeignKey(ETF, on_delete=models.CASCADE)
     joined_date = models.DateTimeField(default=timezone.now)
     leave_date = models.DateTimeField(null=True, blank=True)
-
+    investment_amount = models.IntegerField(default=0)
+    
     class Meta:
         unique_together = ("user", "etf", "joined_date")
-
+    
     def save(self, *args, **kwargs):
         if self.joined_date is None:
             raise ValueError("Joined date is not set.")
         
         if self.etf.ETF_duration:
             self.leave_date = self.joined_date + relativedelta(months=self.etf.ETF_duration)
+
         super().save(*args, **kwargs)

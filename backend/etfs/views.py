@@ -284,14 +284,30 @@ class JoinETFView(APIView):
         if user.current_role == "corp":
             return JsonResponse({"error": "Corporations cannot join ETFs"}, status=400)
 
-        # Create a new UserETF instance without checking for existing entries
-        UserETF.objects.create(user=user, etf=etf)
+        investment_amount = request.data.get("investment_amount")
+        if not investment_amount:
+            return JsonResponse({"error": "Investment amount is required"}, status=400)
+
+        # Convert investment_amount to integer and validate
+        try:
+            investment_amount = int(investment_amount)
+            if investment_amount < etf.lowest_amount:
+                return JsonResponse({"error": f"Investment amount must be at least {etf.lowest_amount}"}, status=400)
+        except ValueError:
+            return JsonResponse({"error": "Invalid investment amount"}, status=400)
+
+        # Create a new UserETF instance
+        user_etf = UserETF.objects.create(user=user, etf=etf, investment_amount=investment_amount)
+
+        # Update the ETF's total investment
+        etf.current_investment += investment_amount
+        etf.save()
 
         # Add the user to the ETF's users set if they haven't joined before
         if not etf.users.filter(id=user.id).exists():
             etf.users.add(user)
 
-        return JsonResponse({"success": "Joined ETF successfully"})
+        return JsonResponse({"success": "Joined ETF successfully", "user_etf_id": user_etf.id})
 
 class LeaveETFView(APIView):
     permission_classes = [IsAuthenticated]

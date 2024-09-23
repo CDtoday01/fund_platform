@@ -36,18 +36,21 @@ const UserETFs = () => {
     }, [user, activeTab, activeState, currentPage]);
     
     const joinETF = async (etfId, etfName) => {
-        if (window.confirm(`Are you sure you want to invest in ${etfName}?`)) {
-            try {
-                const axiosInstance = useAxios();
-                const response = await axiosInstance.post(`/etfs/${etfId}/join/`, {});
-                if (response.status === 200) {
-                    fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
-                    alert("Joined ETF!");
-                } else {
-                    console.error("Failed to join ETF:", response.data);
+        const investmentAmount = window.prompt(`Enter your investment amount for ${etfName}:`);
+        if (investmentAmount && !isNaN(investmentAmount) && parseFloat(investmentAmount) > 0) {
+            if (window.confirm(`Are you sure you want to invest ${investmentAmount} in ${etfName}?`)) {
+                try {
+                    const axiosInstance = useAxios();
+                    const response = await axiosInstance.post(`/etfs/${etfId}/join/`, { investment_amount: investmentAmount });
+                    if (response.status === 200) {
+                        fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
+                        alert("Joined ETF!");
+                    } else {
+                        console.error("Failed to join ETF:", response.data);
+                    }
+                } catch (error) {
+                    console.error("Error joining ETF:", error);
                 }
-            } catch (error) {
-                console.error("Error joining ETF:", error);
             }
         }
     };
@@ -188,16 +191,16 @@ const UserETFs = () => {
                     {transactions.results.map(transaction => (
                         <tr key={transaction.id}>
                             <td>
-                                <button onClick={() => leaveETF(transaction.etf_id, transaction.etf_name)}>✖</button>
+                                <button onClick={() => leaveETF(transaction.etf, transaction.etf_name)}>✖</button>
                             </td>
                             <td><Link to={`/etfs/${transaction.etf}`}>{transaction.etf_name}</Link></td>
                             <td>{transaction.transaction_number}</td>
                             <td>{transaction.category_name}</td>
                             <td>{formatDate(transaction.joined_date)}</td>
                             <td>{formatDate(transaction.leave_date)}</td>
-                            <td>{transaction.ETF_duration} months</td>
+                            <td>{transaction.duration} months</td>
                             <td>{transaction.is_fundraising ? "Yes" : "No"}</td>
-                            <td>{transaction.invested_amount}</td>
+                            <td>{transaction.investment_amount}</td>
                         </tr>
                     ))}
                 </tbody>
