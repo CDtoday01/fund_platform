@@ -251,25 +251,25 @@ const CreateETF = () => {
                     <label>總金額（萬）：</label>
                     <input
                         type="number"
-                        value={total_amount}
-                        onChange={(e) => setTotalAmount(e.target.value)}
+                        value={total_amount / 10000}  // Display the value in 10k units
+                        onChange={(e) => setTotalAmount(e.target.value * 10000)}  // Convert to raw number
                         required
-                        style={{ borderColor: errors.total_amount ? "red": "" }}
+                        style={{ borderColor: errors.total_amount ? "red" : "" }}
                         disabled={loading}
                     />
-                    {errors.total_amount && <span style={{ color: "red"}}>{errors.total_amount}</span>}
+                    {errors.total_amount && <span style={{ color: "red" }}>{errors.total_amount}</span>}
                 </div>
                 <div>
                     <label>每單最低金額（萬）：</label>
                     <input
                         type="number"
-                        value={lowest_amount}
-                        onChange={(e) => setLowestAmount(e.target.value)}
+                        value={lowest_amount / 10000}  // Display the value in 10k units
+                        onChange={(e) => setLowestAmount(e.target.value * 10000)}  // Convert to raw number
                         required
-                        style={{ borderColor: errors.lowest_amount ? "red": "" }}
+                        style={{ borderColor: errors.lowest_amount ? "red" : "" }}
                         disabled={loading}
                     />
-                    {errors.lowest_amount && <span style={{ color: "red"}}>{errors.lowest_amount}</span>}
+                    {errors.lowest_amount && <span style={{ color: "red" }}>{errors.lowest_amount}</span>}
                 </div>
                 <div>
                     <label>公告開始時間：</label>

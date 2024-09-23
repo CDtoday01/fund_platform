@@ -42,9 +42,9 @@ const ETFDetail = () => {
         <div>
             <h1>{etf.name}</h1>
             <p>類別：{etf.etf_type}</p>
-            <p>總金額：{etf.total_amount}萬</p>
-            <p>每單最低金額：{etf.lowest_amount}萬</p>
-            <p>目前投資金額：{etf.current_investment}萬</p>
+            <p>總金額：{etf.total_amount / 10000}萬</p>
+            <p>每單最低金額：{etf.lowest_amount / 10000}萬</p>
+            <p>目前投資金額：{Math.round((etf.current_investment / 10000 + Number.EPSILON) * 100) / 100}萬</p> {/* 取到小數點後兩位*/}
             <p>公告開始時間：{new Date(etf.announcement_start_date).toLocaleString()}</p>
             <p>公告結束時間：{new Date(etf.announcement_end_date).toLocaleString()}</p>
             <p>公告時長：{etf.announcement_duration} 日</p>

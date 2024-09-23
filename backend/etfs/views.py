@@ -296,6 +296,9 @@ class JoinETFView(APIView):
         except ValueError:
             return JsonResponse({"error": "Invalid investment amount"}, status=400)
 
+        if investment_amount > etf.total_amount:
+            return JsonResponse({"error": f"Investment amount exceeds the total amount of {etf.total_amount}"}, status=400)
+        
         # Create a new UserETF instance
         user_etf = UserETF.objects.create(user=user, etf=etf, investment_amount=investment_amount)
 
