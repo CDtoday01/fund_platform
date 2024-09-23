@@ -95,12 +95,21 @@ class UserETF(models.Model):
     
     class Meta:
         unique_together = ("user", "etf", "joined_date")
-    
+        
+    @staticmethod
+    def generate_number():
+        timestamp = int(time.time())  # Get current time in seconds since epoch
+        unique_id = shortuuid.ShortUUID().random(length=4)  # Adjust length for uniqueness
+        return f"{timestamp}{unique_id}"
+
     def save(self, *args, **kwargs):
         if self.joined_date is None:
             raise ValueError("Joined date is not set.")
         
         if self.etf.ETF_duration:
             self.leave_date = self.joined_date + relativedelta(months=self.etf.ETF_duration)
-
+        
+        if not self.transaction_number:
+            self.transaction_number = self.generate_number()
+        
         super().save(*args, **kwargs)

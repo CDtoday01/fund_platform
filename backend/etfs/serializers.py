@@ -111,7 +111,8 @@ class UserETFTransactionSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source="etf.category.subcategory_name", read_only=True)
     duration = serializers.IntegerField(source="etf.ETF_duration", read_only=True)
     is_fundraising = serializers.SerializerMethodField()
-
+    total_amount = serializers.IntegerField(source="etf.total_amount", read_only=True)
+    
     class Meta:
         model = UserETF
         fields = "__all__"

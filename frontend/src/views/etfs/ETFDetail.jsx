@@ -51,12 +51,12 @@ const ETFDetail = () => {
             <p>招募開始時間：{new Date(etf.fundraising_start_date).toLocaleString()}</p>
             <p>招募結束時間：{new Date(etf.fundraising_end_date).toLocaleString()}</p>
             <p>招募時長：{etf.fundraising_duration} 月</p>
-            <p>ETF時長：{etf.ETF_duration} 月</p>
+            <p>E.T.F時長：{etf.ETF_duration} 月</p>
             <p>狀態：{etf.state}</p>
             <p>產品說明：{etf.description}</p>
             {/* debug */}
             <p>========debug欄位========</p>
-            <p>ETF ID：{etf.id}</p>
+            <p>E.T.F ID：{etf.id}</p>
             <p>創建者：{etf.creator}</p>
             <p>用戶：{etf.users && etf.users.join(", ")}</p>
             {etf.can_delete && (

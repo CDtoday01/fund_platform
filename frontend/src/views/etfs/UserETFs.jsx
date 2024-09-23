@@ -160,7 +160,7 @@ const UserETFs = () => {
                                 </>
                             )}
                             <td>{etf.ETF_duration} 月</td>
-                            <td>{etf.total_invested ? etf.total_invested / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
+                            <td>{etf.total_invested ? Math.round((etf.total_invested / 10000 + Number.EPSILON) * 100)/ 100 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                             <td onClick={(e) => { e.stopPropagation(); }}>
                                 {renderButton(etf, activeTab)}
                             </td>
@@ -200,7 +200,11 @@ const UserETFs = () => {
                             <td>{formatDate(transaction.leave_date)}</td>
                             <td>{transaction.duration} 月</td>
                             <td>{transaction.is_fundraising ? "Yes" : "No"}</td>
-                            <td>{transaction.total_invested ? transaction.total_invested / 10000 : 0} 萬 / {transaction.total_amount / 10000} 萬</td>
+                            <td>
+                                {transaction.investment_amount
+                                    ? Math.round((transaction.investment_amount / 10000 + Number.EPSILON) * 100) / 100
+                                    : 0} 萬 / {transaction.total_amount / 10000} 萬
+                            </td>
                         </tr>
                     ))}
                 </tbody>
