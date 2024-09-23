@@ -138,7 +138,7 @@ const UserETFs = () => {
                             </>
                         )}
                         <th>ETF Duration</th>
-                        <th>Investor Count</th>
+                        <th>Invested Amount</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -159,8 +159,8 @@ const UserETFs = () => {
                                     <td>{formatDate(etf.fundraising_end_date)}</td>
                                 </>
                             )}
-                            <td>{etf.ETF_duration} months</td>
-                            <td>{etf.users.length}</td>
+                            <td>{etf.ETF_duration} 月</td>
+                            <td>{etf.total_invested ? etf.total_invested / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                             <td onClick={(e) => { e.stopPropagation(); }}>
                                 {renderButton(etf, activeTab)}
                             </td>
@@ -198,9 +198,9 @@ const UserETFs = () => {
                             <td>{transaction.category_name}</td>
                             <td>{formatDate(transaction.joined_date)}</td>
                             <td>{formatDate(transaction.leave_date)}</td>
-                            <td>{transaction.duration} months</td>
+                            <td>{transaction.duration} 月</td>
                             <td>{transaction.is_fundraising ? "Yes" : "No"}</td>
-                            <td>{transaction.investment_amount}</td>
+                            <td>{transaction.total_invested ? transaction.total_invested / 10000 : 0} 萬 / {transaction.total_amount / 10000} 萬</td>
                         </tr>
                     ))}
                 </tbody>
