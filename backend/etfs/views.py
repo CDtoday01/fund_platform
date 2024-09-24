@@ -257,11 +257,10 @@ class JoinETFView(APIView):
             investment_amount = int(investment_amount)
             if investment_amount < etf.lowest_amount:
                 return JsonResponse({"error": f"Investment amount must be at least {etf.lowest_amount}"}, status=400)
+            if investment_amount > etf.total_amount:
+                return JsonResponse({"error": f"Investment amount exceeds the total amount of {etf.total_amount}"}, status=400)
         except ValueError:
             return JsonResponse({"error": "Invalid investment amount"}, status=400)
-
-        if investment_amount > etf.total_amount:
-            return JsonResponse({"error": f"Investment amount exceeds the total amount of {etf.total_amount}"}, status=400)
         
         # Create a new UserETF instance
         user_etf = UserETF.objects.create(user=user, etf=etf, investment_amount=investment_amount)
@@ -283,11 +282,21 @@ class LeaveETFView(APIView):
         etf = get_object_or_404(ETF, id=etf_id)
         user = request.user
         
-        # Check for the existence of a UserETF instance
+        # Get the UserETF instance associated with this user and ETF
         user_etf_instance = UserETF.objects.filter(user=user, etf=etf).first()
 
         if not user_etf_instance:
             return Response({"error": "Not a member"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Retrieve the investment amount directly from the UserETF instance
+        investment_amount = user_etf_instance.investment_amount
+        
+        if investment_amount is None:
+            return Response({"error": "Investment amount not found"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Update the ETF's total investment
+        etf.current_investment -= investment_amount
+        etf.save()
 
         # Remove the UserETF instance
         user_etf_instance.delete()

@@ -1,9 +1,6 @@
 from rest_framework import serializers
 from .models import ETFCategoryType, ETF, UserETF
-from django.contrib.auth.models import User
 from django.utils import timezone
-from django.urls import reverse
-from typing import Optional
 
 class ETFCategoryTypeSerializer(serializers.ModelSerializer):
     class Meta:
@@ -15,7 +12,8 @@ class ETFSerializer(serializers.ModelSerializer):
     can_delete = serializers.SerializerMethodField()
     creator = serializers.PrimaryKeyRelatedField(read_only=True)
     subcategory_name = serializers.CharField(source="category.subcategory_name", read_only=True)
-
+    is_fundraising = serializers.SerializerMethodField()
+    is_progressing = serializers.SerializerMethodField()
     class Meta:
         model = ETF
         fields = "__all__"
@@ -27,7 +25,7 @@ class ETFSerializer(serializers.ModelSerializer):
         self.fields['joined_date'] = serializers.SerializerMethodField()
         self.fields['leave_date'] = serializers.SerializerMethodField()
 
-    def get_state(self, obj) -> Optional[str]:
+    def get_state(self, obj):
         current_time = timezone.now()
         if current_time < obj.announcement_start_date:
             return "future"
@@ -60,6 +58,15 @@ class ETFSerializer(serializers.ModelSerializer):
             if user_etf:
                 return user_etf.leave_date
         return None
+    
+    def get_is_fundraising(self, obj):
+        current_time = timezone.now()
+        return obj.fundraising_start_date <= current_time <= obj.fundraising_end_date
+    
+    def get_is_progressing(self, obj):
+        # Check if there are any users currently in the ETF
+        active_useretfs = obj.useretf_set.filter(leave_date__isnull=True).exists()
+        return active_useretfs
     
     def validate(self, data):
         current_time = timezone.now()

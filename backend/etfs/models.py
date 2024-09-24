@@ -68,6 +68,7 @@ class ETF(models.Model):
 class UserETF(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     etf = models.ForeignKey(ETF, on_delete=models.CASCADE)
+    transaction_number = models.CharField(max_length=15, unique=True)
     joined_date = models.DateTimeField(default=timezone.now)
     leave_date = models.DateTimeField(null=True, blank=True)
     investment_amount = models.IntegerField(default=0)

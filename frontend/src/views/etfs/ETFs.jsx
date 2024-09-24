@@ -90,7 +90,7 @@ const ETFs = () => {
                                     <td>{formatDate(etf.fundraising_end_date)}</td>
                                     <td>{etf.subcategory_name}</td>
                                     <td>{etf.ETF_duration} 月</td>
-                                    <td>{etf.total_invested ? etf.total_invested / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
+                                    <td>{etf.current_investment ? etf.current_investment / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                                 </tr>
                             ))
                         ) : (
@@ -139,7 +139,7 @@ const ETFs = () => {
                                     <td>{formatDate(etf.fundraising_start_date)}</td>
                                     <td>{formatDate(etf.fundraising_end_date)}</td>
                                     <td>{etf.ETF_duration} 月</td>
-                                    <td>{etf.total_invested ? etf.total_invested / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
+                                    <td>{etf.current_investment ? etf.current_investment / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                                 </tr>
                             ))
                         ) : (

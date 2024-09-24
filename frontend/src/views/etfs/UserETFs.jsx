@@ -12,7 +12,7 @@ const UserETFs = () => {
     const [transactions, setTransactions] = useState({ results: [], count: 0 });
     const [pagination, setPagination] = useState({ next: null, previous: null, count: 0 });
     const [activeTab, setActiveTab] = useState("created");
-    const [activeState, setActiveState] = useState("future");
+    const [activeState, setActiveState] = useState("fundraising");
     const [currentPage, setCurrentPage] = useState(1);
     const { user } = useAuthStore();
     const currentUserId = user ? user.user_id : null;
@@ -34,35 +34,16 @@ const UserETFs = () => {
             
         }
     }, [user, activeTab, activeState, currentPage]);
-    
-    const joinETF = async (etfId, etfName) => {
-        const investmentAmount = window.prompt(`Enter your investment amount for ${etfName}:`);
-        if (investmentAmount && !isNaN(investmentAmount) && parseFloat(investmentAmount) > 0) {
-            if (window.confirm(`Are you sure you want to invest ${investmentAmount} in ${etfName}?`)) {
-                try {
-                    const axiosInstance = useAxios();
-                    const response = await axiosInstance.post(`/etfs/${etfId}/join/`, { investment_amount: investmentAmount });
-                    if (response.status === 200) {
-                        fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
-                        alert("Joined ETF!");
-                    } else {
-                        console.error("Failed to join ETF:", response.data);
-                    }
-                } catch (error) {
-                    console.error("Error joining ETF:", error);
-                }
-            }
-        }
-    };
 
     const leaveETF = async (etfId, etfName) => {
         if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
             try {
                 const axiosInstance = useAxios();
-                const response = await axiosInstance.post(`/etfs/${etfId}/leave/`, {});
+                const response = await axiosInstance.post(`/etfs/${etfId}/leave/`);
                 if (response.status === 200) {
                     fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
                     alert("Left ETF!");
+                    navigate(0);
                 } else {
                     console.error("Failed to leave ETF");
                 }
@@ -88,36 +69,6 @@ const UserETFs = () => {
         }
     };
 
-    const renderButton = (etf, tab) => {
-        const isUserJoined = etf.users.includes(currentUserId);
-        const isUserCreator = etf.creator === currentUserId;
-        const isAnnouncing = etf.state === "announcing";
-        const isDisabled = isUserCreator || isAnnouncing;
-
-        if (tab === "other") {
-            return (
-                <button
-                    className="join-button"
-                    onClick={() => joinETF(etf.id, etf.name)}
-                    disabled={isUserCreator || isAnnouncing}
-                    title={isUserCreator ? "You can't join your own ETF" : isAnnouncing ? "Announcing ETFs can't be joined" : ""}
-                >
-                    Join
-                </button>
-            );
-        } else if (tab === "joined") {
-            if (isUserJoined) {
-                return (
-                    <button className="leave-button" onClick={() => leaveETF(etf.id, etf.name)}>Leave</button>
-                );
-            } else {
-                return null;
-            }
-        } else {
-            return <button className="join-button" disabled={isDisabled}>{isDisabled ? "Disabled" : "Join"}</button>;
-        }
-    };
-
     const renderETFsTable = () => {
         return (
             <table className="table-box">
@@ -139,33 +90,35 @@ const UserETFs = () => {
                         )}
                         <th>ETF Duration</th>
                         <th>Invested Amount</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {etfs.results.map(etf => (
-                        <tr key={etf.id}>
-                            <td><Link to={`/etfs/${etf.id}`}>{etf.name}</Link></td>
-                            <td>{etf.code}</td>
-                            <td>{etf.subcategory_name}</td>
-                            {activeState === "progressing" ? (
-                                <>
-                                    <td>{formatDate(etf.joined_date)}</td>
-                                    <td>{formatDate(etf.leave_date)}</td>
-                                </>
-                            ) : (
-                                <>
-                                    <td>{formatDate(etf.fundraising_start_date)}</td>
-                                    <td>{formatDate(etf.fundraising_end_date)}</td>
-                                </>
-                            )}
-                            <td>{etf.ETF_duration} 月</td>
-                            <td>{etf.total_invested ? Math.round((etf.total_invested / 10000 + Number.EPSILON) * 100)/ 100 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
-                            <td onClick={(e) => { e.stopPropagation(); }}>
-                                {renderButton(etf, activeTab)}
-                            </td>
-                        </tr>
-                    ))}
+                    {etfs.results && etfs.results.length > 0 ? (
+                        etfs.results.map(etf => (
+                            <tr key={etf.id}>
+                                <td><Link to={`/etfs/${etf.id}`}>{etf.name}</Link></td>
+                                <td>{etf.code}</td>
+                                <td>{etf.subcategory_name}</td>
+                                {activeState === "progressing" ? (
+                                    <>
+                                        <td>{formatDate(etf.joined_date)}</td>
+                                        <td>{formatDate(etf.leave_date)}</td>
+                                    </>
+                                ) : (
+                                    <>
+                                        <td>{formatDate(etf.fundraising_start_date)}</td>
+                                        <td>{formatDate(etf.fundraising_end_date)}</td>
+                                    </>
+                                )}
+                                <td>{etf.ETF_duration} 月</td>
+                                <td>{etf.current_investment ? Math.round((etf.current_investment / 10000 + Number.EPSILON) * 100)/ 100 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
+                            </tr>
+                            ))
+                        ): (
+                            <tr>
+                                <td colSpan="7">No ETFs found.</td>
+                            </tr>
+                        )}
                 </tbody>
             </table>
         );
