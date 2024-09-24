@@ -152,84 +152,66 @@ class UserETFsView(generics.ListAPIView):
         filter_state = self.request.query_params.get("filter_state")
         current_time = timezone.now()
 
-        if filter_tab == "joined":
-            # Query for progressing ETFs where leave_date is in the future
-            progressing_etfs = ETF.objects.filter(
+        if filter_state == "progressing":
+            return self.apply_progressing_state(user, filter_tab, current_time)
+        else:
+            return self.apply_tab_filters(user, filter_tab, filter_state, current_time)
+
+    def apply_tab_filters(self, user, filter_tab, filter_state, current_time):
+        if filter_tab == "created":
+            etfs = ETF.objects.filter(creator=user)
+        elif filter_tab == "joined":
+            etfs = ETF.objects.filter(useretf__user=user)
+        else:  # for any other tab, including "other"
+            etfs = ETF.objects.exclude(creator=user).exclude(useretf__user=user)
+
+        return self.apply_state_filters(etfs, filter_state, current_time)
+    
+    def apply_state_filters(self, etfs, filter_state, current_time):
+        if filter_state == "future":
+            etfs = etfs.filter(announcement_start_date__gt=current_time)
+        elif filter_state == "announcing":
+            etfs = etfs.filter(
+                announcement_start_date__lte=current_time,
+                announcement_end_date__gte=current_time
+            )
+        elif filter_state == "fundraising":
+            etfs = etfs.filter(
+                fundraising_start_date__lte=current_time,
+                fundraising_end_date__gte=current_time
+            )
+        elif filter_state == "closed":
+            etfs = etfs.filter(fundraising_end_date__lt=current_time)
+        # return empty queryset for an invalid state
+        else:
+            etfs = ETF.objects.none()
+    
+        return etfs.order_by("id")
+    
+    def apply_progressing_state(self, user, filter_tab, current_time):
+        if filter_tab == "created" or filter_tab == "other":
+            etfs = ETF.objects.annotate(
+                latest_leave_date=Max("useretf__leave_date")
+            ).filter(
+                latest_leave_date__gt=current_time
+            )
+        elif filter_tab == "joined":
+            etfs = ETF.objects.filter(
                 useretf__user=user,
                 useretf__joined_date__lte=current_time,
                 useretf__leave_date__gte=current_time
-            ).annotate(
-                joined_date=F("useretf__joined_date"),
-                duration=F("ETF_duration")
-            )
-
-            # Query for past ETFs where leave_date is in the past
-            past_etfs = ETF.objects.filter(
-                useretf__user=user,
-                useretf__leave_date__lt=current_time
-            ).annotate(
-                joined_date=F("useretf__joined_date"),
-                duration=F("ETF_duration")
-            )
-
-            # Return progressing or past ETFs based on the filter_state
-            if filter_state == "progressing":
-                etfs = progressing_etfs
-            elif filter_state == "past":
-                etfs = past_etfs
-            else:
-                # Return both if no specific filter_state is provided
-                etfs = progressing_etfs | past_etfs
-
-        elif filter_tab == "created":
-            etfs = ETF.objects.filter(creator=user)
-
-            if filter_state == "progressing":
-                # Fetch ETFs created by the user that are still progressing
-                etfs = etfs.annotate(
-                    latest_leave_date=Max("useretf__leave_date")  # Get the latest leave date for each ETF
-                ).filter(
-                    fundraising_end_date__lt=current_time,  # current time > fundraising end date
-                    latest_leave_date__gt=current_time  # latest leave date > current time
-                )
-
+            ).order_by("id")
+        # returning empty queryset for an invalid state
         else:
-            etfs = ETF.objects.exclude(useretf__user=user).exclude(creator=user)
-
-            if filter_state == "progressing":
-                # Fetch ETFs not created by the user and that the user hasn't joined
-                etfs = etfs.annotate(
-                    latest_leave_date=Max("useretf__leave_date")  # Get the latest leave date for each ETF
-                ).filter(
-                    fundraising_end_date__lt=current_time,  # current time > fundraising end date
-                    latest_leave_date__gt=current_time  # latest leave date > current time
-                )
-
-        # Further filtering based on state if filter_tab is not 'joined'
-        if filter_tab != "joined":
-            if filter_state == "future":
-                etfs = etfs.filter(announcement_start_date__gt=current_time)
-            elif filter_state == "announcing":
-                etfs = etfs.filter(
-                    announcement_start_date__lte=current_time,
-                    announcement_end_date__gte=current_time
-                )
-            elif filter_state == "fundraising":
-                etfs = etfs.filter(
-                    fundraising_start_date__lte=current_time,
-                    fundraising_end_date__gte=current_time
-                )
-            elif filter_state == "past":
-                etfs = etfs.filter(fundraising_end_date__lt=current_time)
-
+            etfs = ETF.objects.none()
+    
         return etfs.order_by("id")
-
+    
     def get_serializer_context(self):
         # Pass the request object to the serializer to access the user
         context = super().get_serializer_context()
         context['request'] = self.request
         return context
-
 
 class UserETFTransactionListView(generics.ListAPIView):
     serializer_class = UserETFTransactionSerializer
