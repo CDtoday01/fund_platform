@@ -222,10 +222,10 @@ const UserETFs = () => {
                         Progressing ETFs
                     </button>
                     <button
-                        className={activeState === "past" ? "active" : ""}
-                        onClick={() => handleStateChange("past")}
+                        className={activeState === "closed" ? "active" : ""}
+                        onClick={() => handleStateChange("closed")}
                     >
-                        Past ETFs
+                        Closed ETFs
                     </button>
                 </div>
                 <div className="etf-list">

@@ -29,13 +29,9 @@ class ETFListView(generics.ListAPIView):
     def get_queryset(self):
         etfs = super().get_queryset()
         filter_state = self.request.query_params.get("filter_state", None)
-        filter_tab = self.request.query_params.get("filter_tab", None)
         current_time = timezone.now()
-        user = self.request.user
 
-        if filter_state == "future":
-            etfs = etfs.filter(announcement_start_date__gt=current_time)
-        elif filter_state == "announcing":
+        if filter_state == "announcing":
             etfs = etfs.filter(
                 announcement_start_date__lte=current_time,
                 announcement_end_date__gte=current_time
@@ -45,29 +41,7 @@ class ETFListView(generics.ListAPIView):
                 fundraising_start_date__lte=current_time,
                 fundraising_end_date__gte=current_time
             )
-        elif filter_state == "progressing":
-            if filter_tab == "created":
-                # Progressing if any user is in the ETF (for created ETFs)
-                etfs = etfs.filter(
-                    useretf__joined_date__lte=current_time,
-                    useretf__leave_date__gte=current_time
-                ).distinct()
-            elif filter_tab == "joined":
-                # Progressing if the current user is in the ETF (for joined ETFs)
-                etfs = etfs.filter(
-                    useretf__user=user,
-                    useretf__joined_date__lte=current_time,
-                    useretf__leave_date__gte=current_time
-                ).distinct()
-            else:
-                # Progressing if any user is in the ETF (for other ETFs)
-                etfs = etfs.filter(
-                    useretf__joined_date__lte=current_time,
-                    useretf__leave_date__gte=current_time
-                ).distinct()
-        elif filter_state == "past":
-            etfs = etfs.filter(fundraising_end_date__lt=current_time)
-
+        
         return etfs
 
 class ETFDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -184,6 +158,7 @@ class UserETFsView(generics.ListAPIView):
             etfs = etfs.filter(fundraising_end_date__lt=current_time)
         # return empty queryset for an invalid state
         else:
+            print("invalid state!")
             etfs = ETF.objects.none()
     
         return etfs.order_by("id")
@@ -203,6 +178,7 @@ class UserETFsView(generics.ListAPIView):
             ).order_by("id")
         # returning empty queryset for an invalid state
         else:
+            print("invalid state!")
             etfs = ETF.objects.none()
     
         return etfs.order_by("id")
@@ -219,9 +195,18 @@ class UserETFTransactionListView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        queryset = UserETF.objects.filter(user=user).select_related('etf').order_by('-joined_date') # Sort by most recent first
-        print(queryset)
-        return queryset
+        filter_state = self.request.query_params.get("filter_state")
+        
+        if filter_state == "progressing":
+            useretf = UserETF.objects.filter(user=user)
+        elif filter_state == "closed":
+            useretf = UserETF.objects.filter(user=user, leave_date__lt=timezone.now())
+        # return empty queryset for an invalid state
+        else:
+            return Response({"error": "Invalid filter state"}, status=status.HTTP_400_BAD_REQUEST)
+
+        print(useretf)
+        return useretf.select_related('etf').order_by('-joined_date') # Sort by most recent first
     
 class JoinETFView(APIView):
     permission_classes = [IsAuthenticated]
