@@ -1,11 +1,10 @@
 from django.urls import path
-from .views import SwitchRoleView, ETFDefaultsView, ETFListView, ETFTypeListAPIView, CreateETFView, CheckNameExistsView, DeleteETFView, \
+from .views import ETFDefaultsView, ETFListView, ETFTypeListAPIView, CreateETFView, CheckNameExistsView, DeleteETFView, \
                    ETFDetailView, UserETFsView, UserETFTransactionListView, JoinETFView, LeaveETFView
 
 
 urlpatterns = [
     path("", ETFListView.as_view(), name="etf-list"),                                           # List all ETFs
-    path("switch-role/", SwitchRoleView.as_view(), name="etf-role"),                            # Switch roles between individual and corporate views
     path("etf-types/", ETFTypeListAPIView.as_view(), name="get_etf_types"),                     # Get the available ETF (sub)category types
     path("defaults/", ETFDefaultsView.as_view(), name="etf-defaults"),                          # Get the default settings and values for creating an ETF
     path("create/", CreateETFView.as_view(), name="create-etf"),                                # Create a new ETF with settings provided by the user

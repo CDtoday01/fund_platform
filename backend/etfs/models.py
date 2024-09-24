@@ -1,21 +1,9 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
-from django.core.validators import MinValueValidator
-from django.core.exceptions import ValidationError
 from dateutil.relativedelta import relativedelta
-from datetime import datetime
-from corps.models import Corp
 import shortuuid
 import time
-
-def validate_min_value(min_value):
-    def validator(value):
-        if value < min_value:
-            raise ValidationError(
-                f"Ensure this value is greater than or equal to {min_value // 10000}(萬). You entered {value // 10000}."
-            )
-    return validator
 
 class ETFCategoryType(models.Model):
     category_code = models.CharField(max_length=10)  # Store "種類代碼"
@@ -32,10 +20,9 @@ class ETF(models.Model):
     etf_type = models.CharField(max_length=50, default="全球共享經濟ETF")
     creator = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="created_etfs")
     code = models.CharField(max_length=50, blank=True, null=True, unique=True)
-    corp = models.ForeignKey(Corp, null=True, blank=True, on_delete=models.CASCADE, related_name="etfs")
     
-    total_amount = models.IntegerField(validators=[validate_min_value(1000000)])  # Total investment cap
-    lowest_amount = models.IntegerField(validators=[validate_min_value(20000)])  # Minimum investment amount
+    total_amount = models.IntegerField()  # Total investment cap
+    lowest_amount = models.IntegerField()  # Minimum investment amount
     announcement_start_date = models.DateTimeField(default=timezone.now)
     announcement_end_date = models.DateTimeField(blank=True, null=True)
     announcement_duration = models.IntegerField()  # Duration in days
@@ -44,21 +31,13 @@ class ETF(models.Model):
     fundraising_duration = models.IntegerField()  # Duration in months
     ETF_duration = models.IntegerField()  # Duration in months
     description = models.TextField(max_length=500, blank=True, null=True)  # Description of the ETF
-    total_invested = models.IntegerField(blank=True, null=True)
     # Other fields retained
     current_investment = models.IntegerField(default=0)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UserETF", related_name="etfs")
     created_at = models.DateTimeField(auto_now_add=True)
     
-    def is_corp_etf(self):
-        return self.corp is not None
-    
     def can_be_deleted(self):
         return self.users.count() == 0
-
-    def update_investment(self, amount):
-        self.total_invested += amount
-        self.save()
 
     @staticmethod
     def generate_code(subcategory_code):

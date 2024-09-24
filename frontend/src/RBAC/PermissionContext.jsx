@@ -33,5 +33,5 @@ export const PermissProvider = ({ children}) => {
     )
 }
 
-// 自訂義hook用於方便訪問權限上下文
+// 自定義hook用於方便訪問權限上下文
 export const usePermissions = () => useContext(PermissionContext)

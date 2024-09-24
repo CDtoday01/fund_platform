@@ -48,7 +48,6 @@ INSTALLED_APPS = [
      # custom app
     "userauths",
     "etfs",
-    "corps",
     
     # third party app
     "corsheaders",

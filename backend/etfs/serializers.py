@@ -79,6 +79,14 @@ class ETFSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "amount": "Total amount must be greater than or equal to the lowest amount."
             })
+        if total_amount < 1000000:
+            raise serializers.ValidationError({
+                "total_amount": "Total amount must be greater than or equal to 100 (萬)."
+            })
+        if lowest_amount < 20000:
+            raise serializers.ValidationError({
+                "lowest_amount": "Lowest amount must be greater than or equal to 2 (萬)."
+            })
         if announcement_duration < 7 or announcement_duration > 30:
             raise serializers.ValidationError({
                 "announcement_duration": "Announcement duration must be between 7 to 30 days."

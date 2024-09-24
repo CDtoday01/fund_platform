@@ -21,21 +21,6 @@ from .permission import IsCreatorOrStaff, IsAdminOrReadOnly
 
 User = get_user_model()
 
-class SwitchRoleView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        user = request.user
-        role = request.data.get("role")
-        
-        if role not in ["individual", "corp"]:
-            return Response({"error": "Invalid role"}, status=400)
-        
-        user.current_role = role
-        user.save()
-        
-        return Response({"success": "Role switched successfully"}, status=200)
-
 class ETFListView(generics.ListAPIView):
     queryset = ETF.objects.all()
     serializer_class = ETFSerializer
@@ -111,23 +96,20 @@ class ETFTypeListAPIView(APIView):
         etf_types = ETFCategoryType.objects.values("category_code", "category", "subcategory_code", "subcategory_name")
         return Response(etf_types)
 
-class CreateETFView(APIView):
+class CreateETFView(generics.CreateAPIView):
+    queryset = ETF.objects.all()
+    serializer_class = ETFSerializer
     permission_classes = [IsAuthenticated, IsAdminOrReadOnly]
 
-    def post(self, request):
-        user = request.user
-        data = request.data.copy()
-        
-        if user.current_role == "corp":
-            data["corp"] = user.corp_set.first().id
-        else:
-            data["creator"] = user.id
+    def perform_create(self, serializer):
+        user = self.request.user
 
-        serializer = ETFSerializer(data=data, context={"request": request})
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # Save the ETF with the creator as the current user
+        serializer.save(creator=user)
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        return response
     
 class CheckNameExistsView(APIView):
     def get(self, request, *args, **kwargs):
@@ -266,9 +248,6 @@ class JoinETFView(APIView):
         user = request.user
         etf = get_object_or_404(ETF, id=etf_id)
 
-        if user.current_role == "corp":
-            return JsonResponse({"error": "Corporations cannot join ETFs"}, status=400)
-
         investment_amount = request.data.get("investment_amount")
         if not investment_amount:
             return JsonResponse({"error": "Investment amount is required"}, status=400)
@@ -313,7 +292,6 @@ class LeaveETFView(APIView):
         # Remove the UserETF instance
         user_etf_instance.delete()
 
-        # Optionally: Check if this is the last instance for the user
         if UserETF.objects.filter(user=user, etf=etf).count() == 0:
             etf.users.remove(user)  # Remove the user from ETF's users only if they have no instances left
 
