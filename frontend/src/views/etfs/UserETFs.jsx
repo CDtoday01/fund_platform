@@ -17,7 +17,7 @@ const UserETFs = () => {
     const { user } = useAuthStore();
 
     useEffect(() => {
-        // Auto-switch to "progressing" when the tab is "joined", and its state is in forbidden categories.
+        // Auto-switch to "fundraising" when the tab is "joined", and its state is in forbidden categories.
         if (activeTab === "joined" && ["future", "announcing"].includes(activeState)) {
             setActiveState("fundraising");
         }

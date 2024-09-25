@@ -125,7 +125,8 @@ class UserETFsView(generics.ListAPIView):
         filter_tab = self.request.query_params.get("filter_tab")
         filter_state = self.request.query_params.get("filter_state")
         current_time = timezone.now()
-
+        
+        # progressing is currently hidden. could be used in later version.
         if filter_state == "progressing":
             return self.apply_progressing(user, filter_tab, current_time)
         else:
