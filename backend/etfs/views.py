@@ -203,10 +203,20 @@ class UserETFTransactionListView(generics.ListAPIView):
             useretf = UserETF.objects.filter(user=user, leave_date__lt=timezone.now())
         # return empty queryset for an invalid state
         else:
-            return Response({"error": "Invalid filter state"}, status=status.HTTP_400_BAD_REQUEST)
+            useretf = UserETF.objects.none()
 
         print(useretf)
         return useretf.select_related('etf').order_by('-joined_date') # Sort by most recent first
+    
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+
+        # If the queryset is empty, handle it gracefully
+        if not queryset.exists():
+            return Response({"error": "No transactions found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Call the superclass to handle pagination and response
+        return super().get(request, *args, **kwargs)
     
 class JoinETFView(APIView):
     permission_classes = [IsAuthenticated]
