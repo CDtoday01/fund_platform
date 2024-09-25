@@ -18,8 +18,8 @@ const UserETFs = () => {
 
     useEffect(() => {
         // Auto-switch to "progressing" when the tab is "joined", and its state is in forbidden categories.
-        if (activeTab === "joined" && ["created", "announcing", "fundraising"].includes(activeState)) {
-            setActiveState("progressing");
+        if (activeTab === "joined" && ["future", "announcing"].includes(activeState)) {
+            setActiveState("fundraising");
         }
     }, [activeTab]);
 
@@ -208,17 +208,10 @@ const UserETFs = () => {
                         Announcing ETFs
                     </button>
                     <button
-                        className={activeState === "fundraising" && activeTab !== "joined" ? "active" : ""}
+                        className={activeState === "fundraising" ? "active" : ""}
                         onClick={() => handleStateChange("fundraising")}
-                        disabled={activeTab === "joined"}
                     >
                         Fundraising ETFs
-                    </button>
-                    <button
-                        className={activeState === "progressing" ? "active" : ""}
-                        onClick={() => handleStateChange("progressing")}
-                    >
-                        Progressing ETFs
                     </button>
                     <button
                         className={activeState === "closed" ? "active" : ""}
@@ -228,7 +221,6 @@ const UserETFs = () => {
                     </button>
                 </div>
                 <div className="etf-list">
-                    
                     <div className="pagination">
                         <button
                             onClick={() => handlePageChange('previous')}
@@ -248,8 +240,7 @@ const UserETFs = () => {
             {activeTab !== "joined" && renderETFsTable()}
             {activeTab === "joined" && renderTransactionsTable()}
         </>
-    );
-    
+    );   
 };
 
 export default UserETFs;

@@ -34,7 +34,7 @@ class ETFSerializer(serializers.ModelSerializer):
         elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
             return "fundraising"
         elif obj.fundraising_end_date < current_time:
-            return "past"
+            return "closed"
         return None
     
     def get_can_delete(self, obj):

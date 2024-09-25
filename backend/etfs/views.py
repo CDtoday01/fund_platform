@@ -127,7 +127,7 @@ class UserETFsView(generics.ListAPIView):
         current_time = timezone.now()
 
         if filter_state == "progressing":
-            return self.apply_progressing_state(user, filter_tab, current_time)
+            return self.apply_progressing(user, filter_tab, current_time)
         else:
             return self.apply_tab_filters(user, filter_tab, filter_state, current_time)
 
@@ -163,7 +163,7 @@ class UserETFsView(generics.ListAPIView):
     
         return etfs.order_by("id")
     
-    def apply_progressing_state(self, user, filter_tab, current_time):
+    def apply_progressing(self, user, filter_tab, current_time):
         if filter_tab == "created" or filter_tab == "other":
             etfs = ETF.objects.annotate(
                 latest_leave_date=Max("useretf__leave_date")
@@ -196,27 +196,19 @@ class UserETFTransactionListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         filter_state = self.request.query_params.get("filter_state")
+        useretf = UserETF.objects.filter(user=user)
         
-        if filter_state == "progressing":
-            useretf = UserETF.objects.filter(user=user)
+        if filter_state == "fundraising":
+            useretf = useretf.filter(leave_date__gte=timezone.now())
         elif filter_state == "closed":
-            useretf = UserETF.objects.filter(user=user, leave_date__lt=timezone.now())
+            useretf = useretf.filter(leave_date__lt=timezone.now())
         # return empty queryset for an invalid state
         else:
+            print("invalid state!")
             useretf = UserETF.objects.none()
 
         print(useretf)
         return useretf.select_related('etf').order_by('-joined_date') # Sort by most recent first
-    
-    def get(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-
-        # If the queryset is empty, handle it gracefully
-        if not queryset.exists():
-            return Response({"error": "No transactions found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Call the superclass to handle pagination and response
-        return super().get(request, *args, **kwargs)
     
 class JoinETFView(APIView):
     permission_classes = [IsAuthenticated]
