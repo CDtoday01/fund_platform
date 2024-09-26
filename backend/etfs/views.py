@@ -137,27 +137,28 @@ class UserETFsView(generics.ListAPIView):
             etfs = ETF.objects.filter(creator=user)
         elif filter_tab == "joined":
             etfs = ETF.objects.filter(useretf__user=user)
-        else:  # for any other tab, including "other"
+        else:
             etfs = ETF.objects.exclude(creator=user).exclude(useretf__user=user)
-
+        
         return self.apply_state_filters(etfs, filter_state, current_time)
-    
+
     def apply_state_filters(self, etfs, filter_state, current_time):
         if filter_state == "future":
-            etfs = etfs.filter(announcement_start_date__gt=current_time)
+            return etfs.filter(announcement_start_date__gt=current_time)
         elif filter_state == "announcing":
-            etfs = etfs.filter(
+            return etfs.filter(
                 announcement_start_date__lte=current_time,
                 announcement_end_date__gte=current_time
             )
         elif filter_state == "fundraising":
-            etfs = etfs.filter(
+            return etfs.filter(
                 fundraising_start_date__lte=current_time,
                 fundraising_end_date__gte=current_time
             )
         elif filter_state == "closed":
-            etfs = etfs.filter(fundraising_end_date__lt=current_time)
-        # return empty queryset for an invalid state
+            return etfs.filter(fundraising_end_date__lt=current_time)
+        elif filter_state == "progressing":
+            return self.apply_progressing(etfs, current_time)
         else:
             print("invalid state!")
             etfs = ETF.objects.none()
@@ -185,9 +186,8 @@ class UserETFsView(generics.ListAPIView):
         return etfs.order_by("id")
     
     def get_serializer_context(self):
-        # Pass the request object to the serializer to access the user
         context = super().get_serializer_context()
-        context['request'] = self.request
+        context["request"] = self.request  # Pass the request object for additional context
         return context
 
 class UserETFTransactionListView(generics.ListAPIView):

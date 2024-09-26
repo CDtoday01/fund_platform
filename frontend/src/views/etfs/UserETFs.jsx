@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import "../../css/tab.css";
 import { useAuthStore } from "../../store/auth";
 import formatDate from "../../utils/formatDate";
 import fetchUserETFs from "../../utils/fetchUserETFs";
 import useAxios from "../../utils/useAxios";
 import fetchTransactions from "../../utils/fetchTransactions";
+import "../../css/tab.css";
 
 const UserETFs = () => {
     const [etfs, setETFs] = useState({ results: [], count: 0 });
@@ -40,9 +40,14 @@ const UserETFs = () => {
                 const axiosInstance = useAxios();
                 const response = await axiosInstance.post(`/etfs/${etfId}/leave/`);
                 if (response.status === 200) {
-                    fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
                     alert("Left ETF!");
-                    navigate(0);
+                    
+                    // Re-fetch data based on the active tab after successfully leaving
+                    if (activeTab === "joined") {
+                        fetchTransactions(activeState, setTransactions, setPagination, currentPage); // Re-fetch transactions if in the joined tab
+                    } else {
+                        fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage); // Re-fetch ETFs if not in the joined tab
+                    }
                 } else {
                     console.error("Failed to leave ETF");
                 }

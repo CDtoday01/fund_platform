@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import useAxios from "../../utils/useAxios";
 import { deleteETF } from "../../services/etfService";
+import { useAuthStore } from "../../store/auth";
 
 const ETFDetail = () => {
     const { id } = useParams();
@@ -9,18 +10,10 @@ const ETFDetail = () => {
     const [etf, setETF] = useState(null);
     const [investmentAmount, setInvestmentAmount] = useState(0);
     const [errorMessage, setErrorMessage] = useState("");
-    const [currentUser, setCurrentUser] = useState(null);
+    const { user: currentUser } = useAuthStore();
 
     useEffect(() => {
         const axiosInstance = useAxios();
-
-        // Fetch the current user
-        axiosInstance.get("/etfs/user/").then(response => {
-            setCurrentUser(response.data);
-        }).catch(error => {
-            console.error("Error fetching user details:", error);
-        });
-
         // Fetch ETF details
         axiosInstance.get(`/etfs/${id}/`)
             .then(response => {
@@ -38,14 +31,14 @@ const ETFDetail = () => {
             try {
                 await deleteETF(id);
                 alert("ETF deleted successfully");
-                navigate("/etfs");
+                navigate("/etfs"); // Navigate to the ETF list after deletion
             } catch (error) {
                 console.error("Error deleting ETF:", error);
                 alert("Failed to delete ETF");
             }
         }
     };
-
+    
     const handleJoin = async (etfId, etfName) => {
         if (investmentAmount <= 0) {
             setErrorMessage("Please enter a valid investment amount.");
@@ -60,7 +53,15 @@ const ETFDetail = () => {
                     alert("Joined ETF!");
                     setInvestmentAmount(0); // Reset the investment amount after successful join
                     setErrorMessage(""); // Clear any previous error message
-                    navigate(0);
+                    // Re-fetch the ETF details to update the state after joining
+                    axiosInstance.get(`/etfs/${id}/`)
+                        .then(response => {
+                            setETF(response.data); // Update the ETF details in the state
+                            console.log(response.data);
+                        })
+                        .catch(error => {
+                            console.error("Error fetching updated ETF details:", error);
+                        });
                 } else {
                     console.error("Failed to join ETF:", response.data);
                     setErrorMessage("Failed to join ETF. Please try again.");
@@ -71,13 +72,13 @@ const ETFDetail = () => {
             }
         }
     };
-    
+     
     if (!etf || !currentUser) {
         return <div>Loading...</div>;
     }
 
-    const isCreator = etf.creator === currentUser.username;
-
+    const isCreator = etf.creator === currentUser.user_id;
+    
     return (
         <div>
             <h1>{etf.name}</h1>
