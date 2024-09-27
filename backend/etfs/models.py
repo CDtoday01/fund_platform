@@ -31,6 +31,7 @@ class ETF(models.Model):
     fundraising_duration = models.IntegerField()  # Duration in months
     ETF_duration = models.IntegerField()  # Duration in months
     description = models.TextField(max_length=500, blank=True, null=True)  # Description of the ETF
+    
     # Other fields retained
     current_investment = models.IntegerField(default=0)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UserETF", related_name="etfs")

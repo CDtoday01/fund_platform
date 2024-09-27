@@ -9,6 +9,7 @@ urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("api.urls")),
     path("api/v1/etfs/", include("etfs.urls")),
+    path("api/v1/search", include("search.urls")),
     path("form/", include(router.urls)),
     path("schema/", SpectacularAPIView.as_view(), name="api-schema"),
     path("docs/", SpectacularSwaggerView.as_view(url_name="api-schema"), name="api-docs"),

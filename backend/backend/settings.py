@@ -48,12 +48,15 @@ INSTALLED_APPS = [
      # custom app
     "userauths",
     "etfs",
-    
+    "search",
+
     # third party app
     "corsheaders",
     "rest_framework",
     "rest_framework_simplejwt.token_blacklist",
     "drf_spectacular",
+    "django_elasticsearch_dsl",
+    "django_elasticsearch_dsl_drf",
 ]
 
 MIDDLEWARE = [
@@ -170,6 +173,12 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+}
+
+ELASTICSEARCH_DSL={
+    "default": {
+        "hosts": "http://localhost:9200",
+    }
 }
 
 SIMPLE_JWT = {
