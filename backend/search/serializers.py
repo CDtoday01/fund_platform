@@ -7,10 +7,10 @@ class ETFDocumentSerializer(DocumentSerializer):
         fields = [
             "name",
             "code",
-            "creator",
-            "description",
             "category",
-            "current_investment",
+            "announcement_start_date",
+            "announcement_end_date",
             "fundraising_start_date",
             "fundraising_end_date",
+            "month"
         ]

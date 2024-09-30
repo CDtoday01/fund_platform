@@ -30,7 +30,7 @@ class ETFSerializer(serializers.ModelSerializer):
         if current_time < obj.announcement_start_date:
             return "future"
         elif obj.announcement_start_date <= current_time < obj.announcement_end_date:
-            return "announcing"
+            return "announcement"
         elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
             return "fundraising"
         elif obj.fundraising_end_date < current_time:

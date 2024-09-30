@@ -7,12 +7,12 @@ class ETFDocument(Document):
     # Use fields.TextField for creator"s username (or another field you"d like to include)
     name = fields.TextField(attr="name")
     code = fields.TextField(attr="code")
-    creator = fields.TextField(attr="creator.username")
-    description = fields.TextField(attr="description")
     category = fields.TextField(attr="category.subcategory_name")
-    current_investment = fields.DoubleField(attr="current_investment")
+    announcement_start_date = fields.DateField(attr="announcement_start_date")
+    announcement_end_date = fields.DateField(attr="announcement_end_date")
     fundraising_start_date = fields.DateField(attr="fundraising_start_date")
     fundraising_end_date = fields.DateField(attr="fundraising_end_date")
+    month = fields.DoubleField(attr="ETF_duration")
 
     class Index:
         name = "etfs"

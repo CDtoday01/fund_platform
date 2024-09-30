@@ -31,7 +31,7 @@ class ETFListView(generics.ListAPIView):
         filter_state = self.request.query_params.get("filter_state", None)
         current_time = timezone.now()
 
-        if filter_state == "announcing":
+        if filter_state == "announcement":
             etfs = etfs.filter(
                 announcement_start_date__lte=current_time,
                 announcement_end_date__gte=current_time
@@ -145,7 +145,7 @@ class UserETFsView(generics.ListAPIView):
     def apply_state_filters(self, etfs, filter_state, current_time):
         if filter_state == "future":
             return etfs.filter(announcement_start_date__gt=current_time)
-        elif filter_state == "announcing":
+        elif filter_state == "announcement":
             return etfs.filter(
                 announcement_start_date__lte=current_time,
                 announcement_end_date__gte=current_time

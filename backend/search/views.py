@@ -1,3 +1,6 @@
+from datetime import datetime
+from elasticsearch import Elasticsearch
+from elasticsearch_dsl import Search
 from django_elasticsearch_dsl_drf.filter_backends import (
     DefaultOrderingFilterBackend,
     FilteringFilterBackend,
@@ -6,10 +9,13 @@ from django_elasticsearch_dsl_drf.filter_backends import (
     SearchFilterBackend,
 )
 from django_elasticsearch_dsl_drf.viewsets import DocumentViewSet
-from .documents import ETFDocument
-from .serializers import ETFDocumentSerializer
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.exceptions import ValidationError
+
+from .documents import ETFDocument
+from .serializers import ETFDocumentSerializer
 
 class ETFSearchView(DocumentViewSet):
     document = ETFDocument
@@ -24,39 +30,136 @@ class ETFSearchView(DocumentViewSet):
         OrderingFilterBackend,
         SearchFilterBackend,
     ]
-    # Add search fields for querying
-    search_fields = (
-        "name",
-        "description",
-    )
-    filter_fields = {"category": "category", "created_at": "created_at"}
-    ordering_fields = {"created_at": "created_at"}
-    ordering = ("-created_at",)
+    search_fields = ("name", "code")
+    filter_fields = ("category", "created_at", "announcement_start_date", "announcement_end_date", "fundraising_start_date", "fundraising_end_date", "month")
+    ordering_fields = ("announcement_start_date", "fundraising_start_date")
+    ordering = ("-announcement_start_date", "-fundraising_start_date",)
 
-    # Custom method to replicate the current search logic
     def get_queryset(self):
-        search_query = self.document.search()
-
         # Fetch query parameters from the request
-        name = self.request.GET.get("name", None)
-        lowest_investment = self.request.GET.get("lowest_investment", None)
+        q = self.request.GET.get("q", None)
+        category = self.request.GET.get("category", None)
+        start_date = self.request.GET.get("start", None)
+        end_date = self.request.GET.get("end", None)
+        fundraising = self.request.GET.get("fundraising", None)
+        month = self.request.GET.get("month", None)
+        # Validate date format
+        def validate_date(date_str):
+            try:
+                return datetime.strptime(date_str, "%Y-%m-%d").isoformat()
+            except ValueError:
+                raise ValidationError(f"Invalid date format for {date_str}. Use YYYY-MM-DD.")
 
-        # Search by name if provided
-        if name:
-            search_query = search_query.query("match", name=name)
+        # Validate and reformat start_date and end_date
+        if start_date:
+            start_date = validate_date(start_date)
+            
+        if end_date:
+            end_date = validate_date(end_date)
 
-        # Filter by minimum investment amount if provided
-        if lowest_investment:
-            search_query = search_query.filter("range", investment_amount={"gte": lowest_investment})
+        # Initialize the Elasticsearch client
+        client = Elasticsearch()
+        
+        # Initialize the search query
+        s = Search(using=client)
 
-        # Add sorting logic, e.g., by start date
-        search_query = search_query.sort({"fundraising_start_date": {"order": "desc"}})
+        # Add a multi_match query if 'q' is provided
+        if q:
+            s = s.query("multi_match", query=q, fields=["name", "code"], fuzziness="AUTO")
 
-        return search_query
+        # Filter by category if provided
+        if category:
+            s = s.filter("term", category=category)
+
+        # Filter by month if provided
+        if month:
+            s = s.filter("term", month=month)
+
+        # Time range filtering for announcement start and end dates
+        if not fundraising:
+            s = s.query(
+                "bool",
+                should=[
+                    {
+                        "range": {
+                            "announcement_start_date": {
+                                "gte": start_date,
+                                "lte": end_date
+                            }
+                        }
+                    },
+                    {
+                        "range": {
+                            "announcement_end_date": {
+                                "gte": start_date,
+                                "lte": end_date
+                            }
+                        }
+                    }
+                ],
+                minimum_should_match=1
+            )
+            s = s.sort({"announcement_start_date": {"order": "desc"}})
+        # Time range filtering for fundraising start and end dates
+        else:
+            s = s.query(
+                "bool",
+                should=[
+                    {
+                        "range": {
+                            "fundraising_start_date": {
+                                "gte": start_date,
+                                "lte": end_date
+                            }
+                        }
+                    },
+                    {
+                        "range": {
+                            "fundraising_end_date": {
+                                "gte": start_date,
+                                "lte": end_date
+                            }
+                        }
+                    }
+                ],
+                minimum_should_match=1
+            )
+            s = s.sort({"fundraising_start_date": {"order": "desc"}})
+
+        return s
+
+    # Custom pagination logic
+    def paginate_queryset(self, queryset, request):
+        paginator = PageNumberPagination()
+        page_size = int(self.request.GET.get("page_size", 10))  # Default to 10 if not provided
+        page_number = int(self.request.GET.get(paginator.page_query_param, 1))
+
+        # Use Elasticsearch pagination (from and size)
+        queryset = queryset[(page_number - 1) * page_size : page_number * page_size]
+
+        response = queryset.execute()
+        total_results = response.hits.total.value
+
+        return {
+            "results": response.hits,
+            "total": total_results,
+            "has_next": page_number * page_size < total_results,
+            "page": page_number,
+        }
 
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
-        response = queryset.execute()  # Execute the search query
-        serializer = self.get_serializer(response, many=True)
-        return Response(serializer.data)
-    
+
+        # Handle pagination for the search results
+        paginated_data = self.paginate_queryset(queryset, request)
+
+        # Serialize the results
+        serializer = self.get_serializer(queryset, many=True)
+
+        # Return the paginated response
+        return Response({
+            "results": serializer.data,
+            "count": paginated_data["total"],
+            "next": paginated_data["has_next"],
+            "page": paginated_data["page"]
+        })
