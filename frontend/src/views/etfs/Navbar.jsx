@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/auth";
-import useAxios from "../../utils/useAxios";
 import { logout as authLogout } from "../../utils/auth";  // Renaming to avoid conflict with store"s logout
 
 const Navbar = () => {
@@ -11,9 +10,6 @@ const Navbar = () => {
     }));
 
     const navigate = useNavigate();
-    const axiosInstance = useAxios();
-    const [currentRole, setCurrentRole] = useState(user?.current_role || "individual");
-    
     const handleLogout = () => {
         // Call the authLogout to properly clear cookies
         authLogout();  

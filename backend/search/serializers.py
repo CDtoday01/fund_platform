@@ -8,9 +8,10 @@ class ETFDocumentSerializer(DocumentSerializer):
             "name",
             "code",
             "category",
-            "announcement_start_date",
-            "announcement_end_date",
+            "announcing_start_date",
+            "announcing_end_date",
             "fundraising_start_date",
             "fundraising_end_date",
-            "month"
+            "month",
+            "state",
         ]

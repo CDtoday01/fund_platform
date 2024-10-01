@@ -1,6 +1,5 @@
 import React, {createContext, useContext, useState, useEffect} from "react";
 import { getUserPermissions } from "./authService";
-import UserData from "../views/plugin/userData";
 
 // 創建一個Context 用於權限
 const PermissionContext = createContext()

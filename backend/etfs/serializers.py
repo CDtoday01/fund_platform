@@ -27,10 +27,10 @@ class ETFSerializer(serializers.ModelSerializer):
 
     def get_state(self, obj):
         current_time = timezone.now()
-        if current_time < obj.announcement_start_date:
+        if current_time < obj.announcing_start_date:
             return "future"
-        elif obj.announcement_start_date <= current_time < obj.announcement_end_date:
-            return "announcement"
+        elif obj.announcing_start_date <= current_time < obj.announcing_end_date:
+            return "announcing"
         elif obj.fundraising_start_date <= current_time <= obj.fundraising_end_date:
             return "fundraising"
         elif obj.fundraising_end_date < current_time:
@@ -72,15 +72,15 @@ class ETFSerializer(serializers.ModelSerializer):
         current_time = timezone.now()
         total_amount = data.get("total_amount")
         lowest_amount = data.get("lowest_amount")
-        announcement_duration = data.get("announcement_duration")
+        announcing_duration = data.get("announcing_duration")
         fundraising_duration = data.get("fundraising_duration")
-        announcement_start_date = data.get("announcement_start_date")
+        announcing_start_date = data.get("announcing_start_date")
         ETF_duration = data.get("ETF_duration")
 
         # comment out for debug purpose
-        # if announcement_start_date < current_time:
+        # if announcing_start_date < current_time:
         #     raise serializers.ValidationError({
-        #         "date": "Announcement start date must be in the future."
+        #         "date": "announcing start date must be in the future."
         #     })
         if total_amount < lowest_amount:
             raise serializers.ValidationError({
@@ -94,9 +94,9 @@ class ETFSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({
                 "lowest_amount": "Lowest amount must be greater than or equal to 2 (萬)."
             })
-        if announcement_duration < 7 or announcement_duration > 30:
+        if announcing_duration < 7 or announcing_duration > 30:
             raise serializers.ValidationError({
-                "announcement_duration": "Announcement duration must be between 7 to 30 days."
+                "announcing_duration": "announcing duration must be between 7 to 30 days."
             })
         if fundraising_duration < 1 or fundraising_duration > 6:
             raise serializers.ValidationError({

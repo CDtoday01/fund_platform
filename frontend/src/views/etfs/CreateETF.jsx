@@ -15,11 +15,11 @@ const CreateETF = () => {
     const [selectedSubcategoryCode, setSelectedSubcategoryCode] = useState("");
     const [allSubcategories, setAllSubcategories] = useState([]);
     
-    const [utc_announcement_start_date, setUtcAnnouncementStartDate] = useState("");
-    const [local_announcement_start_date, setLocalAnnouncementStartDate] = useState("");
-    const [announcement_duration, setAnnouncementDuration] = useState("");
-    const [utc_announcement_end_date, setUtcAnnouncementEndDate] = useState("");
-    const [local_announcement_end_date, setLocalAnnouncementEndDate] = useState("");
+    const [utc_announcing_start_date, setUtcannouncingStartDate] = useState("");
+    const [local_announcing_start_date, setLocalannouncingStartDate] = useState("");
+    const [announcing_duration, setannouncingDuration] = useState("");
+    const [utc_announcing_end_date, setUtcannouncingEndDate] = useState("");
+    const [local_announcing_end_date, setLocalannouncingEndDate] = useState("");
     
     const [utc_fundraising_start_date, setUtcFundraisingStartDate] = useState("");
     const [local_fundraising_start_date, setLocalFundraisingStartDate] = useState("");
@@ -45,10 +45,10 @@ const CreateETF = () => {
             try {
                 const response = await axiosInstance.get("/etfs/defaults/");
                 const defaults = response.data;
-                const start_date = utcToLocalISO(defaults.announcement_start_date)
+                const start_date = utcToLocalISO(defaults.announcing_start_date)
                 setType(defaults.etf_type || "");
-                setLocalAnnouncementStartDate(start_date); // get time up to minutes
-                setUtcAnnouncementStartDate(defaults.announcement_start_date);
+                setLocalannouncingStartDate(start_date); // get time up to minutes
+                setUtcannouncingStartDate(defaults.announcing_start_date);
             } catch (error) {
                 console.error("Error fetching default values:", error);
             }
@@ -103,10 +103,10 @@ const CreateETF = () => {
         }
     };
     
-    const handleAnnouncementStartDateChange = (localDate) => {
-        setLocalAnnouncementStartDate(localDate);
+    const handleannouncingStartDateChange = (localDate) => {
+        setLocalannouncingStartDate(localDate);
         const utcDate = localToUtcISO(localDate);
-        setUtcAnnouncementStartDate(utcDate);
+        setUtcannouncingStartDate(utcDate);
     };
 
     const utcToLocalISO = (utcDateString) => {
@@ -121,33 +121,33 @@ const CreateETF = () => {
         return new Date(utcTimestamp).toISOString(); // UTC ISO 8601 format
     };
     
-    // Update dates when announcement_start_date or announcement_duration change
+    // Update dates when announcing_start_date or announcing_duration change
     useEffect(() => {
         // This effect updates end dates based on the start date and duration
-        if (local_announcement_start_date && announcement_duration) {
-            // Calculate announcement end date
-            const local_announcementEnd = new Date(local_announcement_start_date);
-            local_announcementEnd.setDate(local_announcementEnd.getDate() + parseInt(announcement_duration));
+        if (local_announcing_start_date && announcing_duration) {
+            // Calculate announcing end date
+            const local_announcingEnd = new Date(local_announcing_start_date);
+            local_announcingEnd.setDate(local_announcingEnd.getDate() + parseInt(announcing_duration));
             
-            const localEndISO = local_announcementEnd.toISOString();
+            const localEndISO = local_announcingEnd.toISOString();
             const utcEndISO = localToUtcISO(localEndISO);
             
             // Set both local and UTC dates
-            setLocalAnnouncementEndDate(localEndISO);
-            setUtcAnnouncementEndDate(utcEndISO);
+            setLocalannouncingEndDate(localEndISO);
+            setUtcannouncingEndDate(utcEndISO);
             setLocalFundraisingStartDate(localEndISO);
             setUtcFundraisingStartDate(utcEndISO);
             
             // Update fundraising end date if duration is present
             if (fundraising_duration) {
-                const local_fundraisingEnd = new Date(local_announcementEnd);
+                const local_fundraisingEnd = new Date(local_announcingEnd);
                 local_fundraisingEnd.setMonth(local_fundraisingEnd.getMonth() + parseInt(fundraising_duration));
                 const localFundEndISO = local_fundraisingEnd.toISOString();
                 setLocalFundraisingEndDate(localFundEndISO);
                 setUtcFundraisingEndDate(localToUtcISO(localFundEndISO));
             }
         }
-    }, [local_announcement_start_date, announcement_duration, fundraising_duration]);
+    }, [local_announcing_start_date, announcing_duration, fundraising_duration]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -183,8 +183,8 @@ const CreateETF = () => {
             category: selectedSubcategoryCode,
             total_amount,
             lowest_amount,
-            announcement_start_date: utc_announcement_start_date,
-            announcement_duration,
+            announcing_start_date: utc_announcing_start_date,
+            announcing_duration,
             fundraising_start_date: utc_fundraising_start_date,
             fundraising_duration,
             ETF_duration,
@@ -275,42 +275,42 @@ const CreateETF = () => {
                     <label>公告開始時間：</label>
                     <input
                         type="datetime-local"
-                        value={local_announcement_start_date.slice(0, 16)}
-                        onChange={(e) => handleAnnouncementStartDateChange(e.target.value + "Z")} // restore ISO 8601 format by adding utc indicator "Z".
+                        value={local_announcing_start_date.slice(0, 16)}
+                        onChange={(e) => handleannouncingStartDateChange(e.target.value + "Z")} // restore ISO 8601 format by adding utc indicator "Z".
                         required
-                        style={{ borderColor: errors.local_announcement_start_date ? "red" : "" }}
+                        style={{ borderColor: errors.local_announcing_start_date ? "red" : "" }}
                         disabled={loading}
                     />
                     <input
                         type="datetime-local"
-                        value={utc_announcement_start_date.slice(0, 16)}
+                        value={utc_announcing_start_date.slice(0, 16)}
                         disabled
                     />
-                    {errors.local_announcement_start_date && <span style={{ color: "red" }}>{errors.local_announcement_start_date}</span>}
+                    {errors.local_announcing_start_date && <span style={{ color: "red" }}>{errors.local_announcing_start_date}</span>}
                 </div>
                 <div>
                     <label>公告時長（天）：</label>
                     <input
                         type="number"
-                        value={announcement_duration}
-                        onChange={(e) => setAnnouncementDuration(e.target.value)}
+                        value={announcing_duration}
+                        onChange={(e) => setannouncingDuration(e.target.value)}
                         required
-                        style={{ borderColor: errors.announcement_duration ? "red" : "" }}
+                        style={{ borderColor: errors.announcing_duration ? "red" : "" }}
                         disabled={loading}
                         placeholder="7~30"
                     />
-                    {errors.announcement_duration && <span style={{ color: "red" }}>{errors.announcement_duration}</span>}
+                    {errors.announcing_duration && <span style={{ color: "red" }}>{errors.announcing_duration}</span>}
                 </div>
                 <div>
                     <label>公告結束時間：</label>
                     <input
                         type="datetime-local"
-                        value={local_announcement_end_date.slice(0, 16)}
+                        value={local_announcing_end_date.slice(0, 16)}
                         disabled
                     />
                     <input
                         type="datetime-local"
-                        value={utc_announcement_end_date.slice(0, 16)}
+                        value={utc_announcing_end_date.slice(0, 16)}
                         disabled
                     />
                 </div>

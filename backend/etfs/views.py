@@ -31,10 +31,10 @@ class ETFListView(generics.ListAPIView):
         filter_state = self.request.query_params.get("filter_state", None)
         current_time = timezone.now()
 
-        if filter_state == "announcement":
+        if filter_state == "announcing":
             etfs = etfs.filter(
-                announcement_start_date__lte=current_time,
-                announcement_end_date__gte=current_time
+                announcing_start_date__lte=current_time,
+                announcing_end_date__gte=current_time
             )
         elif filter_state == "fundraising":
             etfs = etfs.filter(
@@ -60,7 +60,7 @@ class ETFDefaultsView(APIView):
         now_ISO = timezone.now().isoformat()
         default_values = {
             "etf_type": "全球共享經濟ETF",
-            "announcement_start_date": now_ISO,
+            "announcing_start_date": now_ISO,
         }
         print(now_ISO)
         return Response(default_values)
@@ -144,11 +144,11 @@ class UserETFsView(generics.ListAPIView):
 
     def apply_state_filters(self, etfs, filter_state, current_time):
         if filter_state == "future":
-            return etfs.filter(announcement_start_date__gt=current_time)
-        elif filter_state == "announcement":
+            return etfs.filter(announcing_start_date__gt=current_time)
+        elif filter_state == "announcing":
             return etfs.filter(
-                announcement_start_date__lte=current_time,
-                announcement_end_date__gte=current_time
+                announcing_start_date__lte=current_time,
+                announcing_end_date__gte=current_time
             )
         elif filter_state == "fundraising":
             return etfs.filter(

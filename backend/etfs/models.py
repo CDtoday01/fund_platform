@@ -23,9 +23,9 @@ class ETF(models.Model):
     
     total_amount = models.IntegerField()  # Total investment cap
     lowest_amount = models.IntegerField()  # Minimum investment amount
-    announcement_start_date = models.DateTimeField(default=timezone.now)
-    announcement_end_date = models.DateTimeField(blank=True, null=True)
-    announcement_duration = models.IntegerField()  # Duration in days
+    announcing_start_date = models.DateTimeField(default=timezone.now)
+    announcing_end_date = models.DateTimeField(blank=True, null=True)
+    announcing_duration = models.IntegerField()  # Duration in days
     fundraising_start_date = models.DateTimeField()
     fundraising_end_date = models.DateTimeField(blank=True, null=True)
     fundraising_duration = models.IntegerField()  # Duration in months
@@ -50,9 +50,9 @@ class ETF(models.Model):
 
     def save(self, *args, **kwargs):
         # Calculate end dates
-        if self.announcement_start_date and self.announcement_duration:
-            self.announcement_end_date = self.announcement_start_date + relativedelta(days=self.announcement_duration)
-            self.fundraising_start_date = self.announcement_end_date
+        if self.announcing_start_date and self.announcing_duration:
+            self.announcing_end_date = self.announcing_start_date + relativedelta(days=self.announcing_duration)
+            self.fundraising_start_date = self.announcing_end_date
         if self.fundraising_start_date and self.fundraising_duration:
             self.fundraising_end_date = self.fundraising_start_date + relativedelta(months=self.fundraising_duration)
         

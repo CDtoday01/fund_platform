@@ -1,18 +1,25 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
 from etfs.models import ETF
+from django.utils import timezone
 
 @registry.register_document
 class ETFDocument(Document):
     # Use fields.TextField for creator"s username (or another field you"d like to include)
     name = fields.TextField(attr="name")
-    code = fields.TextField(attr="code")
+    code = fields.TextField(
+        fields={
+            "keyword": fields.KeywordField()  # Case-sensitive, exact match version of 'code'
+        },
+        attr="code"
+    )
     category = fields.TextField(attr="category.subcategory_name")
-    announcement_start_date = fields.DateField(attr="announcement_start_date")
-    announcement_end_date = fields.DateField(attr="announcement_end_date")
+    announcing_start_date = fields.DateField(attr="announcing_start_date")
+    announcing_end_date = fields.DateField(attr="announcing_end_date")
     fundraising_start_date = fields.DateField(attr="fundraising_start_date")
     fundraising_end_date = fields.DateField(attr="fundraising_end_date")
     month = fields.DoubleField(attr="ETF_duration")
+    state = fields.TextField()
 
     class Index:
         name = "etfs"
@@ -23,3 +30,15 @@ class ETFDocument(Document):
         fields = [
             "created_at",
         ]
+        
+    def prepare_state(self, instance):
+        current_time = timezone.now()
+        if current_time < instance.announcing_start_date:
+            return "future"
+        elif instance.announcing_start_date <= current_time < instance.announcing_end_date:
+            return "announcing"
+        elif instance.fundraising_start_date <= current_time <= instance.fundraising_end_date:
+            return "fundraising"
+        elif instance.fundraising_end_date < current_time:
+            return "closed"
+        return None

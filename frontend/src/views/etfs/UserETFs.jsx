@@ -210,7 +210,7 @@ const UserETFs = () => {
                         onClick={() => handleStateChange("announcing")}
                         disabled={activeTab === "joined"}
                     >
-                        Announcing ETFs
+                        announcing ETFs
                     </button>
                     <button
                         className={activeState === "fundraising" ? "active" : ""}
