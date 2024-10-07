@@ -74,6 +74,11 @@ const UserETFs = () => {
     };
 
     const renderETFsTable = () => {
+        // Filter the ETFs to only show open ETFs in the "Other ETFs" tab
+        const filteredETFs = activeTab === "other" 
+            ? etfs.results.filter(etf => etf.is_opened) 
+            : etfs.results;
+    
         return (
             <table className="table-box">
                 <thead>
@@ -97,8 +102,8 @@ const UserETFs = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {etfs.results && etfs.results.length > 0 ? (
-                        etfs.results.map(etf => (
+                    {filteredETFs && filteredETFs.length > 0 ? (
+                        filteredETFs.map(etf => (
                             <tr key={etf.id}>
                                 <td><Link to={`/etfs/${etf.id}`}>{etf.name}</Link></td>
                                 <td>{etf.code}</td>
@@ -115,18 +120,19 @@ const UserETFs = () => {
                                     </>
                                 )}
                                 <td>{etf.ETF_duration} 月</td>
-                                <td>{etf.current_investment ? Math.round((etf.current_investment / 10000 + Number.EPSILON) * 100)/ 100 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
+                                <td>{etf.current_investment ? Math.round((etf.current_investment / 10000 + Number.EPSILON) * 100) / 100 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                             </tr>
-                            ))
-                        ): (
-                            <tr>
-                                <td colSpan="7">No ETFs found.</td>
-                            </tr>
-                        )}
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="7">No ETFs found.</td>
+                        </tr>
+                    )}
                 </tbody>
             </table>
         );
     };
+    
 
     const renderTransactionsTable = () => {
         return (
