@@ -14,6 +14,7 @@ class ETFSerializer(serializers.ModelSerializer):
     subcategory_name = serializers.CharField(source="category.subcategory_name", read_only=True)
     is_fundraising = serializers.SerializerMethodField()
     is_progressing = serializers.SerializerMethodField()
+    
     class Meta:
         model = ETF
         fields = "__all__"
@@ -112,7 +113,7 @@ class ETFSerializer(serializers.ModelSerializer):
         request = self.context.get("request")  # Access the request object from context
         validated_data["creator"] = request.user  # Ensure creator is set
         return super().create(validated_data)
-      
+
 # class UserETFSerializer(serializers.ModelSerializer):
 #     etf = ETFSerializer()  # Serialize the related ETF object
 

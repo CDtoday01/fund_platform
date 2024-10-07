@@ -14,6 +14,7 @@ from django.shortcuts import get_object_or_404
 from django.middleware.csrf import get_token
 
 import json
+from decimal import Decimal
 
 from .models import ETF, ETFCategoryType, UserETF
 from .serializers import ETFSerializer, UserETFTransactionSerializer
@@ -29,6 +30,7 @@ class ETFListView(generics.ListAPIView):
     def get_queryset(self):
         etfs = super().get_queryset()
         filter_state = self.request.query_params.get("filter_state", None)
+        show_closed = self.request.query_params.get("show_closed", "false").lower() == "true"
         current_time = timezone.now()
 
         if filter_state == "announcing":
@@ -41,6 +43,10 @@ class ETFListView(generics.ListAPIView):
                 fundraising_start_date__lte=current_time,
                 fundraising_end_date__gte=current_time
             )
+        
+        # Filter based on is_open status
+        if not show_closed:
+            etfs = etfs.filter(is_open=True)
         
         return etfs
 
@@ -224,7 +230,7 @@ class JoinETFView(APIView):
 
         # Convert investment_amount to integer and validate
         try:
-            investment_amount = int(investment_amount)
+            investment_amount = Decimal(investment_amount)
             if investment_amount < etf.lowest_amount:
                 return JsonResponse({"error": f"Investment amount must be at least {etf.lowest_amount}"}, status=400)
             if investment_amount > etf.total_amount:
@@ -237,6 +243,11 @@ class JoinETFView(APIView):
 
         # Update the ETF's total investment
         etf.current_investment += investment_amount
+        
+        # If current investment exceeds total amount, close the ETF
+        if etf.current_investment > etf.total_amount:
+            etf.is_open = False
+        
         etf.save()
 
         # Add the user to the ETF's users set if they haven't joined before
@@ -273,7 +284,11 @@ class LeaveETFView(APIView):
 
         if UserETF.objects.filter(user=user, etf=etf).count() == 0:
             etf.users.remove(user)  # Remove the user from ETF's users only if they have no instances left
-
+        
+        if etf.current_investment <= etf.total_amount:
+            etf.is_open = True
+            etf.save()  # Save the ETF if we reopen it
+        
         return Response({"success": "Left ETF successfully"}, status=status.HTTP_200_OK)
 
 class CustomTokenObtainPairView(TokenObtainPairView):

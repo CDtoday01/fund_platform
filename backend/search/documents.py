@@ -6,6 +6,7 @@ from django.utils import timezone
 @registry.register_document
 class ETFDocument(Document):
     # Use fields.TextField for creator"s username (or another field you"d like to include)
+    id = fields.IntegerField(attr="id")
     name = fields.TextField(attr="name")
     code = fields.TextField(
         fields={
@@ -18,7 +19,9 @@ class ETFDocument(Document):
     announcing_end_date = fields.DateField(attr="announcing_end_date")
     fundraising_start_date = fields.DateField(attr="fundraising_start_date")
     fundraising_end_date = fields.DateField(attr="fundraising_end_date")
-    month = fields.DoubleField(attr="ETF_duration")
+    month = fields.IntegerField(attr="ETF_duration")
+    total_amount = fields.IntegerField(attr="total_amount")
+    current_investment = fields.DoubleField(attr="current_investment")
     state = fields.TextField()
 
     class Index:

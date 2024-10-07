@@ -23,6 +23,7 @@ class ETF(models.Model):
     
     total_amount = models.IntegerField()  # Total investment cap
     lowest_amount = models.IntegerField()  # Minimum investment amount
+    is_open = models.BooleanField(default=True)
     announcing_start_date = models.DateTimeField(default=timezone.now)
     announcing_end_date = models.DateTimeField(blank=True, null=True)
     announcing_duration = models.IntegerField()  # Duration in days
@@ -33,7 +34,7 @@ class ETF(models.Model):
     description = models.TextField(max_length=500, blank=True, null=True)  # Description of the ETF
     
     # Other fields retained
-    current_investment = models.IntegerField(default=0)
+    current_investment = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     users = models.ManyToManyField(settings.AUTH_USER_MODEL, through="UserETF", related_name="etfs")
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -59,6 +60,8 @@ class ETF(models.Model):
         # Generate code if not already set
         if not self.code:
             self.code = self.generate_code(self.category.subcategory_code)
+        
+        self.is_open = self.current_investment < self.total_amount
         
         # Save the instance
         super().save(*args, **kwargs)

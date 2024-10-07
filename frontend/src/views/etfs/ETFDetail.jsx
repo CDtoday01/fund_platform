@@ -102,6 +102,7 @@ const ETFDetail = () => {
             {/* Investment Amount Input */}
             {!isCreator && (
                 <>
+                    投入金額：
                     <input 
                         type="number" 
                         value={investmentAmount} 

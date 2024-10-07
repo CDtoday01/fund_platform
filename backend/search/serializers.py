@@ -5,6 +5,7 @@ class ETFDocumentSerializer(DocumentSerializer):
     class Meta:
         document = ETFDocument
         fields = [
+            "id",
             "name",
             "code",
             "category",
@@ -13,5 +14,7 @@ class ETFDocumentSerializer(DocumentSerializer):
             "fundraising_start_date",
             "fundraising_end_date",
             "month",
+            "total_amount",
+            "current_investment",
             "state",
         ]
