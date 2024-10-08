@@ -28,7 +28,7 @@ const ETFTable = ({ etfs, onRowClick, title }) => (
                             <td>{formatDate(etf.fundraising_start_date)}</td>
                             <td>{formatDate(etf.fundraising_end_date)}</td>
                             <td>{etf.category}</td>
-                            <td>{etf.month} 月</td>
+                            <td>{etf.months} 月</td>
                             <td>{etf.current_investment ? etf.current_investment / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                         </tr>
                     ))

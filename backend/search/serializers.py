@@ -13,7 +13,7 @@ class ETFDocumentSerializer(DocumentSerializer):
             "announcing_end_date",
             "fundraising_start_date",
             "fundraising_end_date",
-            "month",
+            "months",
             "total_amount",
             "current_investment",
             "state",

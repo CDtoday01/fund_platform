@@ -27,7 +27,7 @@ class ETFSearchView(DocumentViewSet):
         "announcing_end_date": "announcing_end_date",
         "fundraising_start_date": "fundraising_start_date",
         "fundraising_end_date": "fundraising_end_date",
-        "month": "month",
+        "months": "months",
         "state": "state.raw",  # Assuming state needs exact matching
     }
 
@@ -43,6 +43,7 @@ class ETFSearchView(DocumentViewSet):
         q = self.request.GET.get("q")
         category = self.request.GET.get("category")
         state = self.request.GET.get("state")
+        months = self.request.GET.get("months")  # Add months parameter
 
         # Validate and reformat dates
         start_date = self.request.GET.get("start")
@@ -85,9 +86,13 @@ class ETFSearchView(DocumentViewSet):
         if state:
             queryset = queryset.filter("term", state=state)
 
+        # Apply months filter if provided
+        if months is not None:
+            queryset = queryset.filter("term", months=int(months))  # Assuming months is an integer
+
         # Time range filtering for fundraising start and end dates
         if start_date and end_date:
-            if  state == "fundraising":
+            if state == "fundraising":
                 queryset = queryset.query(
                     "bool",
                     should=[
@@ -135,3 +140,4 @@ class ETFSearchView(DocumentViewSet):
                     minimum_should_match=1
                 )
         return queryset
+

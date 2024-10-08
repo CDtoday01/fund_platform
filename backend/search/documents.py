@@ -19,7 +19,7 @@ class ETFDocument(Document):
     announcing_end_date = fields.DateField(attr="announcing_end_date")
     fundraising_start_date = fields.DateField(attr="fundraising_start_date")
     fundraising_end_date = fields.DateField(attr="fundraising_end_date")
-    month = fields.IntegerField(attr="ETF_duration")
+    months = fields.IntegerField(attr="ETF_duration")
     total_amount = fields.IntegerField(attr="total_amount")
     current_investment = fields.DoubleField(attr="current_investment")
     state = fields.TextField()
