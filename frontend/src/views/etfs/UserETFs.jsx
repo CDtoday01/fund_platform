@@ -34,14 +34,19 @@ const UserETFs = () => {
         }
     }, [user, activeTab, activeState, currentPage]);
 
-    const leaveETF = async (etfId, etfName) => {
+    const leaveETF = async (etfId, etfName, isClosed) => {
+        if (isClosed) {
+            alert("You cannot leave a closed ETF.");
+            return;
+        }
+
         if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
             try {
                 const axiosInstance = useAxios();
                 const response = await axiosInstance.post(`/etfs/${etfId}/leave/`);
                 if (response.status === 200) {
                     alert("Left ETF!");
-                    
+
                     // Re-fetch data based on the active tab after successfully leaving
                     if (activeTab === "joined") {
                         fetchTransactions(activeState, setTransactions, setPagination, currentPage); // Re-fetch transactions if in the joined tab
@@ -76,7 +81,7 @@ const UserETFs = () => {
     const renderETFsTable = () => {
         // Filter the ETFs to only show open ETFs in the "Other ETFs" tab
         const filteredETFs = activeTab === "other" 
-            ? etfs.results.filter(etf => etf.is_opened) 
+            ? etfs.results.filter(etf => etf.is_open) 
             : etfs.results;
     
         return (
@@ -151,25 +156,36 @@ const UserETFs = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {transactions.results.map(transaction => (
-                        <tr key={transaction.id}>
-                            <td>
-                                <button onClick={() => leaveETF(transaction.etf, transaction.etf_name)}>✖</button>
-                            </td>
-                            <td><Link to={`/etfs/${transaction.etf}`}>{transaction.etf_name}</Link></td>
-                            <td>{transaction.transaction_number}</td>
-                            <td>{transaction.category_name}</td>
-                            <td>{formatDate(transaction.joined_date)}</td>
-                            <td>{formatDate(transaction.leave_date)}</td>
-                            <td>{transaction.duration} 月</td>
-                            <td>{transaction.is_fundraising ? "Yes" : "No"}</td>
-                            <td>
-                                {transaction.investment_amount
-                                    ? Math.round((transaction.investment_amount / 10000 + Number.EPSILON) * 100) / 100
-                                    : 0} 萬 / {transaction.total_amount / 10000} 萬
-                            </td>
+                    {transactions.results && transactions.results.length > 0 ? (
+                        transactions.results.map(transaction => (
+                            <tr key={transaction.id}>
+                                <td>
+                                    <button 
+                                        onClick={() => leaveETF(transaction.etf, transaction.etf_name, transaction.is_closed)} 
+                                        disabled={transaction.is_closed}
+                                    >
+                                        ✖
+                                    </button>
+                                </td>
+                                <td><Link to={`/etfs/${transaction.etf}`}>{transaction.etf_name}</Link></td>
+                                <td>{transaction.transaction_number}</td>
+                                <td>{transaction.category_name}</td>
+                                <td>{formatDate(transaction.joined_date)}</td>
+                                <td>{formatDate(transaction.leave_date)}</td>
+                                <td>{transaction.duration} 月</td>
+                                <td>{transaction.is_fundraising ? "Yes" : "No"}</td>
+                                <td>
+                                    {transaction.investment_amount
+                                        ? Math.round((transaction.investment_amount / 10000 + Number.EPSILON) * 100) / 100
+                                        : 0} 萬 / {transaction.total_amount / 10000} 萬
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="9">No ETFs found.</td>
                         </tr>
-                    ))}
+                    )}
                 </tbody>
             </table>
         );
