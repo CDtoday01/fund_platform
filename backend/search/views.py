@@ -15,22 +15,6 @@ class ETFSearchView(DocumentViewSet):
     lookup_field = "id"
     permission_classes = [AllowAny]
 
-    multi_match_search_fields = {
-        "name": {"fuzziness": "AUTO"},
-        "code": None
-    }
-
-    filter_fields = {
-        "category": "category.raw",  # Use .raw if needed for exact matches
-        "created_at": "created_at",
-        "announcing_start_date": "announcing_start_date",
-        "announcing_end_date": "announcing_end_date",
-        "fundraising_start_date": "fundraising_start_date",
-        "fundraising_end_date": "fundraising_end_date",
-        "months": "months",
-        "state": "state.raw",  # Assuming state needs exact matching
-    }
-
     ordering_fields = {
         "announcing_start_date": "announcing_start_date",
         "fundraising_start_date": "fundraising_start_date",
@@ -80,8 +64,11 @@ class ETFSearchView(DocumentViewSet):
 
         # Apply category filter if provided
         if category:
-            # First, filter by the main category
-            queryset = queryset.filter("term", category_code=category)
+            if category.isalpha():
+                # First, filter by the main category
+                queryset = queryset.filter("term", category_code=category)
+            else:
+                queryset = queryset.filter("term", subcategory_code=category)
 
         # Apply state filter if provided
         if state:

@@ -9,6 +9,7 @@ class ETFDocumentSerializer(DocumentSerializer):
             "name",
             "code",
             "category_code",
+            "subcategory_code",
             "subcategory_name",
             "announcing_start_date",
             "announcing_end_date",

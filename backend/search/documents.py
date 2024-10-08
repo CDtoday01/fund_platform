@@ -15,6 +15,7 @@ class ETFDocument(Document):
         attr="code"
     )
     category_code = fields.KeywordField(attr="category.category_code")
+    subcategory_code = fields.KeywordField(attr="category.subcategory_code")
     subcategory_name = fields.KeywordField(attr="category.subcategory_name")
     announcing_start_date = fields.DateField(attr="announcing_start_date")
     announcing_end_date = fields.DateField(attr="announcing_end_date")
