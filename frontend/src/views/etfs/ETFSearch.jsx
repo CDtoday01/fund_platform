@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import useAxios from "../../utils/useAxios";
 
-const ETFSearch = ({ onSearch, type }) => {
-    const [query, setQuery] = useState("");
-    const [category, setCategory] = useState("");
-    const [months, setMonths] = useState(null); // Start with null for "All Months"
-    const [startDate, setStartDate] = useState("");
-    const [endDate, setEndDate] = useState("");
+const ETFSearch = ({ onSearch, initialQuery, initialCategory, initialMonths, initialStartDate, initialEndDate, initialShowClosed }) => {
+    const [query, setQuery] = useState(initialQuery || "");
+    const [category, setCategory] = useState(initialCategory || "");
+    const [months, setMonths] = useState(initialMonths || null); // Start with null for "All Months"
+    const [startDate, setStartDate] = useState(initialStartDate || "");
+    const [endDate, setEndDate] = useState(initialEndDate || "");
     const [categories, setCategories] = useState([]);
-    const [showClosed, setShowClosed] = useState(false);
+    const [showClosed, setShowClosed] = useState(initialShowClosed || false);
 
     const axiosInstance = useAxios();
 
@@ -33,8 +33,26 @@ const ETFSearch = ({ onSearch, type }) => {
             alert("Start date cannot be later than end date.");
             return;
         }
+        onSearch({ query, category, months, startDate, endDate, showClosed });
+    };
 
-        onSearch({ query, category, months, startDate, endDate, type, showClosed });
+    // Reset handler
+    const handleReset = () => {
+        setQuery("");
+        setCategory("");
+        setMonths(null);
+        setStartDate("");
+        setEndDate("");
+        setShowClosed(false);
+        // Call onSearch with default parameters
+        onSearch({
+            query: "",
+            category: "",
+            months: null,
+            startDate: "",
+            endDate: "",
+            showClosed: false,
+        });
     };
 
     return (
@@ -49,7 +67,7 @@ const ETFSearch = ({ onSearch, type }) => {
             <select value={category} onChange={(e) => setCategory(e.target.value)}>
                 <option value="">Select Category</option>
                 {categories.map((cat) => (
-                    cat.subcategory_code && cat.subcategory_name ? ( // Check for valid category fields
+                    cat.subcategory_code && cat.subcategory_name ? (
                         <option key={cat.subcategory_code} value={cat.subcategory_code}>
                             {cat.subcategory_name}
                         </option>
@@ -90,7 +108,8 @@ const ETFSearch = ({ onSearch, type }) => {
                 Show Closed ETFs
             </label>
             
-            <button type="submit">Search {type}</button>
+            <button type="submit">Search</button>
+            <button type="button" onClick={handleReset}>Reset</button> {/* Reset button */}
         </form>
     );
 };

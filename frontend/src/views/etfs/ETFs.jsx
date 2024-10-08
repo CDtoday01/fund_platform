@@ -51,13 +51,31 @@ const PaginationControls = ({ hasNext, onNext, label }) => (
 const ETFs = () => {
     const [announcingCurrentPage, setAnnouncingCurrentPage] = useState(1);
     const [fundraisingCurrentPage, setFundraisingCurrentPage] = useState(1);
+
+    // State to hold search params for persistence
     const [searchParams, setSearchParams] = useState({});
+    const [searchTerm, setSearchTerm] = useState(""); // Search term state
+    const [searchCategory, setSearchCategory] = useState("");
+    const [searchMonths, setSearchMonths] = useState(null);
+    const [searchStartDate, setSearchStartDate] = useState("");
+    const [searchEndDate, setSearchEndDate] = useState("");
+    const [searchShowClosed, setSearchShowClosed] = useState(false);
+
     const navigate = useNavigate(); 
 
     const { loading, announcingETFs, fundraisingETFs, announcingPagination, fundraisingPagination } = useFetchETFs(announcingCurrentPage, fundraisingCurrentPage, searchParams);
 
     const handleSearch = (params) => {
+        // Update search params and individual state for persistence
         setSearchParams(params);
+        setSearchTerm(params.query || "");
+        setSearchCategory(params.category || "");
+        setSearchMonths(params.months || null);
+        setSearchStartDate(params.startDate || "");
+        setSearchEndDate(params.endDate || "");
+        setSearchShowClosed(params.showClosed || false);
+
+        // Reset pagination
         setAnnouncingCurrentPage(1);
         setFundraisingCurrentPage(1);
     };
@@ -68,14 +86,35 @@ const ETFs = () => {
                 <div>Loading...</div>
             ) : (
                 <>
-                    <ETFSearch onSearch={handleSearch} />
-                    <ETFTable etfs={announcingETFs} onRowClick={(id) => navigate(`/etfs/${id}`)} title="Announcing E.T.F (coming soon)" />
+                    {/* Pass the current search states to ETFSearch */}
+                    <ETFSearch 
+                        onSearch={handleSearch}
+                        initialQuery={searchTerm}
+                        initialCategory={searchCategory}
+                        initialMonths={searchMonths}
+                        initialStartDate={searchStartDate}
+                        initialEndDate={searchEndDate}
+                        initialShowClosed={searchShowClosed}
+                    />
+                    
+                    <ETFTable 
+                        etfs={announcingETFs} 
+                        onRowClick={(id) => navigate(`/etfs/${id}`)} 
+                        title="Announcing E.T.F (coming soon)" 
+                    />
+                    
                     <PaginationControls 
                         hasNext={announcingPagination.next} 
                         onNext={() => setAnnouncingCurrentPage(prev => prev + 1)} 
                         label="Next Announcing Page" 
                     />
-                    <ETFTable etfs={fundraisingETFs} onRowClick={(id) => navigate(`/etfs/${id}`)} title="Fundraising E.T.F" />
+                    
+                    <ETFTable 
+                        etfs={fundraisingETFs} 
+                        onRowClick={(id) => navigate(`/etfs/${id}`)} 
+                        title="Fundraising E.T.F" 
+                    />
+                    
                     <PaginationControls 
                         hasNext={fundraisingPagination.next} 
                         onNext={() => setFundraisingCurrentPage(prev => prev + 1)} 
