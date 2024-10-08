@@ -64,8 +64,9 @@ class ETFSearchView(DocumentViewSet):
 
         # Apply category filter if provided
         if category:
+            # Main category only contains alphabet
             if category.isalpha():
-                # First, filter by the main category
+                # Filter by the main category
                 queryset = queryset.filter("term", category_code=category)
             else:
                 queryset = queryset.filter("term", subcategory_code=category)
