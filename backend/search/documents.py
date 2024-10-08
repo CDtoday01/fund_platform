@@ -14,7 +14,8 @@ class ETFDocument(Document):
         },
         attr="code"
     )
-    category = fields.TextField(attr="category.subcategory_name")
+    category_code = fields.KeywordField(attr="category.category_code")
+    subcategory_name = fields.KeywordField(attr="category.subcategory_name")
     announcing_start_date = fields.DateField(attr="announcing_start_date")
     announcing_end_date = fields.DateField(attr="announcing_end_date")
     fundraising_start_date = fields.DateField(attr="fundraising_start_date")

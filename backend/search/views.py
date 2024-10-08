@@ -80,7 +80,8 @@ class ETFSearchView(DocumentViewSet):
 
         # Apply category filter if provided
         if category:
-            queryset = queryset.filter("term", category=category)
+            # First, filter by the main category
+            queryset = queryset.filter("term", category_code=category)
 
         # Apply state filter if provided
         if state:

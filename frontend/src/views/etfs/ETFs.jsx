@@ -14,7 +14,7 @@ const ETFTable = ({ etfs, onRowClick, title }) => (
                     <th>Code</th>
                     <th>Fundraising Start</th>
                     <th>Fundraising End</th>
-                    <th>Category</th>
+                    <th>Subcategory</th>
                     <th>Duration</th>
                     <th>Invested Amount</th>
                 </tr>
@@ -27,7 +27,7 @@ const ETFTable = ({ etfs, onRowClick, title }) => (
                             <td>{etf.code}</td>
                             <td>{formatDate(etf.fundraising_start_date)}</td>
                             <td>{formatDate(etf.fundraising_end_date)}</td>
-                            <td>{etf.category}</td>
+                            <td>{etf.subcategory_name}</td>
                             <td>{etf.months} 月</td>
                             <td>{etf.current_investment ? etf.current_investment / 10000 : 0} 萬 / {etf.total_amount / 10000} 萬</td>
                         </tr>
