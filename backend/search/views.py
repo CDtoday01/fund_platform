@@ -86,23 +86,47 @@ class ETFSearchView(DocumentViewSet):
                     "bool",
                     should=[
                         {
-                            "range": {
-                                "fundraising_start_date": {
-                                    "gte": start_date,
-                                    "lte": end_date
-                                }
+                            "bool": {
+                                "must": [
+                                    {
+                                        "range": {
+                                            "fundraising_start_date": {
+                                                "lte": start_date  # Fundraising start must be less than or equal to start date
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "range": {
+                                            "fundraising_end_date": {
+                                                "gte": start_date  # Fundraising end must be greater than or equal to start date
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         },
                         {
-                            "range": {
-                                "fundraising_end_date": {
-                                    "gte": start_date,
-                                    "lte": end_date
-                                }
+                            "bool": {
+                                "must": [
+                                    {
+                                        "range": {
+                                            "fundraising_start_date": {
+                                                "lte": end_date  # Fundraising start must be less than or equal to end date
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "range": {
+                                            "fundraising_end_date": {
+                                                "gte": end_date  # Fundraising end must be greater than or equal to end date
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ],
-                    minimum_should_match=1
+                    minimum_should_match=1  # At least one of the conditions must match
                 )
             # Time range filtering for announcing start and end dates
             else:
@@ -110,23 +134,47 @@ class ETFSearchView(DocumentViewSet):
                     "bool",
                     should=[
                         {
-                            "range": {
-                                "announcing_start_date": {
-                                    "gte": start_date,
-                                    "lte": end_date
-                                }
+                            "bool": {
+                                "must": [
+                                    {
+                                        "range": {
+                                            "announcing_start_date": {
+                                                "lte": start_date  # Fundraising start must be less than or equal to start date
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "range": {
+                                            "announcing_end_date": {
+                                                "gte": start_date  # Fundraising end must be greater than or equal to start date
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         },
                         {
-                            "range": {
-                                "announcing_end_date": {
-                                    "gte": start_date,
-                                    "lte": end_date
-                                }
+                            "bool": {
+                                "must": [
+                                    {
+                                        "range": {
+                                            "announcing_start_date": {
+                                                "lte": end_date  # Fundraising start must be less than or equal to end date
+                                            }
+                                        }
+                                    },
+                                    {
+                                        "range": {
+                                            "announcing_end_date": {
+                                                "gte": end_date  # Fundraising end must be greater than or equal to end date
+                                            }
+                                        }
+                                    }
+                                ]
                             }
                         }
                     ],
-                    minimum_should_match=1
+                    minimum_should_match=1  # At least one of the conditions must match
                 )
         return queryset
 

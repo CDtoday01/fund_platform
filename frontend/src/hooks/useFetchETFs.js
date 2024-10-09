@@ -33,8 +33,8 @@ const useFetchETFs = (announcingCurrentPage, fundraisingCurrentPage, searchParam
                     q: searchParams.query,
                     category: searchParams.category || null,
                     months: searchParams.months || null,
-                    startDate: searchParams.startDate || "",
-                    endDate: searchParams.endDate || "",
+                    start: searchParams.startDate || "",
+                    end: searchParams.endDate || "",
                     showClosed: searchParams.showClosed || false,
                 }).toString();
                 // Fetch Announcing ETFs
@@ -50,8 +50,8 @@ const useFetchETFs = (announcingCurrentPage, fundraisingCurrentPage, searchParam
                     q: searchParams.query,
                     category: searchParams.category || null,
                     months: searchParams.months || null,
-                    startDate: searchParams.startDate || "",
-                    endDate: searchParams.endDate || "",
+                    start: searchParams.startDate || "",
+                    end: searchParams.endDate || "",
                     showClosed: searchParams.showClosed || false,
                 }).toString();
 
