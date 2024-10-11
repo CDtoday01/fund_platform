@@ -204,17 +204,20 @@ class UserETFTransactionListView(generics.ListAPIView):
         user = self.request.user
         filter_state = self.request.query_params.get("filter_state")
         useretf = UserETF.objects.filter(user=user)
-        
-        if filter_state == "fundraising":
-            useretf = useretf.filter(leave_date__gte=timezone.now())
+
+        now = timezone.now()
+
+        if filter_state == "progressing":
+            # Filter for progressing ETFs
+            useretf = useretf.filter(leave_date__gte=now)
         elif filter_state == "closed":
-            useretf = useretf.filter(leave_date__lt=timezone.now())
-        # return empty queryset for an invalid state
+            # Filter for closed ETFs
+            useretf = useretf.filter(leave_date__lt=now)
+        # Return empty queryset for an invalid state
         else:
             print("invalid state!")
             useretf = UserETF.objects.none()
 
-        print(useretf)
         return useretf.select_related('etf').order_by('-joined_date') # Sort by most recent first
     
 class JoinETFView(APIView):

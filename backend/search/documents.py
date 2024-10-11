@@ -1,6 +1,6 @@
 from django_elasticsearch_dsl import Document, fields
 from django_elasticsearch_dsl.registries import registry
-from etfs.models import ETF
+from etfs.models import ETF, UserETF
 from django.utils import timezone
 
 @registry.register_document
@@ -8,9 +8,10 @@ class ETFDocument(Document):
     # Use fields.TextField for creator"s username (or another field you"d like to include)
     id = fields.IntegerField(attr="id")
     name = fields.TextField(attr="name")
+    creator = fields.IntegerField(attr="creator.id")
     code = fields.TextField(
         fields={
-            "keyword": fields.KeywordField()  # Case-sensitive, exact match version of 'code'
+            "keyword": fields.KeywordField()  # Case-sensitive, exact match version of "code"
         },
         attr="code"
     )
@@ -25,6 +26,13 @@ class ETFDocument(Document):
     total_amount = fields.IntegerField(attr="total_amount")
     current_investment = fields.DoubleField(attr="current_investment")
     state = fields.TextField()
+    is_open = fields.BooleanField(attr="is_open")
+    
+    useretf = fields.NestedField(properties={
+        "user": fields.IntegerField(attr="user.id"),  # user_id field from UserETF
+        "joined_date": fields.DateField(),
+        "leave_date": fields.DateField(),
+    })
 
     class Index:
         name = "etfs"
@@ -32,9 +40,7 @@ class ETFDocument(Document):
 
     class Django:
         model = ETF  # The model associated with this Document
-        fields = [
-            "created_at",
-        ]
+        related_models = [UserETF]
         
     def prepare_state(self, instance):
         current_time = timezone.now()
@@ -47,3 +53,7 @@ class ETFDocument(Document):
         elif instance.fundraising_end_date < current_time:
             return "closed"
         return None
+    
+    def get_queryset(self):
+        # Join the related UserETF model to ensure we can access related data in Elasticsearch
+        return super().get_queryset().prefetch_related('useretf_set__user')

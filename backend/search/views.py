@@ -28,6 +28,7 @@ class ETFSearchView(DocumentViewSet):
         category = self.request.GET.get("category")
         state = self.request.GET.get("state")
         months = self.request.GET.get("months")  # Add months parameter
+        show_closed = self.request.GET.get("showClosed", "false").lower() == "true"
 
         # Validate and reformat dates
         start_date = self.request.GET.get("start")
@@ -176,5 +177,9 @@ class ETFSearchView(DocumentViewSet):
                     ],
                     minimum_should_match=1  # At least one of the conditions must match
                 )
+
+        if not show_closed:
+            queryset = queryset.filter("term", is_open=True)
+
         return queryset
 

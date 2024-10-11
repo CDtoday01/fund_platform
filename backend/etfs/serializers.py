@@ -128,6 +128,7 @@ class UserETFTransactionSerializer(serializers.ModelSerializer):
     duration = serializers.IntegerField(source="etf.ETF_duration", read_only=True)
     is_fundraising = serializers.SerializerMethodField()
     total_amount = serializers.IntegerField(source="etf.total_amount", read_only=True)
+    is_progressing = serializers.SerializerMethodField()
     
     class Meta:
         model = UserETF
@@ -137,6 +138,10 @@ class UserETFTransactionSerializer(serializers.ModelSerializer):
         now = timezone.now()
         return obj.etf.fundraising_start_date <= now <= obj.etf.fundraising_end_date
     
+    def get_is_progressing(self, obj):
+        now = timezone.now()
+        return obj.leave_date >= now
+
 # class UserETFKnownSerializer(serializers.ModelSerializer):
 #     user_username = serializers.CharField(source="user.username")
 #     etf_name = serializers.CharField(source="etf.name")

@@ -7,6 +7,7 @@ class ETFDocumentSerializer(DocumentSerializer):
         fields = [
             "id",
             "name",
+            "creator",
             "code",
             "category_code",
             "subcategory_code",
@@ -19,4 +20,5 @@ class ETFDocumentSerializer(DocumentSerializer):
             "total_amount",
             "current_investment",
             "state",
+            "is_open",
         ]
