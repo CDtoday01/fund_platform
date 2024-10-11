@@ -17,25 +17,39 @@ const UserETFs = () => {
     const { user } = useAuthStore();
 
     useEffect(() => {
-        // Auto-switch to "fundraising" when the tab is "joined", and its state is in forbidden categories.
-        if (activeTab === "joined" && ["future", "announcing"].includes(activeState)) {
-            setActiveState("fundraising");
+        const updateActiveState = () => {
+            // Auto-switch to "fundraising" when the tab is "joined", and its state is in forbidden categories.
+            if (activeTab === "joined" && ["future", "announcing", "fundraising"].includes(activeState)) {
+                setActiveState("progressing");
+            // Do the same thing likewise, while switching from progressing to fundraising
+            } else if (["created", "other"].includes(activeTab) && activeState === "progressing") {
+                setActiveState("fundraising");
+            } else {
+                sendAPI();
+            }
         }
-    }, [activeTab]);
+        // Wait for the page to render before changing activeState
+        if (user) {
+            updateActiveState();
+        }
+    }, [user, activeTab]);
+
+    const sendAPI = () => {
+        if (activeTab === "joined") {
+            fetchTransactions(activeState, setTransactions, setPagination, currentPage);
+        } else {
+            fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
+        }
+    };
 
     useEffect(() => {
         if (user) {
-            if (activeTab === "joined") {
-                fetchTransactions(activeState, setTransactions, setPagination, currentPage);
-            } else {
-                fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage);
-            }
-            
+            sendAPI();
         }
-    }, [user, activeTab, activeState, currentPage]);
+    }, [user, activeState, currentPage]);
 
-    const leaveETF = async (etfId, etfName, isClosed) => {
-        if (isClosed) {
+    const leaveETF = async (etfId, etfName, etfState) => {
+        if (etfState == "closed") {
             alert("You cannot leave a closed ETF.");
             return;
         }
@@ -46,13 +60,8 @@ const UserETFs = () => {
                 const response = await axiosInstance.post(`/etfs/${etfId}/leave/`);
                 if (response.status === 200) {
                     alert("Left ETF!");
-
                     // Re-fetch data based on the active tab after successfully leaving
-                    if (activeTab === "joined") {
-                        fetchTransactions(activeState, setTransactions, setPagination, currentPage); // Re-fetch transactions if in the joined tab
-                    } else {
-                        fetchUserETFs(activeTab, activeState, setETFs, setPagination, currentPage); // Re-fetch ETFs if not in the joined tab
-                    }
+                    sendAPI();
                 } else {
                     console.error("Failed to leave ETF");
                 }
@@ -137,7 +146,6 @@ const UserETFs = () => {
             </table>
         );
     };
-    
 
     const renderTransactionsTable = () => {
         return (
@@ -161,8 +169,8 @@ const UserETFs = () => {
                             <tr key={transaction.id}>
                                 <td>
                                     <button 
-                                        onClick={() => leaveETF(transaction.etf, transaction.etf_name, transaction.is_closed)} 
-                                        disabled={transaction.is_closed}
+                                        onClick={() => leaveETF(transaction.etf, transaction.etf_name, transaction.state)} 
+                                        disabled={transaction.state == "closed"}
                                     >
                                         ✖
                                     </button>
@@ -232,14 +240,27 @@ const UserETFs = () => {
                         onClick={() => handleStateChange("announcing")}
                         disabled={activeTab === "joined"}
                     >
-                        announcing ETFs
+                        Announcing ETFs
                     </button>
-                    <button
-                        className={activeState === "fundraising" ? "active" : ""}
-                        onClick={() => handleStateChange("fundraising")}
-                    >
-                        Fundraising ETFs
-                    </button>
+                    {activeTab === "joined" ? (  // Only show this button when in "joined" tab
+                        <>
+                            <button
+                                className={activeState === "progressing" ? "active" : ""}
+                                onClick={() => handleStateChange("progressing")}
+                            >
+                                Progressing ETFs
+                            </button>
+                        </>
+                    ) : (  // Keep the original buttons for other tabs
+                        <>
+                            <button
+                                className={activeState === "fundraising" ? "active" : ""}
+                                onClick={() => handleStateChange("fundraising")}
+                            >
+                                Fundraising ETFs
+                            </button> 
+                        </>
+                    )}
                     <button
                         className={activeState === "closed" ? "active" : ""}
                         onClick={() => handleStateChange("closed")}
@@ -267,7 +288,7 @@ const UserETFs = () => {
             {activeTab !== "joined" && renderETFsTable()}
             {activeTab === "joined" && renderTransactionsTable()}
         </>
-    );   
+    );
 };
 
 export default UserETFs;
