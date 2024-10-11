@@ -40,10 +40,17 @@ const ETFTable = ({ etfs, onRowClick, title }) => (
     </>
 );
 
-const PaginationControls = ({ hasNext, onNext, label }) => (
+const PaginationControls = ({ hasNext, hasPrevious, onNext, onPrevious, labelNext, labelPrevious }) => (
     <div>
+        {hasPrevious && (
+            <button onClick={onPrevious} style={{ marginRight: "10px" }}>
+                {labelPrevious}
+            </button>
+        )}
         {hasNext && (
-            <button onClick={onNext}>{label}</button>
+            <button onClick={onNext}>
+                {labelNext}
+            </button>
         )}
     </div>
 );
@@ -105,8 +112,11 @@ const ETFs = () => {
                     
                     <PaginationControls 
                         hasNext={announcingPagination.next} 
+                        hasPrevious={announcingPagination.previous}
                         onNext={() => setAnnouncingCurrentPage(prev => prev + 1)} 
-                        label="Next Announcing Page" 
+                        onPrevious={() => setAnnouncingCurrentPage(prev => prev - 1)} 
+                        labelNext="Next Announcing Page"
+                        labelPrevious="Previous Announcing Page" 
                     />
                     
                     <ETFTable 
@@ -117,8 +127,11 @@ const ETFs = () => {
                     
                     <PaginationControls 
                         hasNext={fundraisingPagination.next} 
+                        hasPrevious={fundraisingPagination.previous}
                         onNext={() => setFundraisingCurrentPage(prev => prev + 1)} 
-                        label="Next Fundraising Page" 
+                        onPrevious={() => setFundraisingCurrentPage(prev => prev - 1)} 
+                        labelNext="Next Fundraising Page"
+                        labelPrevious="Previous Fundraising Page"
                     />
                 </>
             )}

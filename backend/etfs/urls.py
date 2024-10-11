@@ -2,7 +2,6 @@ from django.urls import path
 from .views import ETFDefaultsView, ETFListView, ETFTypeListAPIView, CreateETFView, CheckNameExistsView, DeleteETFView, \
                    ETFDetailView, UserETFsView, UserETFTransactionListView, JoinETFView, LeaveETFView
 
-
 urlpatterns = [
     path("", ETFListView.as_view(), name="etf-list"),                                           # List all ETFs
     path("etf-types/", ETFTypeListAPIView.as_view(), name="get_etf_types"),                     # Get the available ETF (sub)category types
@@ -15,5 +14,4 @@ urlpatterns = [
     path("<int:pk>/", ETFDetailView.as_view(), name="etf-detail"),                              # View the details of a specific ETF by its primary key (ID)
     path("<int:etf_id>/join/", JoinETFView.as_view(), name="join_etf"),                         # Allow a user to join an ETF by its ID
     path("<int:etf_id>/leave/", LeaveETFView.as_view(), name="leave_etf"),                      # Allow a user to leave an ETF by its ID
-    
 ]
