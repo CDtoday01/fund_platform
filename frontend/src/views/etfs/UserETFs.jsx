@@ -19,10 +19,10 @@ const UserETFs = () => {
     useEffect(() => {
         const updateActiveState = () => {
             // Auto-switch to "fundraising" when the tab is "joined", and its state is in forbidden categories.
-            if (activeTab === "joined" && ["future", "announcing", "fundraising"].includes(activeState)) {
+            if (activeTab === "joined" && ["future", "announcing", "fundraising", "closed"].includes(activeState)) {
                 setActiveState("progressing");
             // Do the same thing likewise, while switching from progressing to fundraising
-            } else if (["created", "other"].includes(activeTab) && activeState === "progressing") {
+            } else if (["created", "other"].includes(activeTab) && ["progressing", "completed"].includes(activeState)) {
                 setActiveState("fundraising");
             } else {
                 sendAPI();
@@ -229,43 +229,46 @@ const UserETFs = () => {
                 </div>
                 <div className="state-tabs">
                     <button
-                        className={activeState === "future" && activeTab !== "joined" ? "active" : ""}
+                        className={activeState === "future" ? "active" : ""}
                         onClick={() => handleStateChange("future")}
-                        disabled={activeTab === "joined"}
+                        disabled={activeTab === "joined"} // Disable for "joined" tab
                     >
                         Future ETFs
                     </button>
                     <button
-                        className={activeState === "announcing" && activeTab !== "joined" ? "active" : ""}
+                        className={activeState === "announcing" ? "active" : ""}
                         onClick={() => handleStateChange("announcing")}
-                        disabled={activeTab === "joined"}
+                        disabled={activeTab === "joined"} // Disable for "joined" tab
                     >
                         Announcing ETFs
                     </button>
-                    {activeTab === "joined" ? (  // Only show this button when in "joined" tab
-                        <>
-                            <button
-                                className={activeState === "progressing" ? "active" : ""}
-                                onClick={() => handleStateChange("progressing")}
-                            >
-                                Progressing ETFs
-                            </button>
-                        </>
-                    ) : (  // Keep the original buttons for other tabs
-                        <>
-                            <button
-                                className={activeState === "fundraising" ? "active" : ""}
-                                onClick={() => handleStateChange("fundraising")}
-                            >
-                                Fundraising ETFs
-                            </button> 
-                        </>
-                    )}
+                    <button
+                        className={activeState === "fundraising" ? "active" : ""}
+                        onClick={() => handleStateChange("fundraising")}
+                        disabled={activeTab === "joined"} // Disable for "joined" tab
+                    >
+                        Fundraising ETFs
+                    </button>
                     <button
                         className={activeState === "closed" ? "active" : ""}
                         onClick={() => handleStateChange("closed")}
+                        disabled={activeTab === "joined"} // Disable for "joined" tab
                     >
                         Closed ETFs
+                    </button>
+                    <button
+                        className={activeState === "progressing" ? "active" : ""}
+                        onClick={() => handleStateChange("progressing")}
+                        disabled={activeTab !== "joined"} // Disable for non-"joined" tabs
+                    >
+                        Progressing ETFs
+                    </button>
+                    <button
+                        className={activeState === "completed" ? "active" : ""}
+                        onClick={() => handleStateChange("completed")}
+                        disabled={activeTab !== "joined"} // Disable for non-"joined" tabs
+                    >
+                        Completed ETFs
                     </button>
                 </div>
                 <div className="etf-list">

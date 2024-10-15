@@ -164,32 +164,34 @@ class UserETFsView(generics.ListAPIView):
         elif filter_state == "closed":
             return etfs.filter(fundraising_end_date__lt=current_time)
         elif filter_state == "progressing":
-            return self.apply_progressing(etfs, current_time)
+            # return self.apply_progressing(etfs, current_time)
+            pass
         else:
             print("invalid state!")
             etfs = ETF.objects.none()
     
         return etfs.order_by("id")
     
-    def apply_progressing(self, user, filter_tab, current_time):
-        if filter_tab == "created" or filter_tab == "other":
-            etfs = ETF.objects.annotate(
-                latest_leave_date=Max("useretf__leave_date")
-            ).filter(
-                latest_leave_date__gt=current_time
-            )
-        elif filter_tab == "joined":
-            etfs = ETF.objects.filter(
-                useretf__user=user,
-                useretf__joined_date__lte=current_time,
-                useretf__leave_date__gte=current_time
-            ).order_by("id")
-        # returning empty queryset for an invalid state
-        else:
-            print("invalid state!")
-            etfs = ETF.objects.none()
+    # # Unused in current version
+    # def apply_progressing(self, user, filter_tab, current_time):
+    #     if filter_tab == "created" or filter_tab == "other":
+    #         etfs = ETF.objects.annotate(
+    #             latest_leave_date=Max("useretf__leave_date")
+    #         ).filter(
+    #             latest_leave_date__gt=current_time
+    #         )
+    #     elif filter_tab == "joined":
+    #         etfs = ETF.objects.filter(
+    #             useretf__user=user,
+    #             useretf__joined_date__lte=current_time,
+    #             useretf__leave_date__gte=current_time
+    #         ).order_by("id")
+    #     # returning empty queryset for an invalid state
+    #     else:
+    #         print("invalid state!")
+    #         etfs = ETF.objects.none()
     
-        return etfs.order_by("id")
+    #     return etfs.order_by("id")
     
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -210,7 +212,7 @@ class UserETFTransactionListView(generics.ListAPIView):
         if filter_state == "progressing":
             # Filter for progressing ETFs
             useretf = useretf.filter(leave_date__gte=now)
-        elif filter_state == "closed":
+        elif filter_state == "completed":
             # Filter for closed ETFs
             useretf = useretf.filter(leave_date__lt=now)
         # Return empty queryset for an invalid state
