@@ -264,13 +264,12 @@ class JoinETFView(APIView):
 class LeaveETFView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request, etf_id):
-        etf = get_object_or_404(ETF, id=etf_id)
-        user = request.user
-        
-        # Get the UserETF instance associated with this user and ETF
-        user_etf_instance = UserETF.objects.filter(user=user, etf=etf).first()
+    def post(self, request, transaction_id):
+        # Get the UserETF instance based on the transaction_id
+        user_etf_instance = get_object_or_404(UserETF, id=transaction_id, user=request.user)
 
+        etf = user_etf_instance.etf  # Get the associated ETF
+        
         if not user_etf_instance:
             return Response({"error": "Not a member"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -280,21 +279,24 @@ class LeaveETFView(APIView):
         if investment_amount is None:
             return Response({"error": "Investment amount not found"}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Update the ETF's total investment
+        # Update the ETF's current investment
         etf.current_investment -= investment_amount
         etf.save()
 
-        # Remove the UserETF instance
+        # Remove the UserETF instance to signify the user has left
         user_etf_instance.delete()
 
-        if UserETF.objects.filter(user=user, etf=etf).count() == 0:
-            etf.users.remove(user)  # Remove the user from ETF's users only if they have no instances left
-        
+        # Check if the user has any other instances left; if not, remove them from the ETF's users
+        if UserETF.objects.filter(user=request.user, etf=etf).count() == 0:
+            etf.users.remove(request.user)
+
+        # Check if the ETF can be reopened
         if etf.current_investment <= etf.total_amount:
             etf.is_open = True
             etf.save()  # Save the ETF if we reopen it
-        
+
         return Response({"success": "Left ETF successfully"}, status=status.HTTP_200_OK)
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

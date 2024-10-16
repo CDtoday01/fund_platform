@@ -13,5 +13,5 @@ urlpatterns = [
     path("user-etf-transactions/", UserETFTransactionListView.as_view(), name="transactions"),  # List transcations associated with the current user and ETF
     path("<int:pk>/", ETFDetailView.as_view(), name="etf-detail"),                              # View the details of a specific ETF by its primary key (ID)
     path("<int:etf_id>/join/", JoinETFView.as_view(), name="join_etf"),                         # Allow a user to join an ETF by its ID
-    path("<int:etf_id>/leave/", LeaveETFView.as_view(), name="leave_etf"),                      # Allow a user to leave an ETF by its ID
+    path('transactions/<int:transaction_id>/leave/', LeaveETFView.as_view(), name='leave-etf'), # Allow a user to leave an ETF by its transaction ID
 ]

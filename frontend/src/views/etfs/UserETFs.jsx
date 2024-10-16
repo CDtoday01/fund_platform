@@ -48,16 +48,16 @@ const UserETFs = () => {
         }
     }, [user, activeState, currentPage]);
 
-    const leaveETF = async (etfId, etfName, etfState) => {
-        if (etfState == "closed") {
+    const leaveETF = async (transactionId, etfId, etfName, etfState) => {
+        if (etfState === "closed") {
             alert("You cannot leave a closed ETF.");
             return;
         }
-
+    
         if (window.confirm(`Are you sure you want to refund and leave ${etfName}?`)) {
             try {
                 const axiosInstance = useAxios();
-                const response = await axiosInstance.post(`/etfs/${etfId}/leave/`);
+                const response = await axiosInstance.post(`etfs/transactions/${transactionId}/leave/`);
                 if (response.status === 200) {
                     alert("Left ETF!");
                     // Re-fetch data based on the active tab after successfully leaving
@@ -169,7 +169,7 @@ const UserETFs = () => {
                             <tr key={transaction.id}>
                                 <td>
                                     <button 
-                                        onClick={() => leaveETF(transaction.etf, transaction.etf_name, transaction.state)} 
+                                        onClick={() => leaveETF(transaction.id, transaction.etf, transaction.etf_name, transaction.state)} 
                                         disabled={transaction.state == "closed"}
                                     >
                                         ✖
