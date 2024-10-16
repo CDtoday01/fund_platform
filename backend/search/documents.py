@@ -57,3 +57,12 @@ class ETFDocument(Document):
     def get_queryset(self):
         # Join the related UserETF model to ensure we can access related data in Elasticsearch
         return super().get_queryset().prefetch_related('useretf_set__user')
+    
+    def get_instances_from_related(self, related_instance):
+        """
+        This method returns the main model instance(s) when a related model changes.
+        """
+        # Example for a foreign key relationship
+        if isinstance(related_instance, UserETF):
+            return [related_instance.etf]
+        return None

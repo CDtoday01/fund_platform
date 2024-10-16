@@ -78,7 +78,8 @@ const ETFDetail = () => {
     }
 
     const isCreator = etf.creator === currentUser.user_id;
-    
+    const isInvestmentLimitReached = etf.current_investment >= etf.total_amount;
+
     return (
         <div>
             <h1>{etf.name}</h1>
@@ -109,11 +110,14 @@ const ETFDetail = () => {
                         onChange={(e) => setInvestmentAmount(Number(e.target.value))} // Ensure it's a number
                         placeholder="Enter investment amount" 
                     />
-                    <button onClick={() => handleJoin(etf.id, etf.name)} disabled={investmentAmount <= 0 || !etf.is_fundraising}>
-                    {/* <button onClick={() => handleJoin(etf.id)} disabled={investmentAmount <= 0}> */}
+                    <button 
+                        onClick={() => handleJoin(etf.id, etf.name)} 
+                        disabled={investmentAmount <= 0 || !etf.is_fundraising || isInvestmentLimitReached}
+                    >
                         Join ETF
                     </button>
                     {errorMessage && <p className="error-message">{errorMessage}</p>}
+                    {isInvestmentLimitReached && <p className="error-message">The ETF has reached its investment limit.</p>}
                 </>
             )}
             {/* Debugging information */}
