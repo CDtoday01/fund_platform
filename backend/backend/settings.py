@@ -47,7 +47,7 @@ INSTALLED_APPS = [
     
      # custom app
     "userauths",
-    "etfs",
+    "Funds",
     "search",
 
     # third party app
@@ -97,7 +97,7 @@ WSGI_APPLICATION = "backend.wsgi.application"
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "etf",
+        "NAME": "fund",
         "USER": "thlee",
         "PASSWORD": "1qazwsxdcv",
         "HOST": "localhost",  # Set to your database host, e.g., "127.0.0.1" or "localhost"

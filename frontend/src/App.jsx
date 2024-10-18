@@ -1,18 +1,18 @@
 import React, { useEffect } from "react";
 import { Route, Routes, BrowserRouter } from "react-router-dom";
 import { setUser } from "./utils/auth";
-import PrivateRoute from "./views/etfs/PrivateRoute";
+import PrivateRoute from "./views/Funds/PrivateRoute";
 import Home from "./views/auth/dashboard";
 import Login from "./views/auth/login";
 import Register from "./views/auth/register";
 import Logout from "./views/auth/logout";
 import ForgotPassword from "./views/auth/forgotPassword";
 import CreatePassword from "./views/auth/createPassword";
-import ETFs from "./views/etfs/ETFs";
-import ETFDetail from "./views/etfs/ETFDetail";
-import CreateETF from "./views/etfs/CreateETF";
-import UserETFs from "./views/etfs/UserETFs";
-import Navbar from "./views/etfs/Navbar";
+import Funds from "./views/Funds/Funds";
+import FundDetail from "./views/Funds/FundDetail";
+import CreateFund from "./views/Funds/CreateFund";
+import Userfunds from "./views/Funds/UserFunds";
+import Navbar from "./views/Funds/Navbar";
 
 function App() {
   useEffect(() => {
@@ -31,10 +31,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/create-new-password" element={<CreatePassword />} />
-          <Route path="/etfs" element={<PrivateRoute><ETFs /></PrivateRoute>} />
-          <Route path="/etfs/new" element={<PrivateRoute><CreateETF /></PrivateRoute>} />
-          <Route path="/etfs/:id" element={<PrivateRoute><ETFDetail /></PrivateRoute>} />
-          <Route path="/user/etfs" element={<PrivateRoute><UserETFs /></PrivateRoute>} />
+          <Route path="/funds" element={<PrivateRoute><Funds /></PrivateRoute>} />
+          <Route path="/funds/new" element={<PrivateRoute><CreateFund /></PrivateRoute>} />
+          <Route path="/funds/:id" element={<PrivateRoute><FundDetail /></PrivateRoute>} />
+          <Route path="/user/funds" element={<PrivateRoute><Userfunds /></PrivateRoute>} />
         </Routes>
       </BrowserRouter>
     </div>

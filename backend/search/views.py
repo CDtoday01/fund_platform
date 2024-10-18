@@ -5,12 +5,12 @@ from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import PageNumberPagination
 
-from .documents import ETFDocument
-from .serializers import ETFDocumentSerializer
+from .documents import FundDocument
+from .serializers import FundDocumentSerializer
 
-class ETFSearchView(DocumentViewSet):
-    document = ETFDocument
-    serializer_class = ETFDocumentSerializer
+class fundsearchView(DocumentViewSet):
+    document = FundDocument
+    serializer_class = FundDocumentSerializer
     pagination_class = PageNumberPagination
     lookup_field = "id"
     permission_classes = [AllowAny]

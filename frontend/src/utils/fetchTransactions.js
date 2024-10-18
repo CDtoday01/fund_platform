@@ -9,7 +9,7 @@ const fetchTransactions = async (state, setTransactions, setPagination, page = 1
             params.filter_state = state;
         }
 
-        const response = await axiosInstance.get(`/etfs/user-etf-transactions/`, {params});
+        const response = await axiosInstance.get(`/funds/user-fund-transactions/`, {params});
         // Ensure that we always have `results` in the response
         setTransactions({
             results: response.data.results || [],   // Fallback to an empty array

@@ -1,9 +1,9 @@
 from django_elasticsearch_dsl_drf.serializers import DocumentSerializer
-from .documents import ETFDocument
+from .documents import FundDocument
 
-class ETFDocumentSerializer(DocumentSerializer):
+class FundDocumentSerializer(DocumentSerializer):
     class Meta:
-        document = ETFDocument
+        document = FundDocument
         fields = [
             "id",
             "name",

@@ -1,6 +1,6 @@
 from django.urls import path
-from .views import ETFSearchView
+from .views import fundsearchView
 
 urlpatterns = [
-    path("", ETFSearchView.as_view({"get": "list"}), name="search_etf"),
+    path("", fundsearchView.as_view({"get": "list"}), name="search_fund"),
 ]

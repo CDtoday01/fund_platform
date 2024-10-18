@@ -8,7 +8,7 @@ router = routers.DefaultRouter()
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/v1/", include("api.urls")),
-    path("api/v1/etfs/", include("etfs.urls")),
+    path("api/v1/funds/", include("Funds.urls")),
     path("api/v1/search/", include("search.urls")),
     path("form/", include(router.urls)),
     path("schema/", SpectacularAPIView.as_view(), name="api-schema"),

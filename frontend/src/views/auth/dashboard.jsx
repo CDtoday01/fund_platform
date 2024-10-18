@@ -1,7 +1,7 @@
 import React from "react";
 import { useAuthStore } from "../../store/auth";
 import { Link } from "react-router-dom";
-import ETFs from "../etfs/ETFs";
+import Funds from "../Funds/Funds";
 
 function Dashboard() {
   const isLoggedIn = useAuthStore(state => state.isLoggedIn);
@@ -35,7 +35,7 @@ function Dashboard() {
           </>
         )}
       </div> */}
-      <ETFs />
+      <Funds />
     </>
   );
 }
