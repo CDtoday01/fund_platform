@@ -1,0 +1,84 @@
+{
+  "mappings": {
+    "properties": {
+      "id": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "creator": {
+        "type": "integer"
+      },
+      "code": {
+        "type": "text",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          }
+        }
+      },
+      "category_code": {
+        "type": "keyword"
+      },
+      "subcategory_code": {
+        "type": "keyword"
+      },
+      "subcategory_name": {
+        "type": "keyword"
+      },
+      "announcing_start_date": {
+        "type": "date"
+      },
+      "announcing_end_date": {
+        "type": "date"
+      },
+      "fundraising_start_date": {
+        "type": "date"
+      },
+      "fundraising_end_date": {
+        "type": "date"
+      },
+      "months": {
+        "type": "integer"
+      },
+      "total_amount": {
+        "type": "integer"
+      },
+      "current_investment": {
+        "type": "double"
+      },
+      "state": {
+        "type": "text"
+      },
+      "is_open": {
+        "type": "boolean"
+      },
+      "userfund": {
+        "type": "nested",
+        "properties": {
+          "user": {
+            "type": "integer"
+          },
+          "joined_date": {
+            "type": "date"
+          },
+          "leave_date": {
+            "type": "date"
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "number_of_shards": 1,
+    "number_of_replicas": 0
+  }
+}

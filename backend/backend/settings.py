@@ -98,7 +98,7 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "fund",
-        "USER": "thlee",
+        "USER": "lsps_",
         "PASSWORD": "1qazwsxdcv",
         "HOST": "localhost",  # Set to your database host, e.g., "127.0.0.1" or "localhost"
         "PORT": "5432",  # Set to your database port, default is 5432
@@ -152,6 +152,7 @@ AUTH_USER_MODEL = "userauths.User"
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173"]
 
 # White listing the localhost:3000 port
+CORS_ALLOW_ALL_ORIGINS = True
 # for React
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
@@ -178,6 +179,7 @@ REST_FRAMEWORK = {
 ELASTICSEARCH_DSL={
     "default": {
         "hosts": "http://localhost:9200",
+        "http_auth": ("elastic", os.getenv("ELASTIC_PASSWORD", "default_password")),
     }
 }
 
